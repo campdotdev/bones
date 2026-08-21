@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>bones auto.css sandbox</title>
+    <link rel="stylesheet" href="../src/css/auto.css" />
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 40rem;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+      img {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="toggle" data-bones-auto="off">Toggle aria-busy</button>
+    <section id="page" aria-busy="true">
+      <h1>Article title</h1>
+      <p>First paragraph with a couple of lines of copy to show the bar geometry.</p>
+      <p>Second paragraph, shorter.</p>
+      <p>Third paragraph to exercise the width buckets.</p>
+      <p>Fourth paragraph closes the cycle.</p>
+      <img src="https://placehold.co/120" alt="avatar" width="120" height="120" />
+      <button>Save</button>
+      <input value="a field" />
+      <div role="status" aria-busy="true" data-bones-auto="off">Saving… (exempt live region)</div>
+      <h3 data-bone="text">explicit data-bone element (styled by bones.css)</h3>
+    </section>
+    <script>
+      const region = document.getElementById("page");
+      document.getElementById("toggle").addEventListener("click", () => {
+        const busy = region.getAttribute("aria-busy") === "true";
+        region.setAttribute("aria-busy", busy ? "false" : "true");
+      });
+    </script>
+  </body>
+</html>
