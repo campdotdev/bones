@@ -6,6 +6,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   # ── Bones library ──────────────────────────────────────────
   bones-check:
