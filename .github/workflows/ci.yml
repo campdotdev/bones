@@ -21,7 +21,7 @@ jobs:
           cache: true
 
       - name: Run lint, format, and type checks
-        run: vp run --filter @lovo/bones check
+        run: vp run --filter @camp-dev/bones check
 
   bones-build:
     name: "Bones: Build"
@@ -36,7 +36,7 @@ jobs:
           cache: true
 
       - name: Build library
-        run: vp run --filter @lovo/bones build
+        run: vp run --filter @camp-dev/bones build
 
   bones-test:
     name: "Bones: Test"
@@ -51,7 +51,7 @@ jobs:
           cache: true
 
       - name: Run tests
-        run: vp run --filter @lovo/bones test -- --run
+        run: vp run --filter @camp-dev/bones test -- --run
 
   # ── Demo app ───────────────────────────────────────────────
   demo-check:
@@ -67,7 +67,7 @@ jobs:
           cache: true
 
       - name: Build bones library
-        run: vp run --filter @lovo/bones build
+        run: vp run --filter @camp-dev/bones build
 
       - name: Run type check
         run: vp run --filter bones-demo check
@@ -85,7 +85,7 @@ jobs:
           cache: true
 
       - name: Build bones library
-        run: vp run --filter @lovo/bones build
+        run: vp run --filter @camp-dev/bones build
 
       - name: Build demo app
         run: vp run --filter bones-demo build
@@ -103,7 +103,7 @@ jobs:
           cache: true
 
       - name: Build bones library
-        run: vp run --filter @lovo/bones build
+        run: vp run --filter @camp-dev/bones build
 
       - name: Run tests
         run: vp run --filter bones-demo test -- --run
@@ -122,7 +122,7 @@ jobs:
           cache: true
 
       - name: Build bones library
-        run: vp run --filter @lovo/bones build
+        run: vp run --filter @camp-dev/bones build
 
       - name: Run type check
         run: vp run --filter bones-docs check
@@ -140,7 +140,7 @@ jobs:
           cache: true
 
       - name: Build bones library
-        run: vp run --filter @lovo/bones build
+        run: vp run --filter @camp-dev/bones build
 
       - name: Build docs site
         run: vp run --filter bones-docs build
