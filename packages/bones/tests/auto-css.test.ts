@@ -159,6 +159,17 @@ describe("block overrides", () => {
     }
   });
 
+  test("object fallback content gets nothing while object keeps its block bone", () => {
+    mount(`
+      <section aria-busy="true">
+        <object id="objectWithFallback"><span id="fallback">install a plugin</span></object>
+      </section>
+    `);
+    expect(el("objectWithFallback").matches(BLOCK_LEAF)).toBe(true);
+    expect(el("fallback").matches(TEXT_LEAF)).toBe(false);
+    expect(el("fallback").matches(BLOCK_LEAF)).toBe(false);
+  });
+
   test("hr and br stay untouched", () => {
     mount('<section aria-busy="true"><hr id="hr" /><br id="br" /></section>');
     for (const id of ["hr", "br"]) {
