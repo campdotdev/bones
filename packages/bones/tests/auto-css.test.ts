@@ -16,8 +16,9 @@ const flat = css.replace(/\s+/g, " ");
 
 const EXEMPT =
   ':not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *)';
-const OVERRIDES = "img, svg, video, canvas, picture, button, input, select, textarea";
-const TEXT_LEAF = `[aria-busy="true"] :not(:has(*))${EXEMPT}:not(${OVERRIDES}, svg *, picture *, select *)`;
+const OVERRIDES =
+  "img, svg, video, canvas, picture, iframe, embed, object, audio, button, input, select, textarea, progress, meter";
+const TEXT_LEAF = `[aria-busy="true"] :not(:has(*))${EXEMPT}:not(${OVERRIDES}, hr, br, svg *, picture *, select *, object *)`;
 
 const BLOCK_LEAF = `[aria-busy="true"] :is(${OVERRIDES})${EXEMPT}`;
 
@@ -90,6 +91,11 @@ describe("text-leaf trigger", () => {
     mount('<section aria-busy="true"><p id="empty"></p></section>');
     expect(el("empty").matches(TEXT_LEAF)).toBe(true);
   });
+
+  test("the busy host itself does not match", () => {
+    mount('<p id="host" aria-busy="true">copy</p>');
+    expect(el("host").matches(TEXT_LEAF)).toBe(false);
+  });
 });
 
 describe("exemptions", () => {
@@ -134,6 +140,31 @@ describe("block overrides", () => {
     }
     expect(el("text").matches(BLOCK_LEAF)).toBe(false);
     expect(el("text").matches(TEXT_LEAF)).toBe(true);
+  });
+
+  test("embedded content and gauge elements are block bones, not text bones", () => {
+    mount(`
+      <section aria-busy="true">
+        <iframe id="iframe" title="embed"></iframe>
+        <embed id="embed" />
+        <object id="object"></object>
+        <audio id="audio"></audio>
+        <progress id="progress"></progress>
+        <meter id="meter"></meter>
+      </section>
+    `);
+    for (const id of ["iframe", "embed", "object", "audio", "progress", "meter"]) {
+      expect(el(id).matches(BLOCK_LEAF)).toBe(true);
+      expect(el(id).matches(TEXT_LEAF)).toBe(false);
+    }
+  });
+
+  test("hr and br stay untouched", () => {
+    mount('<section aria-busy="true"><hr id="hr" /><br id="br" /></section>');
+    for (const id of ["hr", "br"]) {
+      expect(el(id).matches(BLOCK_LEAF)).toBe(false);
+      expect(el(id).matches(TEXT_LEAF)).toBe(false);
+    }
   });
 
   test("svg gets a block bone and its internals get nothing", () => {

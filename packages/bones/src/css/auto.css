@@ -27,13 +27,22 @@
       video,
       canvas,
       picture,
+      iframe,
+      embed,
+      object,
+      audio,
       button,
       input,
       select,
       textarea,
+      progress,
+      meter,
+      hr,
+      br,
       svg *,
       picture *,
-      select *
+      select *,
+      object *
     ) {
     color: transparent;
     position: relative;
@@ -53,13 +62,22 @@
       video,
       canvas,
       picture,
+      iframe,
+      embed,
+      object,
+      audio,
       button,
       input,
       select,
       textarea,
+      progress,
+      meter,
+      hr,
+      br,
       svg *,
       picture *,
-      select *
+      select *,
+      object *
     )::before {
     content: "\200b";
   }
@@ -76,13 +94,22 @@
       video,
       canvas,
       picture,
+      iframe,
+      embed,
+      object,
+      audio,
       button,
       input,
       select,
       textarea,
+      progress,
+      meter,
+      hr,
+      br,
       svg *,
       picture *,
-      select *
+      select *,
+      object *
     )::after {
     content: "";
     position: absolute;
@@ -100,12 +127,23 @@
      A text bar across an avatar or a button looks wrong. Leafness is not
      required — svg and select routinely have element children. */
   [aria-busy="true"]
-    :is(img, svg, video, canvas, picture, button, input, select, textarea):not(
-      [data-bone],
-      [data-bone] *,
-      [data-bones-auto="off"],
-      [data-bones-auto="off"] *
-    ) {
+    :is(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      iframe,
+      embed,
+      object,
+      audio,
+      button,
+      input,
+      select,
+      textarea,
+      progress,
+      meter
+    ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
     color: transparent;
     background-color: var(--bone-base);
     border-radius: var(--bone-radius);
@@ -127,13 +165,22 @@
       video,
       canvas,
       picture,
+      iframe,
+      embed,
+      object,
+      audio,
       button,
       input,
       select,
       textarea,
+      progress,
+      meter,
+      hr,
+      br,
       svg *,
       picture *,
-      select *
+      select *,
+      object *
     ):nth-child(4n + 1) {
     width: 85%;
   }
@@ -150,13 +197,22 @@
       video,
       canvas,
       picture,
+      iframe,
+      embed,
+      object,
+      audio,
       button,
       input,
       select,
       textarea,
+      progress,
+      meter,
+      hr,
+      br,
       svg *,
       picture *,
-      select *
+      select *,
+      object *
     ):nth-child(4n + 2) {
     width: 100%;
   }
@@ -173,13 +229,22 @@
       video,
       canvas,
       picture,
+      iframe,
+      embed,
+      object,
+      audio,
       button,
       input,
       select,
       textarea,
+      progress,
+      meter,
+      hr,
+      br,
       svg *,
       picture *,
-      select *
+      select *,
+      object *
     ):nth-child(4n + 3) {
     width: 92%;
   }
@@ -196,13 +261,22 @@
       video,
       canvas,
       picture,
+      iframe,
+      embed,
+      object,
+      audio,
       button,
       input,
       select,
       textarea,
+      progress,
+      meter,
+      hr,
+      br,
       svg *,
       picture *,
-      select *
+      select *,
+      object *
     ):nth-child(4n) {
     width: 60%;
   }
@@ -225,13 +299,22 @@
       video,
       canvas,
       picture,
+      iframe,
+      embed,
+      object,
+      audio,
       button,
       input,
       select,
       textarea,
+      progress,
+      meter,
+      hr,
+      br,
       svg *,
       picture *,
-      select *
+      select *,
+      object *
     )::before,
   [aria-busy="true"]
     :not(:has(*)):not(
@@ -245,21 +328,41 @@
       video,
       canvas,
       picture,
+      iframe,
+      embed,
+      object,
+      audio,
       button,
       input,
       select,
       textarea,
+      progress,
+      meter,
+      hr,
+      br,
       svg *,
       picture *,
-      select *
+      select *,
+      object *
     )::after,
   [aria-busy="true"]
-    :is(img, svg, video, canvas, picture, button, input, select, textarea):not(
-      [data-bone],
-      [data-bone] *,
-      [data-bones-auto="off"],
-      [data-bones-auto="off"] *
-    ) {
+    :is(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      iframe,
+      embed,
+      object,
+      audio,
+      button,
+      input,
+      select,
+      textarea,
+      progress,
+      meter
+    ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
     animation: bone-shimmer var(--bone-duration) ease-in-out infinite;
     background: linear-gradient(
       90deg,
@@ -283,13 +386,22 @@
         video,
         canvas,
         picture,
+        iframe,
+        embed,
+        object,
+        audio,
         button,
         input,
         select,
         textarea,
+        progress,
+        meter,
+        hr,
+        br,
         svg *,
         picture *,
-        select *
+        select *,
+        object *
       )::before,
     [aria-busy="true"]
       :not(:has(*)):not(
@@ -303,21 +415,41 @@
         video,
         canvas,
         picture,
+        iframe,
+        embed,
+        object,
+        audio,
         button,
         input,
         select,
         textarea,
+        progress,
+        meter,
+        hr,
+        br,
         svg *,
         picture *,
-        select *
+        select *,
+        object *
       )::after,
     [aria-busy="true"]
-      :is(img, svg, video, canvas, picture, button, input, select, textarea):not(
-        [data-bone],
-        [data-bone] *,
-        [data-bones-auto="off"],
-        [data-bones-auto="off"] *
-      ) {
+      :is(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter
+      ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
       animation: bone-shimmer var(--bone-duration) ease-in-out infinite;
       background: linear-gradient(
         90deg,
@@ -341,13 +473,22 @@
           video,
           canvas,
           picture,
+          iframe,
+          embed,
+          object,
+          audio,
           button,
           input,
           select,
           textarea,
+          progress,
+          meter,
+          hr,
+          br,
           svg *,
           picture *,
-          select *
+          select *,
+          object *
         )::before,
       [aria-busy="true"]
         :not(:has(*)):not(
@@ -361,21 +502,41 @@
           video,
           canvas,
           picture,
+          iframe,
+          embed,
+          object,
+          audio,
           button,
           input,
           select,
           textarea,
+          progress,
+          meter,
+          hr,
+          br,
           svg *,
           picture *,
-          select *
+          select *,
+          object *
         )::after,
       [aria-busy="true"]
-        :is(img, svg, video, canvas, picture, button, input, select, textarea):not(
-          [data-bone],
-          [data-bone] *,
-          [data-bones-auto="off"],
-          [data-bones-auto="off"] *
-        ) {
+        :is(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          iframe,
+          embed,
+          object,
+          audio,
+          button,
+          input,
+          select,
+          textarea,
+          progress,
+          meter
+        ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
         animation: bone-pulse 2s ease-in-out infinite;
         background: var(--bone-base);
         background-size: auto;
@@ -395,21 +556,41 @@
           video,
           canvas,
           picture,
+          iframe,
+          embed,
+          object,
+          audio,
           button,
           input,
           select,
           textarea,
+          progress,
+          meter,
+          hr,
+          br,
           svg *,
           picture *,
-          select *
+          select *,
+          object *
         )::after,
       [aria-busy="true"]
-        :is(img, svg, video, canvas, picture, button, input, select, textarea):not(
-          [data-bone],
-          [data-bone] *,
-          [data-bones-auto="off"],
-          [data-bones-auto="off"] *
-        ) {
+        :is(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          iframe,
+          embed,
+          object,
+          audio,
+          button,
+          input,
+          select,
+          textarea,
+          progress,
+          meter
+        ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
         background-color: GrayText;
         forced-color-adjust: none;
       }
@@ -429,13 +610,22 @@
         video,
         canvas,
         picture,
+        iframe,
+        embed,
+        object,
+        audio,
         button,
         input,
         select,
         textarea,
+        progress,
+        meter,
+        hr,
+        br,
         svg *,
         picture *,
-        select *
+        select *,
+        object *
       )::before,
     [aria-busy="true"]
       :not(:has(*)):not(
@@ -449,21 +639,41 @@
         video,
         canvas,
         picture,
+        iframe,
+        embed,
+        object,
+        audio,
         button,
         input,
         select,
         textarea,
+        progress,
+        meter,
+        hr,
+        br,
         svg *,
         picture *,
-        select *
+        select *,
+        object *
       )::after,
     [aria-busy="true"]
-      :is(img, svg, video, canvas, picture, button, input, select, textarea):not(
-        [data-bone],
-        [data-bone] *,
-        [data-bones-auto="off"],
-        [data-bones-auto="off"] *
-      ) {
+      :is(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter
+      ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
       animation: bone-pulse var(--bone-duration) ease-in-out infinite;
       background: var(--bone-base);
       background-size: auto;
@@ -482,13 +692,22 @@
           video,
           canvas,
           picture,
+          iframe,
+          embed,
+          object,
+          audio,
           button,
           input,
           select,
           textarea,
+          progress,
+          meter,
+          hr,
+          br,
           svg *,
           picture *,
-          select *
+          select *,
+          object *
         )::before,
       [aria-busy="true"]
         :not(:has(*)):not(
@@ -502,21 +721,41 @@
           video,
           canvas,
           picture,
+          iframe,
+          embed,
+          object,
+          audio,
           button,
           input,
           select,
           textarea,
+          progress,
+          meter,
+          hr,
+          br,
           svg *,
           picture *,
-          select *
+          select *,
+          object *
         )::after,
       [aria-busy="true"]
-        :is(img, svg, video, canvas, picture, button, input, select, textarea):not(
-          [data-bone],
-          [data-bone] *,
-          [data-bones-auto="off"],
-          [data-bones-auto="off"] *
-        ) {
+        :is(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          iframe,
+          embed,
+          object,
+          audio,
+          button,
+          input,
+          select,
+          textarea,
+          progress,
+          meter
+        ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
         animation: bone-pulse 2s ease-in-out infinite;
         background: var(--bone-base);
         background-size: auto;
@@ -536,21 +775,41 @@
           video,
           canvas,
           picture,
+          iframe,
+          embed,
+          object,
+          audio,
           button,
           input,
           select,
           textarea,
+          progress,
+          meter,
+          hr,
+          br,
           svg *,
           picture *,
-          select *
+          select *,
+          object *
         )::after,
       [aria-busy="true"]
-        :is(img, svg, video, canvas, picture, button, input, select, textarea):not(
-          [data-bone],
-          [data-bone] *,
-          [data-bones-auto="off"],
-          [data-bones-auto="off"] *
-        ) {
+        :is(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          iframe,
+          embed,
+          object,
+          audio,
+          button,
+          input,
+          select,
+          textarea,
+          progress,
+          meter
+        ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
         background-color: GrayText;
         forced-color-adjust: none;
       }
@@ -570,13 +829,22 @@
         video,
         canvas,
         picture,
+        iframe,
+        embed,
+        object,
+        audio,
         button,
         input,
         select,
         textarea,
+        progress,
+        meter,
+        hr,
+        br,
         svg *,
         picture *,
-        select *
+        select *,
+        object *
       )::before,
     [aria-busy="true"]
       :not(:has(*)):not(
@@ -590,21 +858,41 @@
         video,
         canvas,
         picture,
+        iframe,
+        embed,
+        object,
+        audio,
         button,
         input,
         select,
         textarea,
+        progress,
+        meter,
+        hr,
+        br,
         svg *,
         picture *,
-        select *
+        select *,
+        object *
       )::after,
     [aria-busy="true"]
-      :is(img, svg, video, canvas, picture, button, input, select, textarea):not(
-        [data-bone],
-        [data-bone] *,
-        [data-bones-auto="off"],
-        [data-bones-auto="off"] *
-      ) {
+      :is(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter
+      ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
       animation: none;
       background: var(--bone-base);
       background-size: auto;
@@ -623,21 +911,41 @@
           video,
           canvas,
           picture,
+          iframe,
+          embed,
+          object,
+          audio,
           button,
           input,
           select,
           textarea,
+          progress,
+          meter,
+          hr,
+          br,
           svg *,
           picture *,
-          select *
+          select *,
+          object *
         )::after,
       [aria-busy="true"]
-        :is(img, svg, video, canvas, picture, button, input, select, textarea):not(
-          [data-bone],
-          [data-bone] *,
-          [data-bones-auto="off"],
-          [data-bones-auto="off"] *
-        ) {
+        :is(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          iframe,
+          embed,
+          object,
+          audio,
+          button,
+          input,
+          select,
+          textarea,
+          progress,
+          meter
+        ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
         background-color: GrayText;
         forced-color-adjust: none;
       }
@@ -657,13 +965,22 @@
         video,
         canvas,
         picture,
+        iframe,
+        embed,
+        object,
+        audio,
         button,
         input,
         select,
         textarea,
+        progress,
+        meter,
+        hr,
+        br,
         svg *,
         picture *,
-        select *
+        select *,
+        object *
       )::before,
     [aria-busy="true"]
       :not(:has(*)):not(
@@ -677,21 +994,41 @@
         video,
         canvas,
         picture,
+        iframe,
+        embed,
+        object,
+        audio,
         button,
         input,
         select,
         textarea,
+        progress,
+        meter,
+        hr,
+        br,
         svg *,
         picture *,
-        select *
+        select *,
+        object *
       )::after,
     [aria-busy="true"]
-      :is(img, svg, video, canvas, picture, button, input, select, textarea):not(
-        [data-bone],
-        [data-bone] *,
-        [data-bones-auto="off"],
-        [data-bones-auto="off"] *
-      ) {
+      :is(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter
+      ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
       animation: bone-pulse 2s ease-in-out infinite;
       background: var(--bone-base);
       background-size: auto;
@@ -713,21 +1050,41 @@
         video,
         canvas,
         picture,
+        iframe,
+        embed,
+        object,
+        audio,
         button,
         input,
         select,
         textarea,
+        progress,
+        meter,
+        hr,
+        br,
         svg *,
         picture *,
-        select *
+        select *,
+        object *
       )::after,
     [aria-busy="true"]
-      :is(img, svg, video, canvas, picture, button, input, select, textarea):not(
-        [data-bone],
-        [data-bone] *,
-        [data-bones-auto="off"],
-        [data-bones-auto="off"] *
-      ) {
+      :is(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter
+      ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
       background-color: GrayText;
       forced-color-adjust: none;
     }

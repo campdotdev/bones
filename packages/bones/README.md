@@ -32,12 +32,12 @@ import "@camp-dev/bones/css";
 
 ## Entry points
 
-| Import                     | Contents                                                                                                                  |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `@camp-dev/bones/react`    | `createBones`, `readPromise`, `forceBones`, `minMax`, `<Bones>`, `<BonesForce>`                                           |
-| `@camp-dev/bones/css`      | The skeleton stylesheet. Import once in your root layout.                                                                 |
-| `@camp-dev/bones/auto.css` | Skeletonizes unmarked leaves under `aria-busy="true"`. Import alongside `/css`, or instead of hand-marking every element. |
-| `@camp-dev/bones`          | The framework-agnostic core (`boneAttributes`, `minMax`). You only need this to build your own renderer or adapter.       |
+| Import                     | Contents                                                                                                                            |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `@camp-dev/bones/react`    | `createBones`, `readPromise`, `forceBones`, `minMax`, `<Bones>`, `<BonesForce>`                                                     |
+| `@camp-dev/bones/css`      | The skeleton stylesheet. Import once in your root layout.                                                                           |
+| `@camp-dev/bones/auto.css` | Skeletonizes unmarked leaves under `aria-busy="true"`. Imports the base stylesheet itself, so a separate `/css` import is optional. |
+| `@camp-dev/bones`          | The framework-agnostic core (`boneAttributes`, `minMax`). You only need this to build your own renderer or adapter.                 |
 
 React is an optional peer dependency: installing the package without React is supported and only the `/react` entry requires it.
 
@@ -110,7 +110,7 @@ import { BonesForce } from "@camp-dev/bones/react";
 
 ## Automatic skeletons
 
-For markup you haven't wired up with `bone()` — third-party components, server-rendered HTML, anything without explicit attributes — import the auto stylesheet instead of, or alongside, `/css`:
+For markup you haven't wired up with `bone()` — third-party components, server-rendered HTML, anything without explicit attributes — import the auto stylesheet. It imports `/css` itself, so this one file is a complete setup:
 
 ```tsx
 import "@camp-dev/bones/auto.css";
@@ -127,7 +127,7 @@ Set `aria-busy="true"` on the loading region and every unmarked leaf inside it b
 
 `[data-bones-auto="off"]` opts a subtree out — useful for a status message you want to stay readable while its container skeletonizes. Explicit `data-bone` markup is left alone; `auto.css` only styles elements neither `bone()` nor a manual `data-bone` attribute has already claimed.
 
-Auto rules live in `@layer bones-auto`, so any page CSS that sets `color` on an element outranks the bone's transparent text, and that text stays visible over its skeleton bar. `data-bone-animate` also has to sit on an ancestor of the `aria-busy` element — set directly on it, it has no effect.
+Auto rules live in `@layer bones-auto`, so any page CSS that sets `color` on an element outranks the bone's transparent text, and that text stays visible over its skeleton bar. `data-bone-animate` also has to sit on an ancestor of the `aria-busy` element — set directly on it, it has no effect. The `data-bone-animate` overrides rely on `@scope`. In a browser without `@scope`, auto bones always shimmer, and `data-bone-animate="pulse"` and `"none"` cannot change that. The `prefers-reduced-motion` fallback to pulse still applies.
 
 ## Development
 
