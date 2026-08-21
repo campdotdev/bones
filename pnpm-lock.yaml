@@ -25,7 +25,7 @@ importers:
   apps/demo:
     dependencies:
       bones:
-        specifier: workspace:@lovo/bones@*
+        specifier: workspace:@camp-dev/bones@*
         version: link:../../packages/bones
       lucide-react:
         specifier: ^1.11.0
@@ -62,7 +62,7 @@ importers:
   apps/docs:
     dependencies:
       bones:
-        specifier: workspace:@lovo/bones@*
+        specifier: workspace:@camp-dev/bones@*
         version: link:../../packages/bones
       fumadocs-core:
         specifier: latest

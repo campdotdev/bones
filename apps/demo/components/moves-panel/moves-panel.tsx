@@ -1,4 +1,4 @@
-import { createBones } from "bones";
+import { createBones } from "bones/react";
 import type { PokemonMoveEntry, MoveDetail } from "@/lib/pokeapi";
 import { MovesInteractive } from "./moves-interactive";
 

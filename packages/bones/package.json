@@ -1,16 +1,16 @@
 {
-  "name": "@lovo/bones",
+  "name": "@camp-dev/bones",
   "version": "0.1.2",
   "description": "Skeleton loaders designed for React Server Components and streaming.",
-  "homepage": "https://github.com/lovo-hq/bones#readme",
+  "homepage": "https://github.com/campdotdev/bones#readme",
   "bugs": {
-    "url": "https://github.com/lovo-hq/bones/issues"
+    "url": "https://github.com/campdotdev/bones/issues"
   },
   "license": "MIT",
   "author": "hunterbecton",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lovo-hq/bones.git"
+    "url": "git+https://github.com/campdotdev/bones.git"
   },
   "files": [
     "dist",

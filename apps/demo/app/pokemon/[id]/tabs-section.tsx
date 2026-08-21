@@ -1,4 +1,4 @@
-import { Bones } from "bones";
+import { Bones } from "bones/react";
 import type { PokemonMoveEntry, MoveDetail, EncounterLocation } from "@/lib/pokeapi";
 import { DetailTabs } from "@/components/detail-tabs/detail-tabs";
 import { MovesPanel } from "@/components/moves-panel/moves-panel";

@@ -1,4 +1,4 @@
-import { createBones, minMax } from "bones";
+import { createBones, minMax } from "bones/react";
 import styles from "./styles.module.css";
 
 const VERSION_TO_GENERATION: Record<string, string> = {

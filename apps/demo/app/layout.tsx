@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
-import { BonesForce } from "bones";
+import { BonesForce } from "bones/react";
 import { BonesDevTool } from "@/components/bones-devtool/bones-devtool";
 import "bones/css";
 import "./globals.css";
