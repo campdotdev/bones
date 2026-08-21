@@ -327,6 +327,93 @@
       );
       background-size: 200% 100%;
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      [aria-busy="true"]
+        :not(:has(*)):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ):not(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          button,
+          input,
+          select,
+          textarea,
+          svg *,
+          picture *,
+          select *
+        )::before,
+      [aria-busy="true"]
+        :not(:has(*)):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ):not(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          button,
+          input,
+          select,
+          textarea,
+          svg *,
+          picture *,
+          select *
+        )::after,
+      [aria-busy="true"]
+        :is(img, svg, video, canvas, picture, button, input, select, textarea):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ) {
+        animation: bone-pulse 2s ease-in-out infinite;
+        background: var(--bone-base);
+        background-size: auto;
+      }
+    }
+
+    @media (forced-colors: active) {
+      [aria-busy="true"]
+        :not(:has(*)):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ):not(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          button,
+          input,
+          select,
+          textarea,
+          svg *,
+          picture *,
+          select *
+        )::after,
+      [aria-busy="true"]
+        :is(img, svg, video, canvas, picture, button, input, select, textarea):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ) {
+        background-color: GrayText;
+        forced-color-adjust: none;
+      }
+    }
   }
 
   @scope ([data-bone-animate="pulse"]) to ([data-bone-animate]:not([data-bone-animate="pulse"])) {
@@ -381,6 +468,93 @@
       background: var(--bone-base);
       background-size: auto;
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      [aria-busy="true"]
+        :not(:has(*)):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ):not(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          button,
+          input,
+          select,
+          textarea,
+          svg *,
+          picture *,
+          select *
+        )::before,
+      [aria-busy="true"]
+        :not(:has(*)):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ):not(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          button,
+          input,
+          select,
+          textarea,
+          svg *,
+          picture *,
+          select *
+        )::after,
+      [aria-busy="true"]
+        :is(img, svg, video, canvas, picture, button, input, select, textarea):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ) {
+        animation: bone-pulse 2s ease-in-out infinite;
+        background: var(--bone-base);
+        background-size: auto;
+      }
+    }
+
+    @media (forced-colors: active) {
+      [aria-busy="true"]
+        :not(:has(*)):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ):not(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          button,
+          input,
+          select,
+          textarea,
+          svg *,
+          picture *,
+          select *
+        )::after,
+      [aria-busy="true"]
+        :is(img, svg, video, canvas, picture, button, input, select, textarea):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ) {
+        background-color: GrayText;
+        forced-color-adjust: none;
+      }
+    }
   }
 
   @scope ([data-bone-animate="none"]) to ([data-bone-animate]:not([data-bone-animate="none"])) {
@@ -434,6 +608,39 @@
       animation: none;
       background: var(--bone-base);
       background-size: auto;
+    }
+
+    @media (forced-colors: active) {
+      [aria-busy="true"]
+        :not(:has(*)):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ):not(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          button,
+          input,
+          select,
+          textarea,
+          svg *,
+          picture *,
+          select *
+        )::after,
+      [aria-busy="true"]
+        :is(img, svg, video, canvas, picture, button, input, select, textarea):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ) {
+        background-color: GrayText;
+        forced-color-adjust: none;
+      }
     }
   }
 

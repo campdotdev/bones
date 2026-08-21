@@ -167,7 +167,7 @@ describe("width variance", () => {
   test("each bucket rule ships with its width", () => {
     for (const bucket of WIDTH_BUCKETS) {
       expect(flat).toContain(`{ width: ${bucket.width}; }`);
-      expect(ruleSelectors(css)).toContain(`${bucket.selector}`);
+      expect(ruleSelectors(css)).toContain(bucket.selector);
     }
   });
 
