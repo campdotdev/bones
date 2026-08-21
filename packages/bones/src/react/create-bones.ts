@@ -1,10 +1,10 @@
 import { cache, cloneElement, createElement, isValidElement, type ReactNode } from "react";
-import { boneAttributes } from "./core/attributes.ts";
-import type { BoneOptions, BoneType, MinMax } from "./core/attributes.ts";
+import { boneAttributes } from "../core/attributes.ts";
+import type { BoneOptions, BoneType, MinMax } from "../core/attributes.ts";
 
 // Re-export the framework-agnostic pieces so the React entry's public API is
 // unchanged by the core extraction.
-export { minMax, isMinMax } from "./core/attributes.ts";
+export { minMax, isMinMax } from "../core/attributes.ts";
 export type { BoneOptions, BoneType, MinMax };
 
 // ---------------------------------------------------------------------------

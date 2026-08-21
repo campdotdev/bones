@@ -22,6 +22,7 @@
   ],
   "exports": {
     ".": "./dist/index.mjs",
+    "./react": "./dist/react/index.mjs",
     "./package.json": "./package.json",
     "./css": {
       "style": "./src/css/bones.css",
@@ -55,5 +56,13 @@
   "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
   }
 }
