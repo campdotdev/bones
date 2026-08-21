@@ -1,0 +1,96 @@
+@import "./bones.css";
+
+/* ---------------------------------------------------------------------------
+   auto.css — skeletonize unmarked markup under [aria-busy="true"].
+
+   data-bone marks shape, aria-busy marks state; this layer keys on state so a
+   page with zero data-bone attributes still gets skeletons. Escape hatches:
+   [data-bones-auto="off"] exempts a subtree, and explicit [data-bone] markup
+   is always left to bones.css. Every rule lives in @layer bones-auto so page
+   CSS outranks it without !important.
+--------------------------------------------------------------------------- */
+
+@layer bones-auto {
+  /* Text default: any element with no child elements, minus exemptions and
+     the replaced/control elements that get block treatment below. Same bar
+     geometry as [data-bone="text"] in bones.css — restated because CSS cannot
+     alias an attribute selector; the test suite pins both copies. */
+  [aria-busy="true"]
+    :not(:has(*)):not(
+      [data-bone],
+      [data-bone] *,
+      [data-bones-auto="off"],
+      [data-bones-auto="off"] *
+    ):not(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      button,
+      input,
+      select,
+      textarea,
+      svg *,
+      picture *,
+      select *
+    ) {
+    color: transparent;
+    position: relative;
+    min-width: 4ch;
+    min-height: 1lh;
+  }
+
+  [aria-busy="true"]
+    :not(:has(*)):not(
+      [data-bone],
+      [data-bone] *,
+      [data-bones-auto="off"],
+      [data-bones-auto="off"] *
+    ):not(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      button,
+      input,
+      select,
+      textarea,
+      svg *,
+      picture *,
+      select *
+    )::before {
+    content: "\200b";
+  }
+
+  [aria-busy="true"]
+    :not(:has(*)):not(
+      [data-bone],
+      [data-bone] *,
+      [data-bones-auto="off"],
+      [data-bones-auto="off"] *
+    ):not(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      button,
+      input,
+      select,
+      textarea,
+      svg *,
+      picture *,
+      select *
+    )::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: calc((1lh + 1cap) / 2 - 1ex);
+    height: 1ex;
+    background-color: var(--bone-base);
+    border-radius: var(--bone-radius);
+    pointer-events: none;
+  }
+}
