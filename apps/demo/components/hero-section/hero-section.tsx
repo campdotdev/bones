@@ -13,7 +13,7 @@ export function HeroSection() {
         </a>
         <span className={styles.heroDot} aria-hidden="true" />
         <a
-          href="https://github.com/lovo-hq/bones"
+          href="https://github.com/campdotdev/bones"
           className={styles.heroLink}
           target="_blank"
           rel="noopener noreferrer"

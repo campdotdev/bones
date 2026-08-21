@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   </svg>
                 ),
                 text: "GitHub",
-                url: "https://github.com/lovo-hq/bones",
+                url: "https://github.com/campdotdev/bones",
                 external: true,
               },
             ]}

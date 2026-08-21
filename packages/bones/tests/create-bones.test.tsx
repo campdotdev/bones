@@ -1,7 +1,7 @@
 import { cleanup, render, screen, act } from "@testing-library/react";
 import { Suspense } from "react";
 import { afterEach, describe, expect, test } from "vite-plus/test";
-import { createBones, forceBones } from "../src/create-bones.ts";
+import { createBones, forceBones } from "../src/react/create-bones.ts";
 
 const mockData = { name: "Pikachu" };
 

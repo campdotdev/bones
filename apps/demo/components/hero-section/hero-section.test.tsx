@@ -20,6 +20,6 @@ describe("HeroSection", () => {
     const docsLink = screen.getByRole("link", { name: "Docs" });
     const githubLink = screen.getByRole("link", { name: "GitHub" });
     expect(docsLink.getAttribute("href")).toBe("https://bones.lovo.sh");
-    expect(githubLink.getAttribute("href")).toBe("https://github.com/lovo-hq/bones");
+    expect(githubLink.getAttribute("href")).toBe("https://github.com/campdotdev/bones");
   });
 });

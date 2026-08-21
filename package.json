@@ -3,11 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "vp run --filter @lovo/bones dev",
-    "build": "vp run --filter @lovo/bones build",
+    "dev": "vp run --filter @camp-dev/bones dev",
+    "build": "vp run --filter @camp-dev/bones build",
     "demo": "vp run --filter bones-demo dev",
-    "test": "vp run --filter @lovo/bones test",
-    "health": "vp run --filter @lovo/bones health",
+    "test": "vp run --filter @camp-dev/bones test",
+    "health": "vp run --filter @camp-dev/bones health",
     "docs": "vp run --filter bones-docs dev",
     "prepare": "vp config"
   },

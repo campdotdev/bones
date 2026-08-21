@@ -1,6 +1,6 @@
 # Bones
 
-[![Bundle Size](https://deno.bundlejs.com/badge?q=@lovo/bones)](https://bundlejs.com/?q=%40lovo%2Fbones)
+[![Bundle Size](https://deno.bundlejs.com/badge?q=@camp-dev/bones)](https://bundlejs.com/?q=%40camp-dev%2Fbones)
 
 Skeleton loaders designed for React Server Components and streaming.
 
@@ -21,21 +21,31 @@ Bones skips the duplication. You write your markup once and it handles both stat
 ## Installation
 
 ```bash
-npm install @lovo/bones
+npm install @camp-dev/bones
 ```
 
 Import the CSS once in your root layout or entry point:
 
 ```tsx
-import "@lovo/bones/css";
+import "@camp-dev/bones/css";
 ```
+
+## Entry points
+
+| Import                  | Contents                                                                                                            |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `@camp-dev/bones/react` | `createBones`, `readPromise`, `forceBones`, `minMax`, `<Bones>`, `<BonesForce>`                                     |
+| `@camp-dev/bones/css`   | The skeleton stylesheet. Import once in your root layout.                                                           |
+| `@camp-dev/bones`       | The framework-agnostic core (`boneAttributes`, `minMax`). You only need this to build your own renderer or adapter. |
+
+React is an optional peer dependency: installing the package without React is supported and only the `/react` entry requires it.
 
 ## Basic usage
 
 Pass data (or a promise of data) to `createBones`. Spread the `bone` function's return value onto elements that should show skeletons while loading.
 
 ```tsx
-import { createBones } from "@lovo/bones";
+import { createBones } from "@camp-dev/bones/react";
 
 function ProfileCard({ user }: { user: Promise<User> | User }) {
   const { bone, data, lines } = createBones(user);
@@ -55,7 +65,7 @@ function ProfileCard({ user }: { user: Promise<User> | User }) {
 Wrap components that receive promises in `<Bones>`. It creates a Suspense boundary and generates the skeleton fallback for you:
 
 ```tsx
-import { Bones } from "@lovo/bones";
+import { Bones } from "@camp-dev/bones/react";
 
 export default function Page() {
   return (
@@ -81,7 +91,7 @@ While the promise is pending, `<Bones>` renders the same `<ProfileCard>` tree wi
 Use `forceBones` to see a component's skeleton state without setting up real data:
 
 ```tsx
-import { createBones, forceBones } from "@lovo/bones";
+import { createBones, forceBones } from "@camp-dev/bones/react";
 
 <ProfileCard user={forceBones} />;
 ```
@@ -89,7 +99,7 @@ import { createBones, forceBones } from "@lovo/bones";
 To force an entire subtree into skeleton mode at once, wrap it with `<BonesForce>`:
 
 ```tsx
-import { BonesForce } from "@lovo/bones";
+import { BonesForce } from "@camp-dev/bones/react";
 
 <BonesForce>
   <ProfileCard />

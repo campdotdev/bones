@@ -1,4 +1,4 @@
-import { Bones } from "bones";
+import { Bones } from "bones/react";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { delay } from "@/lib/delay";

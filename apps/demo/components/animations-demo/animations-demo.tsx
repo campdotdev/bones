@@ -1,4 +1,4 @@
-import { BonesForce } from "bones";
+import { BonesForce } from "bones/react";
 import { DemoSection } from "@/components/demo-section/demo-section";
 import { PokemonCard } from "@/components/pokemon-card/pokemon-card";
 import styles from "./styles.module.css";

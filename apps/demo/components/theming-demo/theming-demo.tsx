@@ -1,4 +1,4 @@
-import { BonesForce } from "bones";
+import { BonesForce } from "bones/react";
 import { DemoSection } from "@/components/demo-section/demo-section";
 import { PokemonCard } from "@/components/pokemon-card/pokemon-card";
 import styles from "./styles.module.css";
@@ -9,8 +9,8 @@ export function ThemingDemo() {
       title="Theming"
       description={
         <>
-          Customize skeleton colors with CSS custom properties. Override{" "}
-          <code>--bone-base</code> and <code>--bone-highlight</code> on any container.
+          Customize skeleton colors with CSS custom properties. Override <code>--bone-base</code>{" "}
+          and <code>--bone-highlight</code> on any container.
         </>
       }
     >

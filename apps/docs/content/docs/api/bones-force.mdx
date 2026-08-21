@@ -4,7 +4,7 @@ description: Force skeleton mode for an entire subtree without Suspense.
 ---
 
 ```tsx
-import { BonesForce } from "@lovo/bones";
+import { BonesForce } from "@camp-dev/bones/react";
 ```
 
 `<BonesForce>` sets the loading flag for its entire subtree so all nested `createBones` calls return skeleton attributes. Unlike `<Bones>`, it does not create a Suspense boundary.
@@ -12,7 +12,7 @@ import { BonesForce } from "@lovo/bones";
 ## Usage
 
 ```tsx
-import { BonesForce } from "@lovo/bones";
+import { BonesForce } from "@camp-dev/bones/react";
 
 function SkeletonPreview() {
   return (

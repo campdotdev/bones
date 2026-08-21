@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { createBones, minMax } from "bones";
+import { createBones, minMax } from "bones/react";
 import type { PokemonMoveEntry, MoveDetail } from "@/lib/pokeapi";
 import { TypeBadge } from "@/components/type-badge/type-badge";
 import styles from "./styles.module.css";

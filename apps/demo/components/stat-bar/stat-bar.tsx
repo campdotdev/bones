@@ -1,4 +1,4 @@
-import { createBones } from "bones";
+import { createBones } from "bones/react";
 import styles from "./styles.module.css";
 
 type Stat = { name: string; value: number };

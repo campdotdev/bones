@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { afterEach, describe, expect, test } from "vite-plus/test";
 
 // readPromise is internal — import directly from source
-import { readPromise } from "../src/create-bones.ts";
+import { readPromise } from "../src/react/create-bones.ts";
 
 function ReadPromiseTest({ promise }: { promise: Promise<string> }) {
   const result = readPromise(promise);

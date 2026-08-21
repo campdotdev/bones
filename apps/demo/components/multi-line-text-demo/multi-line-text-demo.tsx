@@ -1,4 +1,4 @@
-import { BonesForce } from "bones";
+import { BonesForce } from "bones/react";
 import { ArticlePreview } from "@/components/article-preview/article-preview";
 import { DemoSection } from "@/components/demo-section/demo-section";
 import styles from "./styles.module.css";

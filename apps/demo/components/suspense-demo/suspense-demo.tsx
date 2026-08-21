@@ -1,4 +1,4 @@
-import { Bones } from "bones";
+import { Bones } from "bones/react";
 import { delay } from "@/lib/delay";
 import { fetchPokemonList } from "@/lib/pokeapi";
 import { DemoSection } from "@/components/demo-section/demo-section";

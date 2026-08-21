@@ -1,4 +1,4 @@
-import { BonesForce, forceBones } from "bones";
+import { BonesForce, forceBones } from "bones/react";
 import Link from "next/link";
 import { PokemonHero } from "@/components/pokemon-hero/pokemon-hero";
 import { BaseStatsCard } from "@/components/base-stats-card/base-stats-card";
