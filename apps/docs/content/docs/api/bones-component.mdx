@@ -4,7 +4,7 @@ description: Suspense wrapper that automatically renders skeletons as the fallba
 ---
 
 ```tsx
-import { Bones } from "@lovo/bones";
+import { Bones } from "@camp-dev/bones/react";
 ```
 
 `<Bones>` wraps its children in a `<Suspense>` boundary. The fallback is the same component tree, but with all `Promise` props replaced by `forceBones` and a loading flag set so nested `createBones` calls return skeleton attributes.
@@ -12,7 +12,7 @@ import { Bones } from "@lovo/bones";
 ## Usage
 
 ```tsx
-import { Bones } from "@lovo/bones";
+import { Bones } from "@camp-dev/bones/react";
 
 export default function Page() {
   return (

@@ -4,7 +4,7 @@ description: Sentinel value for forcing skeleton mode on individual components.
 ---
 
 ```tsx
-import { forceBones } from "@lovo/bones";
+import { forceBones } from "@camp-dev/bones/react";
 ```
 
 `forceBones` is a frozen empty object typed as `Promise<never>`. Pass it as data to `createBones` to trigger skeleton mode for a single component without a Suspense boundary or `<BonesForce>` wrapper.
@@ -12,7 +12,7 @@ import { forceBones } from "@lovo/bones";
 ## Usage
 
 ```tsx
-import { createBones, forceBones } from "@lovo/bones";
+import { createBones, forceBones } from "@camp-dev/bones/react";
 
 function UserCard({ user }: { user: Promise<User> }) {
   const { bone, data } = createBones(user);
