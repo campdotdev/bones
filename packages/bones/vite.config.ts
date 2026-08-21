@@ -17,6 +17,10 @@ export default defineConfig({
           style: "./src/css/bones.css",
           default: "./src/css/bones.css",
         },
+        "./auto.css": {
+          style: "./src/css/auto.css",
+          default: "./src/css/auto.css",
+        },
       },
     },
     deps: {

@@ -182,3 +182,25 @@ describe("width variance", () => {
     expect(paragraphs[0].matches(WIDTH_BUCKETS[1].selector)).toBe(false);
   });
 });
+
+describe("motion and accessibility", () => {
+  test("auto bones default to shimmer", () => {
+    expect(flat).toContain("animation: bone-shimmer var(--bone-duration) ease-in-out infinite");
+  });
+
+  test("data-bone-animate scopes override the default", () => {
+    expect(flat).toContain('@scope ([data-bone-animate="pulse"])');
+    expect(flat).toContain('@scope ([data-bone-animate="none"])');
+    expect(flat).toContain('@scope ([data-bone-animate="shimmer"])');
+  });
+
+  test("reduced motion falls back to pulse", () => {
+    expect(flat).toContain("@media (prefers-reduced-motion: reduce)");
+  });
+
+  test("forced colors swaps to system colors", () => {
+    expect(flat).toContain("@media (forced-colors: active)");
+    expect(flat).toContain("background-color: GrayText");
+    expect(flat).toContain("forced-color-adjust: none");
+  });
+});
