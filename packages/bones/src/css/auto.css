@@ -94,3 +94,116 @@
     pointer-events: none;
   }
 }
+
+@layer bones-auto {
+  /* Block override: replaced elements and form controls fill their own box.
+     A text bar across an avatar or a button looks wrong. Leafness is not
+     required — svg and select routinely have element children. */
+  [aria-busy="true"]
+    :is(img, svg, video, canvas, picture, button, input, select, textarea):not(
+      [data-bone],
+      [data-bone] *,
+      [data-bones-auto="off"],
+      [data-bones-auto="off"] *
+    ) {
+    color: transparent;
+    background-color: var(--bone-base);
+    border-radius: var(--bone-radius);
+    border-color: transparent;
+  }
+
+  /* Width variance: text leaves cycle 85 / 100 / 92 / 60 so runs of lines
+     look organic. Takes effect on block-level leaves; inline leaves keep
+     their content-derived width, which already varies. */
+  [aria-busy="true"]
+    :not(:has(*)):not(
+      [data-bone],
+      [data-bone] *,
+      [data-bones-auto="off"],
+      [data-bones-auto="off"] *
+    ):not(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      button,
+      input,
+      select,
+      textarea,
+      svg *,
+      picture *,
+      select *
+    ):nth-child(4n + 1) {
+    width: 85%;
+  }
+
+  [aria-busy="true"]
+    :not(:has(*)):not(
+      [data-bone],
+      [data-bone] *,
+      [data-bones-auto="off"],
+      [data-bones-auto="off"] *
+    ):not(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      button,
+      input,
+      select,
+      textarea,
+      svg *,
+      picture *,
+      select *
+    ):nth-child(4n + 2) {
+    width: 100%;
+  }
+
+  [aria-busy="true"]
+    :not(:has(*)):not(
+      [data-bone],
+      [data-bone] *,
+      [data-bones-auto="off"],
+      [data-bones-auto="off"] *
+    ):not(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      button,
+      input,
+      select,
+      textarea,
+      svg *,
+      picture *,
+      select *
+    ):nth-child(4n + 3) {
+    width: 92%;
+  }
+
+  [aria-busy="true"]
+    :not(:has(*)):not(
+      [data-bone],
+      [data-bone] *,
+      [data-bones-auto="off"],
+      [data-bones-auto="off"] *
+    ):not(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      button,
+      input,
+      select,
+      textarea,
+      svg *,
+      picture *,
+      select *
+    ):nth-child(4n) {
+    width: 60%;
+  }
+}
