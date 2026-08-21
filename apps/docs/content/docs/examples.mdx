@@ -8,7 +8,7 @@ description: Common patterns for using bones.
 Pass a promise to a component wrapped in `<Bones>`.
 
 ```tsx
-import { Bones } from "@camp-dev/bones/react";
+import { Bones, createBones } from "@camp-dev/bones/react";
 
 async function fetchUser(): Promise<User> {
   const res = await fetch("/api/user");
