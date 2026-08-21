@@ -1,4 +1,11 @@
 import { cache, cloneElement, createElement, isValidElement, type ReactNode } from "react";
+import { boneAttributes } from "./core/attributes.ts";
+import type { BoneOptions, BoneType, MinMax } from "./core/attributes.ts";
+
+// Re-export the framework-agnostic pieces so the React entry's public API is
+// unchanged by the core extraction.
+export { minMax, isMinMax } from "./core/attributes.ts";
+export type { BoneOptions, BoneType, MinMax };
 
 // ---------------------------------------------------------------------------
 // Server-safe loading context via React.cache
@@ -9,39 +16,8 @@ import { cache, cloneElement, createElement, isValidElement, type ReactNode } fr
 
 export const getBonesContext = cache(() => ({ loading: false }));
 
-export type BoneType = "text" | "block" | "container";
-
-// ---------------------------------------------------------------------------
-// minMax — variable-length skeleton helper
-//
-// Returns a descriptor that `bone("text", { length: minMax(4, 12) })` uses to
-// produce a different deterministic width on each call within a createBones
-// instance. Ideal inside repeat() loops for natural-looking skeleton lists.
-// ---------------------------------------------------------------------------
-
-const MIN_MAX_BRAND = Symbol("minMax");
-
-export interface MinMax {
-  readonly [MIN_MAX_BRAND]: true;
-  readonly min: number;
-  readonly max: number;
-}
-
-export function minMax(min: number, max: number): MinMax {
-  return { [MIN_MAX_BRAND]: true, min, max };
-}
-
-export function isMinMax(value: unknown): value is MinMax {
-  return typeof value === "object" && value !== null && MIN_MAX_BRAND in value;
-}
-
 function withKey(node: ReactNode, key: string | number): ReactNode {
   return isValidElement(node) ? cloneElement(node, { key }) : node;
-}
-
-export interface BoneOptions {
-  length?: number | MinMax;
-  contained?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -87,34 +63,7 @@ export function readPromise<T>(promise: Promise<T>): T {
 // When `data` is a Promise it delegates to `readPromise` for Suspense support.
 // ---------------------------------------------------------------------------
 
-const TRANSPARENT_PIXEL =
-  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-
 type BoneProps = Record<string, unknown>;
-
-function resolveLength(length: number | MinMax | undefined, callIndex: number): number | undefined {
-  if (length == null) return undefined;
-  if (typeof length === "number") return length;
-  // MinMax: deterministic variation based on call index
-  const range = length.max - length.min + 1;
-  return length.min + ((callIndex * 7 + 3) % range);
-}
-
-function buildTextStyle(
-  options: BoneOptions | undefined,
-  resolvedLength: number | undefined,
-): Record<string, unknown> | undefined {
-  const style: Record<string, unknown> = {};
-
-  if (options?.contained) {
-    style["--bone-contained"] = 1;
-  }
-  if (resolvedLength) {
-    style["--bone-length"] = resolvedLength;
-  }
-
-  return Object.keys(style).length > 0 ? style : undefined;
-}
 
 // ---------------------------------------------------------------------------
 // forceBones — sentinel for forced skeleton mode
@@ -202,24 +151,7 @@ export function createBones<T>(
 
   const bone = (type: BoneType, options?: BoneOptions): BoneProps => {
     if (!isLoading) return {};
-
-    const callIndex = boneCallIndex++;
-    const props: BoneProps = {
-      "data-bone": type,
-      "aria-busy": true,
-    };
-
-    if (type === "text") {
-      const length = resolveLength(options?.length, callIndex);
-      const style = buildTextStyle(options, length);
-      if (style) props.style = style;
-    }
-
-    if (type === "block") {
-      props.src = TRANSPARENT_PIXEL;
-    }
-
-    return props;
+    return { ...boneAttributes(type, options, boneCallIndex++) };
   };
 
   function repeat<U>(
