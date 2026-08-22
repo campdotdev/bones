@@ -100,10 +100,12 @@ export class BonesBoundary extends Base {
     // A pending element that gets reparented (moved with appendChild, busy
     // unchanged) must restart its delay rather than get stuck: without this,
     // connectedCallback's #evaluate sees busy=true and state="pending" (not
-    // idle or draining) and does nothing. A showing element keeps its
-    // aria-busy/inert attributes across the move, so connectedCallback's
-    // adoption path above re-adopts it as showing instead of resetting it.
-    this.#state = "idle";
+    // idle or draining) and does nothing. A showing or draining element keeps
+    // its state (and its aria-busy/inert attributes) across the move: it
+    // already has a live skeleton on screen and must keep its original
+    // min-duration clock rather than re-fire bones:show and restart the
+    // window from the reconnect time.
+    if (this.#state === "pending") this.#state = "idle";
   }
 
   attributeChangedCallback(): void {
@@ -147,7 +149,11 @@ export class BonesBoundary extends Base {
     if (this.#state === "pending") {
       this.#clearTimer();
       this.#state = "idle";
-    } else if (this.#state === "showing") {
+    } else if (this.showing) {
+      // Covers both "showing" and "draining": a reconnected draining element
+      // (its timer was cleared by disconnectedCallback) reschedules the
+      // remainder of its original min-duration window rather than a fresh one.
+      this.#clearTimer();
       const remaining = this.#shownAt + this.minDuration - Date.now();
       if (remaining <= 0) {
         this.#hide();

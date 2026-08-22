@@ -397,6 +397,8 @@ describe("disconnect", () => {
     el.remove();
     vi.advanceTimersByTime(1000);
     expect(log).toEqual(["show"]);
+    expect(el.getAttribute("aria-busy")).toBe("true");
+    expect(el.hasAttribute("inert")).toBe(true);
   });
 
   test("an element moved while pending restarts its delay", () => {
@@ -414,18 +416,39 @@ describe("disconnect", () => {
 
   test("a showing element that is moved keeps its bones and still hides", () => {
     const el = mount();
+    const log = events(el);
     el.busy = true;
-    vi.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200); // shows at t=200, shownAt=200
+    vi.advanceTimersByTime(100); // t=300, still showing (busy), 100ms since show
     const other = document.createElement("div");
     document.body.append(other);
     other.append(el);
+    // The move must not re-fire bones:show or reset the min-duration clock.
     expect(shown(el)).toBe(true);
-    expect(el.showing).toBe(true);
-    el.busy = false;
-    vi.advanceTimersByTime(399);
+    expect(log).toEqual(["show"]);
+    el.busy = false; // t=300: 300ms remain until 400ms since the original show
+    vi.advanceTimersByTime(299); // t=599, still short of t=600
     expect(shown(el)).toBe(true);
-    vi.advanceTimersByTime(1);
+    vi.advanceTimersByTime(1); // t=600 = 400ms after the ORIGINAL show at t=200
     expect(shown(el)).toBe(false);
+    expect(log).toEqual(["show", "hide"]);
+  });
+
+  test("a draining element that is moved hides on its original schedule", () => {
+    const el = mount();
+    const log = events(el);
+    el.busy = true;
+    vi.advanceTimersByTime(200); // shows at t=200, shownAt=200
+    el.busy = false; // draining starts at t=200, scheduled to hide at t=600
+    vi.advanceTimersByTime(350); // t=550, still draining, 50ms left
+    const other = document.createElement("div");
+    document.body.append(other);
+    other.append(el);
+    vi.advanceTimersByTime(49); // t=599, still short of t=600
+    expect(shown(el)).toBe(true);
+    vi.advanceTimersByTime(1); // t=600 = 400ms after the original show at t=200
+    expect(shown(el)).toBe(false);
+    expect(log).toEqual(["show", "hide"]);
   });
 });
 
