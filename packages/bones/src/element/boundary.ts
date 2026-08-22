@@ -83,12 +83,27 @@ export class BonesBoundary extends Base {
 
   connectedCallback(): void {
     this.#connected = true;
+    // Server-rendered markup can carry aria-busy="true" so the CSS paints
+    // bones before this script runs. Adopt that as "showing" rather than
+    // re-running the delay; min-duration counts from now.
+    if (this.getAttribute("aria-busy") === "true" && !this.showing) {
+      this.#show();
+      if (!this.busy && !this.force) this.#evaluate();
+      return;
+    }
     this.#evaluate();
   }
 
   disconnectedCallback(): void {
     this.#connected = false;
     this.#clearTimer();
+    // A pending element that gets reparented (moved with appendChild, busy
+    // unchanged) must restart its delay rather than get stuck: without this,
+    // connectedCallback's #evaluate sees busy=true and state="pending" (not
+    // idle or draining) and does nothing. A showing element keeps its
+    // aria-busy/inert attributes across the move, so connectedCallback's
+    // adoption path above re-adopts it as showing instead of resetting it.
+    this.#state = "idle";
   }
 
   attributeChangedCallback(): void {
@@ -155,8 +170,30 @@ export class BonesBoundary extends Base {
   #hide(): void {
     this.#clearTimer();
     this.#state = "idle";
-    this.removeAttribute("aria-busy");
-    this.removeAttribute("inert");
-    this.dispatchEvent(new CustomEvent("bones:hide", { bubbles: true, composed: true }));
+    const update = (): void => {
+      this.removeAttribute("aria-busy");
+      this.removeAttribute("inert");
+      this.dispatchEvent(new CustomEvent("bones:hide", { bubbles: true, composed: true }));
+    };
+    if (this.#canTransition()) {
+      document.startViewTransition(update);
+    } else {
+      update();
+    }
+  }
+
+  // Showing never animates: a crossfade into a skeleton only delays the
+  // loading state. Hiding animates when the page allows it.
+  #canTransition(): boolean {
+    if (this.transition === "none") return false;
+    if (typeof document.startViewTransition !== "function") return false;
+    if (
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return false;
+    }
+    return true;
   }
 }

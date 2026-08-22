@@ -239,3 +239,212 @@ describe("force", () => {
     expect(shown(el)).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// View transitions. jsdom has neither startViewTransition nor matchMedia, so
+// each test installs what it needs and the afterEach removes it.
+// ---------------------------------------------------------------------------
+
+// Omit + intersect rather than plain intersect: this lib's DOM types already
+// declare startViewTransition/matchMedia with stricter, non-optional
+// signatures, so a plain intersection would merge the real property type
+// with the mock's and reject the mock as unassignable.
+type TransitionDoc = Omit<Document, "startViewTransition"> & {
+  startViewTransition?: (update: () => void) => unknown;
+};
+type MediaWindow = Omit<Window, "matchMedia"> & {
+  matchMedia?: (query: string) => { matches: boolean };
+};
+
+function stubTransition() {
+  const fn = vi.fn((update: () => void) => {
+    update();
+    return {};
+  });
+  (document as TransitionDoc).startViewTransition = fn;
+  return fn;
+}
+
+function stubReducedMotion(matches: boolean) {
+  (window as MediaWindow).matchMedia = vi.fn(() => ({ matches }));
+}
+
+describe("view transitions", () => {
+  afterEach(() => {
+    delete (document as TransitionDoc).startViewTransition;
+    delete (window as MediaWindow).matchMedia;
+  });
+
+  test("hide runs inside startViewTransition and show does not", () => {
+    const fn = stubTransition();
+    const el = mount();
+    const log = events(el);
+    el.busy = true;
+    vi.advanceTimersByTime(200);
+    expect(fn).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(400);
+    el.busy = false;
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(shown(el)).toBe(false);
+    expect(log).toEqual(["show", "hide"]);
+  });
+
+  test("bones:hide fires inside the update callback", () => {
+    const order: string[] = [];
+    const fn = vi.fn((update: () => void) => {
+      order.push("before");
+      update();
+      order.push("after");
+      return {};
+    });
+    (document as TransitionDoc).startViewTransition = fn;
+    const el = mount({ delay: "0", "min-duration": "0" });
+    el.addEventListener("bones:hide", () => order.push("hide"));
+    el.busy = true;
+    el.busy = false;
+    expect(order).toEqual(["before", "hide", "after"]);
+  });
+
+  test("transition=none skips startViewTransition", () => {
+    const fn = stubTransition();
+    const el = mount({ delay: "0", "min-duration": "0", transition: "none" });
+    el.busy = true;
+    el.busy = false;
+    expect(fn).not.toHaveBeenCalled();
+    expect(shown(el)).toBe(false);
+  });
+
+  test("reduced motion skips startViewTransition", () => {
+    const fn = stubTransition();
+    stubReducedMotion(true);
+    const el = mount({ delay: "0", "min-duration": "0" });
+    el.busy = true;
+    el.busy = false;
+    expect(fn).not.toHaveBeenCalled();
+    expect(shown(el)).toBe(false);
+  });
+
+  test("a matchMedia that does not match still allows the transition", () => {
+    const fn = stubTransition();
+    stubReducedMotion(false);
+    const el = mount({ delay: "0", "min-duration": "0" });
+    el.busy = true;
+    el.busy = false;
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  test("hide completes when startViewTransition is absent", () => {
+    const el = mount({ delay: "0", "min-duration": "0" });
+    const log = events(el);
+    el.busy = true;
+    el.busy = false;
+    expect(shown(el)).toBe(false);
+    expect(log).toEqual(["show", "hide"]);
+  });
+});
+
+describe("server-rendered state", () => {
+  test("an element connected with aria-busy=true adopts showing", () => {
+    const el = document.createElement("bones-boundary");
+    el.setAttribute("busy", "");
+    el.setAttribute("aria-busy", "true");
+    el.setAttribute("inert", "");
+    document.body.append(el);
+    expect(el.showing).toBe(true);
+    expect(shown(el)).toBe(true);
+  });
+
+  test("min-duration counts from connect for adopted state", () => {
+    const el = document.createElement("bones-boundary");
+    el.setAttribute("busy", "");
+    el.setAttribute("aria-busy", "true");
+    document.body.append(el);
+    el.busy = false;
+    expect(shown(el)).toBe(true);
+    vi.advanceTimersByTime(399);
+    expect(shown(el)).toBe(true);
+    vi.advanceTimersByTime(1);
+    expect(shown(el)).toBe(false);
+  });
+
+  test("aria-busy without busy or force still adopts, then hides after min-duration", () => {
+    const el = document.createElement("bones-boundary");
+    el.setAttribute("aria-busy", "true");
+    document.body.append(el);
+    expect(el.showing).toBe(true);
+    vi.advanceTimersByTime(400);
+    expect(shown(el)).toBe(false);
+  });
+});
+
+describe("disconnect", () => {
+  test("removing the element clears timers and fires nothing", () => {
+    const el = mount();
+    const log = events(el);
+    el.busy = true;
+    el.remove();
+    vi.advanceTimersByTime(1000);
+    expect(shown(el)).toBe(false);
+    expect(log).toEqual([]);
+  });
+
+  test("removing a draining element leaves its attributes alone and fires nothing more", () => {
+    const el = mount();
+    const log = events(el);
+    el.busy = true;
+    vi.advanceTimersByTime(200);
+    el.busy = false;
+    el.remove();
+    vi.advanceTimersByTime(1000);
+    expect(log).toEqual(["show"]);
+  });
+
+  test("an element moved while pending restarts its delay", () => {
+    const el = mount();
+    el.busy = true;
+    vi.advanceTimersByTime(100);
+    const other = document.createElement("div");
+    document.body.append(other);
+    other.append(el);
+    vi.advanceTimersByTime(199);
+    expect(shown(el)).toBe(false);
+    vi.advanceTimersByTime(1);
+    expect(shown(el)).toBe(true);
+  });
+
+  test("a showing element that is moved keeps its bones and still hides", () => {
+    const el = mount();
+    el.busy = true;
+    vi.advanceTimersByTime(200);
+    const other = document.createElement("div");
+    document.body.append(other);
+    other.append(el);
+    expect(shown(el)).toBe(true);
+    expect(el.showing).toBe(true);
+    el.busy = false;
+    vi.advanceTimersByTime(399);
+    expect(shown(el)).toBe(true);
+    vi.advanceTimersByTime(1);
+    expect(shown(el)).toBe(false);
+  });
+});
+
+describe("auto.css contract", () => {
+  test("a leaf inside a showing boundary matches the auto.css text-leaf selector", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const css = readFileSync(join(import.meta.dirname, "../src/css/auto.css"), "utf8");
+    // Search past the file's header comment: its prose mentions the literal
+    // text `[aria-busy="true"]` before the first real rule does.
+    const layerStart = css.indexOf("@layer bones-auto");
+    const start = css.indexOf('[aria-busy="true"]', layerStart);
+    const selector = css.slice(start, css.indexOf("{", start)).replace(/\s+/g, " ").trim();
+    const el = mount({ delay: "0", "min-duration": "0" });
+    const leaf = el.querySelector("p")!;
+    expect(leaf.matches(selector)).toBe(false);
+    el.busy = true;
+    expect(leaf.matches(selector)).toBe(true);
+    el.busy = false;
+    expect(leaf.matches(selector)).toBe(false);
+  });
+});
