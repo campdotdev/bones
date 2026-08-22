@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { createBones } from "bones/react";
+import { createBones } from "@camp.dev/bones/react";
 import Link from "next/link";
 import type { PokemonListItem } from "@/lib/pokeapi";
 import { TypeBadge } from "@/components/type-badge/type-badge";

@@ -1,4 +1,4 @@
-import { createBones } from "bones/react";
+import { createBones } from "@camp.dev/bones/react";
 import { PokemonCard } from "@/components/pokemon-card/pokemon-card";
 import type { PokemonListItem } from "@/lib/pokeapi";
 import styles from "./styles.module.css";

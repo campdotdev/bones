@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
-import { BonesForce } from "bones/react";
+import { BonesForce } from "@camp.dev/bones/react";
 import { BonesDevTool } from "@/components/bones-devtool/bones-devtool";
-import "bones/css";
+import "@camp.dev/bones/css";
 import "./globals.css";
 
 export const metadata: Metadata = {

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { createBones } from "bones/react";
+import { createBones } from "@camp.dev/bones/react";
 import type { EvolutionChain } from "@/lib/pokeapi";
 import styles from "./styles.module.css";
 

@@ -4,12 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "pnpm --filter @camp-dev/bones build && next build",
+    "build": "vp run --filter @camp.dev/bones build && next build",
     "start": "next start",
     "check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
-    "bones": "workspace:@camp-dev/bones@*",
+    "@camp.dev/bones": "workspace:*",
     "fumadocs-core": "latest",
     "fumadocs-mdx": "latest",
     "fumadocs-ui": "latest",
