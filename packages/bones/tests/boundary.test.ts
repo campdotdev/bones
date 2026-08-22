@@ -137,3 +137,105 @@ describe("delay", () => {
     expect(shown(el)).toBe(true);
   });
 });
+
+describe("min-duration", () => {
+  test("bones stay until min-duration has elapsed, then bones:hide fires", () => {
+    const el = mount();
+    const log = events(el);
+    el.busy = true;
+    vi.advanceTimersByTime(200);
+    expect(shown(el)).toBe(true);
+    vi.advanceTimersByTime(100);
+    el.busy = false;
+    expect(shown(el)).toBe(true);
+    expect(el.showing).toBe(true);
+    vi.advanceTimersByTime(299);
+    expect(shown(el)).toBe(true);
+    vi.advanceTimersByTime(1);
+    expect(shown(el)).toBe(false);
+    expect(el.getAttribute("aria-busy")).toBeNull();
+    expect(el.hasAttribute("inert")).toBe(false);
+    expect(el.showing).toBe(false);
+    expect(log).toEqual(["show", "hide"]);
+  });
+
+  test("clearing busy after min-duration hides at once", () => {
+    const el = mount();
+    const log = events(el);
+    el.busy = true;
+    vi.advanceTimersByTime(200 + 400);
+    el.busy = false;
+    expect(shown(el)).toBe(false);
+    expect(log).toEqual(["show", "hide"]);
+  });
+
+  test("busy set again while draining cancels the hide without a second show", () => {
+    const el = mount();
+    const log = events(el);
+    el.busy = true;
+    vi.advanceTimersByTime(200);
+    el.busy = false;
+    vi.advanceTimersByTime(100);
+    el.busy = true;
+    vi.advanceTimersByTime(1000);
+    expect(shown(el)).toBe(true);
+    expect(log).toEqual(["show"]);
+  });
+
+  test("min-duration=0 hides at once", () => {
+    const el = mount({ "min-duration": "0" });
+    el.busy = true;
+    vi.advanceTimersByTime(200);
+    el.busy = false;
+    expect(shown(el)).toBe(false);
+  });
+});
+
+describe("force", () => {
+  test("force shows at once and ignores delay", () => {
+    const el = mount();
+    const log = events(el);
+    el.force = true;
+    expect(shown(el)).toBe(true);
+    expect(log).toEqual(["show"]);
+  });
+
+  test("force in markup shows at connect", () => {
+    const el = mount({ force: "" });
+    expect(shown(el)).toBe(true);
+  });
+
+  test("force set while draining keeps bones showing", () => {
+    const el = mount();
+    const log = events(el);
+    el.busy = true;
+    vi.advanceTimersByTime(200);
+    el.busy = false;
+    el.force = true;
+    vi.advanceTimersByTime(1000);
+    expect(shown(el)).toBe(true);
+    expect(log).toEqual(["show"]);
+  });
+
+  test("clearing force with busy absent hides after min-duration counted from the force", () => {
+    const el = mount();
+    el.force = true;
+    vi.advanceTimersByTime(100);
+    el.force = false;
+    expect(shown(el)).toBe(true);
+    vi.advanceTimersByTime(299);
+    expect(shown(el)).toBe(true);
+    vi.advanceTimersByTime(1);
+    expect(shown(el)).toBe(false);
+  });
+
+  test("clearing force with busy set keeps showing", () => {
+    const el = mount();
+    el.busy = true;
+    el.force = true;
+    vi.advanceTimersByTime(1000);
+    el.force = false;
+    vi.advanceTimersByTime(1000);
+    expect(shown(el)).toBe(true);
+  });
+});

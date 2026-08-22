@@ -32,6 +32,7 @@ export class BonesBoundary extends Base {
   #state: State = "idle";
   #timer: ReturnType<typeof setTimeout> | undefined;
   #connected = false;
+  #shownAt = 0;
 
   get busy(): boolean {
     return this.hasAttribute("busy");
@@ -131,14 +132,31 @@ export class BonesBoundary extends Base {
     if (this.#state === "pending") {
       this.#clearTimer();
       this.#state = "idle";
+    } else if (this.#state === "showing") {
+      const remaining = this.#shownAt + this.minDuration - Date.now();
+      if (remaining <= 0) {
+        this.#hide();
+      } else {
+        this.#state = "draining";
+        this.#timer = setTimeout(() => this.#hide(), remaining);
+      }
     }
   }
 
   #show(): void {
     this.#clearTimer();
     this.#state = "showing";
+    this.#shownAt = Date.now();
     this.setAttribute("aria-busy", "true");
     this.toggleAttribute("inert", true);
     this.dispatchEvent(new CustomEvent("bones:show", { bubbles: true, composed: true }));
+  }
+
+  #hide(): void {
+    this.#clearTimer();
+    this.#state = "idle";
+    this.removeAttribute("aria-busy");
+    this.removeAttribute("inert");
+    this.dispatchEvent(new CustomEvent("bones:hide", { bubbles: true, composed: true }));
   }
 }
