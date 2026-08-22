@@ -145,6 +145,8 @@ Auto rules live in `@layer bones-auto`, so any page CSS that sets `color` on an 
 </bones-boundary>
 ```
 
+`@camp.dev/bones/element` is a bare specifier. A browser cannot resolve it on its own, so this snippet needs a bundler or an import map. To load the element straight from a CDN in a plain HTML file, see the URL form on the [bones-boundary docs page](apps/docs/content/docs/api/bones-boundary.mdx).
+
 Pair it with `auto.css` for zero-markup skeletons, or with `data-bone` markup from `boneAttributes`. The element is also exported for React as `<BonesBoundary>` from `@camp.dev/bones/react`.
 
 ## Development

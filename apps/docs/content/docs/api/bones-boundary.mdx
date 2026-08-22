@@ -24,17 +24,18 @@ Set `busy` when loading starts and remove it when loading ends. The element wait
   <p>Three lines of copy become three bones while busy.</p>
 </bones-boundary>
 
-<script>
+<script type="module">
+  await customElements.whenDefined("bones-boundary");
   const boundary = document.getElementById("profile");
-  fetch("/api/profile")
-    .then((response) => response.json())
-    .then((profile) => {
-      boundary.querySelector("h2").textContent = profile.name;
-      boundary.querySelector("p").textContent = profile.bio;
-      boundary.busy = false;
-    });
+  const response = await fetch("/api/profile");
+  const profile = await response.json();
+  boundary.querySelector("h2").textContent = profile.name;
+  boundary.querySelector("p").textContent = profile.bio;
+  boundary.busy = false;
 </script>
 ```
+
+The second script waits for the definition instead of trusting script order. A classic `<script>` in its place would run before the deferred module import above it and touch a boundary that has not upgraded yet. A property written before the upgrade is replayed when the upgrade happens, but a property read before it returns `undefined`.
 
 ## Attributes
 
@@ -48,9 +49,15 @@ Set `busy` when loading starts and remove it when loading ends. The element wait
 
 Every property reflects to its attribute. A `delay` or `min-duration` that is missing, negative, or not a number falls back to the default. The read-only `showing` property is `true` while bones are visible.
 
+A new `delay` or `min-duration` applies to the next transition, not the one already running. The element reads each value once, at the moment it starts the timer.
+
 ## Output attributes
 
-While bones show, the element carries `aria-busy="true"` and `inert`. `inert` removes the subtree from the tab order and from assistive technology, and ignores pointer events. Do not set these two attributes yourself on the client. Setting them on the server is how you render the loading state before JavaScript runs (see below).
+While bones show, the element carries `aria-busy="true"` and `inert`. `inert` removes the subtree from the tab order and from assistive technology, and ignores pointer events. Do not set these two attributes yourself on the client. The element puts them back if anything else removes them while bones are showing. Setting them on the server is how you render the loading state before JavaScript runs (see below).
+
+`inert` blurs whatever was focused inside the boundary, and the element does not restore that focus when bones hide. Move focus yourself in a `bones:hide` listener if the interaction needs it.
+
+An element that upgrades with `aria-busy="true"` already in its markup adopts the showing state, so `bones:show` fires on upgrade as well as after `delay`.
 
 ## Events
 
@@ -113,6 +120,10 @@ function Profile({ loading, user }: { loading: boolean; user?: User }) {
 | `onHide`      | `bones:hide`   | Same.                                                                                |
 
 The wrapper uses no hooks, so it renders inside server components. `<Bones>` and Suspense do not need it: the Suspense fallback renders `data-bone` markup that the stylesheet styles on its own.
+
+React owns none of the attributes the element writes. The wrapper sets `suppressHydrationWarning`, so a boundary that already shows bones by the time React hydrates it is not reported as a mismatch, and the element restores `aria-busy` and `inert` if a React update removes them.
+
+The package augments `JSX.IntrinsicElements` with `"bones-boundary"`. A project that already declares the same tag gets a conflicting-declaration error from TypeScript. Delete the local declaration and use this one.
 
 ## Browser support
 
