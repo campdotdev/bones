@@ -1,0 +1,119 @@
+---
+title: bones-boundary
+description: A custom element that manages the loading state of its subtree.
+---
+
+```ts
+import "@camp.dev/bones/element";
+```
+
+`<bones-boundary>` sets `aria-busy="true"` and `inert` on itself while its subtree is loading, and removes them when it is not. It draws nothing. `@camp.dev/bones/css` styles `data-bone` markup and `@camp.dev/bones/auto.css` styles unmarked leaves, and both key on `aria-busy="true"`.
+
+Set `busy` when loading starts and remove it when loading ends. The element waits `delay` before it shows bones, so a fast response never flashes a skeleton, and it keeps bones for at least `min-duration`, so a slow one never strobes.
+
+## Usage
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/@camp.dev/bones/src/css/auto.css" />
+<script type="module">
+  import "https://unpkg.com/@camp.dev/bones/dist/element/index.mjs";
+</script>
+
+<bones-boundary id="profile" busy>
+  <h2>Loading profile</h2>
+  <p>Three lines of copy become three bones while busy.</p>
+</bones-boundary>
+
+<script>
+  const boundary = document.getElementById("profile");
+  fetch("/api/profile")
+    .then((response) => response.json())
+    .then((profile) => {
+      boundary.querySelector("h2").textContent = profile.name;
+      boundary.querySelector("p").textContent = profile.bio;
+      boundary.busy = false;
+    });
+</script>
+```
+
+## Attributes
+
+| Attribute      | Property      | Type                 | Default  | Description                                                        |
+| -------------- | ------------- | -------------------- | -------- | ------------------------------------------------------------------ |
+| `busy`         | `busy`        | boolean              | absent   | The subtree is loading.                                            |
+| `force`        | `force`       | boolean              | absent   | Show bones now and keep them until removed. Skips both timers.     |
+| `delay`        | `delay`       | number (ms)          | `200`    | How long `busy` must stay set before bones show.                   |
+| `min-duration` | `minDuration` | number (ms)          | `400`    | Once shown, bones stay at least this long.                         |
+| `transition`   | `transition`  | `"auto"` or `"none"` | `"auto"` | Whether hiding bones runs inside `document.startViewTransition()`. |
+
+Every property reflects to its attribute. A `delay` or `min-duration` that is missing, negative, or not a number falls back to the default. The read-only `showing` property is `true` while bones are visible.
+
+## Output attributes
+
+While bones show, the element carries `aria-busy="true"` and `inert`. `inert` removes the subtree from the tab order and from assistive technology, and ignores pointer events. Do not set these two attributes yourself on the client. Setting them on the server is how you render the loading state before JavaScript runs (see below).
+
+## Events
+
+| Event        | When                                                            |
+| ------------ | --------------------------------------------------------------- |
+| `bones:show` | After `aria-busy` and `inert` are set.                          |
+| `bones:hide` | After they are removed. A view transition may still be playing. |
+
+Both bubble and cross shadow roots. Neither is cancelable.
+
+```js
+boundary.addEventListener("bones:hide", () => console.log("content visible"));
+```
+
+## The swap
+
+When `busy` is removed and `min-duration` has elapsed, the element removes its output attributes inside `document.startViewTransition()`, which crossfades bones into content. The call is skipped when `transition="none"` is set, when the browser has no `startViewTransition`, or when `prefers-reduced-motion: reduce` matches. In every case the content appears.
+
+Two limits of the View Transitions API apply:
+
+- The API snapshots the whole document. If two boundaries hide within the same crossfade, the browser skips the first transition and runs the second.
+- The page does not respond to input for the length of the crossfade. Set `transition="none"` on boundaries where that matters.
+
+## Server rendering
+
+Render the output attributes yourself when you know a region is loading at request time:
+
+```html
+<bones-boundary busy aria-busy="true" inert>…</bones-boundary>
+```
+
+The stylesheet paints bones and the subtree is inert before the element upgrades. On upgrade the element adopts the showing state, and `min-duration` counts from that moment.
+
+## React
+
+`@camp.dev/bones/react` exports a typed wrapper. Import the element once in a client entry so the tag is registered.
+
+```tsx
+import "@camp.dev/bones/element";
+import { BonesBoundary } from "@camp.dev/bones/react";
+
+function Profile({ loading, user }: { loading: boolean; user?: User }) {
+  return (
+    <BonesBoundary busy={loading} minDuration={600} onHide={() => track("profile:visible")}>
+      <h2>{user?.name ?? "Loading"}</h2>
+      <p>{user?.bio ?? "Three lines of copy become three bones while busy."}</p>
+    </BonesBoundary>
+  );
+}
+```
+
+| Prop          | Maps to        | Notes                                                                                |
+| ------------- | -------------- | ------------------------------------------------------------------------------------ |
+| `busy`        | `busy`         |                                                                                      |
+| `force`       | `force`        | Also renders `aria-busy="true"` and `inert` on the server.                           |
+| `delay`       | `delay`        |                                                                                      |
+| `minDuration` | `min-duration` |                                                                                      |
+| `transition`  | `transition`   |                                                                                      |
+| `onShow`      | `bones:show`   | Listener. Passing a function from a server component is an error, as with `onClick`. |
+| `onHide`      | `bones:hide`   | Same.                                                                                |
+
+The wrapper uses no hooks, so it renders inside server components. `<Bones>` and Suspense do not need it: the Suspense fallback renders `data-bone` markup that the stylesheet styles on its own.
+
+## Browser support
+
+Custom elements, `inert` (Chrome 102, Safari 15.5, Firefox 112), and the `:has()` selector that `auto.css` already needs. View Transitions are detected at runtime.
