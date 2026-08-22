@@ -4,13 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "pnpm --filter @camp-dev/bones build && next build",
+    "build": "vp run --filter @camp.dev/bones build && next build",
     "start": "next start",
     "check": "tsc --noEmit",
     "test": "vp test"
   },
   "dependencies": {
-    "bones": "workspace:@camp-dev/bones@*",
+    "@camp.dev/bones": "workspace:*",
     "lucide-react": "^1.11.0",
     "next": "^15.3.1",
     "react": "^19.1.0",

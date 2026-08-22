@@ -4,7 +4,7 @@ description: Accepts data (or a promise) and returns skeleton helpers.
 ---
 
 ```ts
-import { createBones, minMax } from "@camp-dev/bones/react";
+import { createBones, minMax } from "@camp.dev/bones/react";
 
 const { bone, data, repeat, lines } = createBones(dataOrPromise, options?);
 ```
@@ -61,7 +61,7 @@ These options only apply to `"text"` bones. They are ignored for `"block"` and `
 Creates a variable-length descriptor for the `length` option. Each `bone()` call within a `createBones` instance gets a different deterministic width between `min` and `max` (inclusive). Useful inside `repeat()` so skeleton lists don't all look the same.
 
 ```tsx
-import { createBones, minMax } from "@camp-dev/bones/react";
+import { createBones, minMax } from "@camp.dev/bones/react";
 
 const { bone, data, repeat } = createBones(pokemon);
 

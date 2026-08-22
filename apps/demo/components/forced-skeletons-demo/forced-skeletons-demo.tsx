@@ -1,4 +1,4 @@
-import { BonesForce } from "bones/react";
+import { BonesForce } from "@camp.dev/bones/react";
 import { fetchPokemonList } from "@/lib/pokeapi";
 import { DemoSection } from "@/components/demo-section/demo-section";
 import { PokemonGrid } from "@/components/pokemon-grid/pokemon-grid";

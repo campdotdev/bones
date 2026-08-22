@@ -8,7 +8,7 @@ description: Common patterns for using bones.
 Pass a promise to a component wrapped in `<Bones>`.
 
 ```tsx
-import { Bones, createBones } from "@camp-dev/bones/react";
+import { Bones, createBones } from "@camp.dev/bones/react";
 
 async function fetchUser(): Promise<User> {
   const res = await fetch("/api/user");
@@ -43,7 +43,7 @@ function UserCard({ user }: { user: Promise<User> }) {
 `<BonesForce>` shows skeleton states without real data:
 
 ```tsx
-import { BonesForce } from "@camp-dev/bones/react";
+import { BonesForce } from "@camp.dev/bones/react";
 
 function SkeletonDemo() {
   return (
@@ -65,7 +65,7 @@ function SkeletonDemo() {
 With hooks like React Query or SWR, pass the `loading` option to control skeleton state:
 
 ```tsx
-import { createBones } from "@camp-dev/bones/react";
+import { createBones } from "@camp.dev/bones/react";
 import useSWR from "swr";
 
 function UserCard() {
@@ -97,7 +97,7 @@ const { bone, repeat } = createBones({ loading: !moveDetails });
 `lines` generates skeleton `<span>` elements inside your wrapper. Full-width lines with a shorter last line, each with its own animation:
 
 ```tsx
-import { createBones } from "@camp-dev/bones/react";
+import { createBones } from "@camp.dev/bones/react";
 
 function ArticleCard({ article }: { article: Promise<Article> }) {
   const { bone, data, lines } = createBones(article);
@@ -121,7 +121,7 @@ During loading, `item` is an array of skeleton spans that render inside the `<p>
 `repeat` renders a fixed number of placeholder items while data loads. The callback receives each item (or `undefined` during loading) and its index:
 
 ```tsx
-import { createBones, minMax } from "@camp-dev/bones/react";
+import { createBones, minMax } from "@camp.dev/bones/react";
 
 function TagList({ pokemon }: { pokemon: Promise<Pokemon> }) {
   const { bone, data, repeat } = createBones(pokemon);

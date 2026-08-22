@@ -1,5 +1,5 @@
 {
-  "name": "@camp-dev/bones",
+  "name": "@camp.dev/bones",
   "version": "0.1.2",
   "description": "Skeleton loaders designed for React Server Components and streaming.",
   "homepage": "https://github.com/campdotdev/bones#readme",

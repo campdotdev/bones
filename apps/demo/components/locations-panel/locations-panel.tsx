@@ -1,4 +1,4 @@
-import { createBones } from "bones/react";
+import { createBones } from "@camp.dev/bones/react";
 import type { EncounterLocation } from "@/lib/pokeapi";
 import styles from "./styles.module.css";
 

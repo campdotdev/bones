@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { createBones } from "bones/react";
+import { createBones } from "@camp.dev/bones/react";
 import styles from "./pokemon-card.module.css";
 
 interface Pokemon {
