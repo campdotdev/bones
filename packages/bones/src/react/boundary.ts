@@ -1,4 +1,8 @@
-import { createElement, type CSSProperties, type ReactNode, type Ref } from "react";
+import { createElement, type HTMLAttributes, type ReactNode, type Ref } from "react";
+// A type-only import: it is erased at build time, so the rule that src/react
+// never depends on src/element at runtime still holds. The element module is
+// what registers the tag, and this file must not pull it into a bundle.
+import type { BonesBoundary as BonesBoundaryElement } from "../element/boundary.ts";
 
 // ---------------------------------------------------------------------------
 // <BonesBoundary> — typed wrapper for the <bones-boundary> element
@@ -12,22 +16,21 @@ import { createElement, type CSSProperties, type ReactNode, type Ref } from "rea
 // `@camp.dev/bones/element` once in a client entry; this file does not do it.
 // ---------------------------------------------------------------------------
 
-type ElementAttributes = {
+// Everything a plain <div> accepts, plus the element's own attributes. A
+// boundary wraps real content, so `role`, `hidden`, `tabIndex`, `onClick`, and
+// the rest of the aria-* set all have reasons to appear on it.
+interface ElementAttributes extends HTMLAttributes<HTMLElement> {
   busy?: boolean;
   force?: boolean;
   delay?: number;
   "min-duration"?: number;
   transition?: "auto" | "none";
-  inert?: boolean;
-  "aria-busy"?: "true" | "false";
+  // React maps `className` to class on custom elements too, but a raw
+  // <bones-boundary> written by hand reads better with the HTML name.
   class?: string;
-  className?: string;
-  style?: CSSProperties;
-  id?: string;
-  children?: ReactNode;
-  ref?: Ref<HTMLElement>;
+  ref?: Ref<BonesBoundaryElement>;
   [dataAttribute: `data-${string}`]: string | number | boolean | undefined;
-};
+}
 
 declare module "react" {
   namespace JSX {
@@ -67,6 +70,10 @@ export function BonesBoundary({
       "min-duration": minDuration,
       transition,
       ...(force ? { "aria-busy": "true", inert: true } : {}),
+      // The element writes aria-busy and inert itself, and it can have done so
+      // before hydration reaches this subtree. React must not treat those
+      // attributes as a mismatch against the server HTML and warn about them.
+      suppressHydrationWarning: true,
       "onbones:show": onShow,
       "onbones:hide": onHide,
     },

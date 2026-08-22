@@ -54,6 +54,21 @@ describe("server rendering", () => {
     expect(html).toContain('data-testid="b"');
   });
 
+  test("standard HTML and ARIA props type-check and reach the element", () => {
+    const html = renderToString(
+      <BonesBoundary role="status" aria-label="Loading" tabIndex={-1} onClick={() => {}}>
+        x
+      </BonesBoundary>,
+    );
+    expect(html).toContain('role="status"');
+    expect(html).toContain('aria-label="Loading"');
+  });
+
+  test("suppressHydrationWarning never reaches the markup", () => {
+    const html = renderToString(<BonesBoundary busy>x</BonesBoundary>);
+    expect(html.toLowerCase()).not.toContain("suppresshydrationwarning");
+  });
+
   test("raw <bones-boundary> type-checks with the augmented intrinsic element", () => {
     const html = renderToString(
       <bones-boundary busy delay={0} min-duration={0} transition="none">
@@ -89,6 +104,42 @@ describe("client rendering", () => {
       </BonesBoundary>,
     );
     expect(el.getAttribute("aria-busy")).toBeNull();
+    expect(onHide).toHaveBeenCalledTimes(1);
+  });
+
+  test("the output attributes survive a force to busy rerender", () => {
+    vi.useFakeTimers();
+    const onHide = vi.fn();
+    const { container, rerender } = render(
+      <BonesBoundary force onHide={onHide}>
+        <p>copy</p>
+      </BonesBoundary>,
+    );
+    const el = container.querySelector("bones-boundary")!;
+    expect(el.getAttribute("aria-busy")).toBe("true");
+    expect(el.hasAttribute("inert")).toBe(true);
+    // React deletes the aria-busy and inert it rendered for `force` before it
+    // applies `busy`, so the element has to put them back.
+    rerender(
+      <BonesBoundary busy delay={0} onHide={onHide}>
+        <p>copy</p>
+      </BonesBoundary>,
+    );
+    expect(el.getAttribute("aria-busy")).toBe("true");
+    expect(el.hasAttribute("inert")).toBe(true);
+    expect(el.showing).toBe(true);
+    expect(onHide).not.toHaveBeenCalled();
+    rerender(
+      <BonesBoundary busy={false} delay={0} onHide={onHide}>
+        <p>copy</p>
+      </BonesBoundary>,
+    );
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+    expect(el.getAttribute("aria-busy")).toBeNull();
+    expect(el.hasAttribute("inert")).toBe(false);
+    expect(el.showing).toBe(false);
     expect(onHide).toHaveBeenCalledTimes(1);
   });
 
