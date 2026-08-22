@@ -1,6 +1,6 @@
 {
   "name": "@camp.dev/bones",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Skeleton loaders designed for React Server Components and streaming.",
   "homepage": "https://github.com/campdotdev/bones#readme",
   "bugs": {
