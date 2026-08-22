@@ -6,6 +6,11 @@
     <title>bones-boundary sandbox</title>
     <link rel="stylesheet" href="../src/css/auto.css" />
     <style>
+      /* bones.css picks --bone-base from prefers-color-scheme, so the page must
+         follow the scheme too or dark-mode bones paint white on white. */
+      :root {
+        color-scheme: light dark;
+      }
       body {
         font-family: system-ui, sans-serif;
         max-width: 40rem;
@@ -23,7 +28,7 @@
         margin-bottom: 1rem;
       }
       pre {
-        background: #f4f4f4;
+        background: light-dark(#f4f4f4, #1f1f1f);
         padding: 0.5rem;
         max-height: 10rem;
         overflow: auto;
