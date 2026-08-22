@@ -76,6 +76,25 @@ describe("registration and reflection", () => {
     expect(el.delay).toBe(200);
   });
 
+  test("a property assigned before upgrade is replayed through the setter", () => {
+    const el = document.createElement("bones-boundary");
+    // What `boundary.busy = true` leaves behind when the page runs it before
+    // the element module loads: an own data property that shadows the
+    // prototype accessor for good once the element upgrades.
+    Object.defineProperty(el, "busy", {
+      value: true,
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    });
+    document.body.append(el);
+    expect(Object.prototype.hasOwnProperty.call(el, "busy")).toBe(false);
+    expect(el.hasAttribute("busy")).toBe(true);
+    expect(el.busy).toBe(true);
+    vi.advanceTimersByTime(200);
+    expect(shown(el)).toBe(true);
+  });
+
   test("transition reads auto unless the attribute is none", () => {
     const el = mount();
     expect(el.transition).toBe("auto");
@@ -205,6 +224,19 @@ describe("force", () => {
     expect(shown(el)).toBe(true);
   });
 
+  test("force set during the delay cancels the timer and fires one bones:show", () => {
+    const el = mount();
+    const log = events(el);
+    el.busy = true;
+    vi.advanceTimersByTime(100);
+    el.force = true;
+    expect(shown(el)).toBe(true);
+    // The delay timer would have fired at t=200 and shown a second time.
+    vi.advanceTimersByTime(1000);
+    expect(shown(el)).toBe(true);
+    expect(log).toEqual(["show"]);
+  });
+
   test("force set while draining keeps bones showing", () => {
     const el = mount();
     const log = events(el);
@@ -240,6 +272,46 @@ describe("force", () => {
   });
 });
 
+describe("output attribute defense", () => {
+  test("attributes stripped while bones show are put back", () => {
+    const el = mount({ delay: "0" });
+    const log = events(el);
+    el.busy = true;
+    el.removeAttribute("aria-busy");
+    expect(el.getAttribute("aria-busy")).toBe("true");
+    el.removeAttribute("inert");
+    expect(shown(el)).toBe(true);
+    // Draining counts as on screen too: the bones are still painted.
+    el.busy = false;
+    expect(el.showing).toBe(true);
+    el.removeAttribute("aria-busy");
+    el.removeAttribute("inert");
+    expect(shown(el)).toBe(true);
+    vi.advanceTimersByTime(400);
+    expect(shown(el)).toBe(false);
+    expect(log).toEqual(["show", "hide"]);
+  });
+
+  test("the element leaves alone attributes it did not set", () => {
+    const el = mount({ delay: "0", "min-duration": "0" });
+    // Idle: the author owns these attributes, so neither setting nor
+    // removing them by hand pulls the element into a showing state.
+    el.setAttribute("aria-busy", "true");
+    el.toggleAttribute("inert", true);
+    expect(el.showing).toBe(false);
+    el.removeAttribute("aria-busy");
+    el.removeAttribute("inert");
+    expect(el.hasAttribute("aria-busy")).toBe(false);
+    expect(el.hasAttribute("inert")).toBe(false);
+    // And the element's own hide is not something it defends against.
+    el.busy = true;
+    expect(shown(el)).toBe(true);
+    el.busy = false;
+    expect(shown(el)).toBe(false);
+    expect(el.showing).toBe(false);
+  });
+});
+
 // ---------------------------------------------------------------------------
 // View transitions. jsdom has neither startViewTransition nor matchMedia, so
 // each test installs what it needs and the afterEach removes it.
@@ -267,6 +339,18 @@ function stubTransition() {
 
 function stubReducedMotion(matches: boolean) {
   (window as MediaWindow).matchMedia = vi.fn(() => ({ matches }));
+}
+
+// A real startViewTransition runs its update callback on a later frame. This
+// stub captures the callback instead of running it, so a test can act inside
+// that window and then let the stale update run.
+function captureTransition(): () => void {
+  let captured = (): void => {};
+  (document as TransitionDoc).startViewTransition = (update: () => void) => {
+    captured = update;
+    return {};
+  };
+  return () => captured();
 }
 
 describe("view transitions", () => {
@@ -331,6 +415,47 @@ describe("view transitions", () => {
     el.busy = true;
     el.busy = false;
     expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  test("busy set again before the update runs keeps bones and fires no second show", () => {
+    const run = captureTransition();
+    const el = mount({ delay: "0", "min-duration": "0" });
+    const log = events(el);
+    el.busy = true;
+    el.busy = false;
+    expect(el.showing).toBe(true);
+    expect(shown(el)).toBe(true);
+    el.busy = true;
+    run();
+    expect(shown(el)).toBe(true);
+    expect(el.showing).toBe(true);
+    expect(log).toEqual(["show"]);
+  });
+
+  test("an element removed before the update runs fires no bones:hide", () => {
+    const run = captureTransition();
+    const el = mount({ delay: "0", "min-duration": "0" });
+    const log = events(el);
+    el.busy = true;
+    el.busy = false;
+    el.remove();
+    run();
+    expect(log).toEqual(["show"]);
+    expect(el.getAttribute("aria-busy")).toBe("true");
+    expect(el.hasAttribute("inert")).toBe(true);
+  });
+
+  test("an uninterrupted update still hides and fires bones:hide", () => {
+    const run = captureTransition();
+    const el = mount({ delay: "0", "min-duration": "0" });
+    const log = events(el);
+    el.busy = true;
+    el.busy = false;
+    expect(shown(el)).toBe(true);
+    run();
+    expect(shown(el)).toBe(false);
+    expect(el.showing).toBe(false);
+    expect(log).toEqual(["show", "hide"]);
   });
 
   test("hide completes when startViewTransition is absent", () => {

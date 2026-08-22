@@ -11,7 +11,14 @@
 export const DEFAULT_DELAY = 200;
 export const DEFAULT_MIN_DURATION = 400;
 
-type State = "idle" | "pending" | "showing" | "draining";
+const UPGRADE_PROPERTIES = ["busy", "force", "delay", "minDuration", "transition"] as const;
+type UpgradeProperty = (typeof UPGRADE_PROPERTIES)[number];
+
+// "hiding" is the window a view transition leaves open: #hide has decided to
+// remove the output attributes, but the browser runs the update callback on a
+// later frame. Bones are still on screen, and busy or force arriving in that
+// window must cancel the hide rather than race it.
+type State = "idle" | "pending" | "showing" | "draining" | "hiding";
 
 function parseMs(value: string | null, fallback: number): number {
   if (value === null || value.trim() === "") return fallback;
@@ -27,12 +34,15 @@ const Base: typeof HTMLElement =
   typeof HTMLElement === "undefined" ? (class {} as unknown as typeof HTMLElement) : HTMLElement;
 
 export class BonesBoundary extends Base {
-  static readonly observedAttributes = ["busy", "force"];
+  // aria-busy and inert are outputs, observed only so the element can put
+  // them back when something else strips them. See attributeChangedCallback.
+  static readonly observedAttributes = ["busy", "force", "aria-busy", "inert"];
 
   #state: State = "idle";
   #timer: ReturnType<typeof setTimeout> | undefined;
   #connected = false;
   #shownAt = 0;
+  #writingOutput = false;
 
   get busy(): boolean {
     return this.hasAttribute("busy");
@@ -78,10 +88,11 @@ export class BonesBoundary extends Base {
   }
 
   get showing(): boolean {
-    return this.#state === "showing" || this.#state === "draining";
+    return this.#state === "showing" || this.#state === "draining" || this.#state === "hiding";
   }
 
   connectedCallback(): void {
+    for (const name of UPGRADE_PROPERTIES) this.#upgradeProperty(name);
     this.#connected = true;
     // Server-rendered markup can carry aria-busy="true" so the CSS paints
     // bones before this script runs. Adopt that as "showing" rather than
@@ -104,14 +115,49 @@ export class BonesBoundary extends Base {
     // its state (and its aria-busy/inert attributes) across the move: it
     // already has a live skeleton on screen and must keep its original
     // min-duration clock rather than re-fire bones:show and restart the
-    // window from the reconnect time.
-    if (this.#state === "pending") this.#state = "idle";
+    // window from the reconnect time. A hiding element resets too, so the
+    // view transition's queued update finds a state it no longer owns and
+    // bails: a removed element fires no events.
+    if (this.#state === "pending" || this.#state === "hiding") this.#state = "idle";
   }
 
-  attributeChangedCallback(): void {
+  attributeChangedCallback(name: string): void {
     // Attributes parsed from markup fire this before connectedCallback; the
     // connect path evaluates once for all of them.
-    if (this.#connected) this.#evaluate();
+    if (!this.#connected) return;
+    if (name === "aria-busy" || name === "inert") {
+      this.#defendOutput();
+      return;
+    }
+    this.#evaluate();
+  }
+
+  // React 19 owns every prop it renders, so a <BonesBoundary> that drops
+  // `force` makes React delete the aria-busy and inert it wrote alongside it,
+  // mid-update, while the element still means to show bones. Put them back.
+  // Only in the two states that mean "bones are on screen and staying there":
+  // #hide leaves "showing" and "draining" for "hiding" before it removes
+  // anything, so the element never fights its own hide, and #writingOutput
+  // keeps the reaction from its own setAttribute out of here entirely. An
+  // idle element leaves both attributes alone; they are the author's then.
+  #defendOutput(): void {
+    if (this.#writingOutput) return;
+    if (this.#state !== "showing" && this.#state !== "draining") return;
+    if (this.getAttribute("aria-busy") === "true" && this.hasAttribute("inert")) return;
+    this.#writeOutput(true);
+  }
+
+  // A page that assigns boundary.busy = false before this module loads writes
+  // an own data property onto the element. Upgrading does not remove it, and
+  // it shadows the prototype accessor from then on, so the setter never runs
+  // and the element never reads the attribute again. Replay the value through
+  // the accessor and delete the shadow.
+  #upgradeProperty(name: UpgradeProperty): void {
+    if (!Object.prototype.hasOwnProperty.call(this, name)) return;
+    const self = this as unknown as Partial<Record<UpgradeProperty, unknown>>;
+    const value = self[name];
+    delete self[name];
+    self[name] = value;
   }
 
   #clearTimer(): void {
@@ -121,9 +167,8 @@ export class BonesBoundary extends Base {
 
   #evaluate(): void {
     if (this.force) {
-      if (this.#state === "draining") {
-        this.#clearTimer();
-        this.#state = "showing";
+      if (this.#state === "draining" || this.#state === "hiding") {
+        this.#resume();
       } else if (this.#state !== "showing") {
         this.#show();
       }
@@ -139,9 +184,8 @@ export class BonesBoundary extends Base {
           this.#state = "pending";
           this.#timer = setTimeout(() => this.#show(), delay);
         }
-      } else if (this.#state === "draining") {
-        this.#clearTimer();
-        this.#state = "showing";
+      } else if (this.#state === "draining" || this.#state === "hiding") {
+        this.#resume();
       }
       return;
     }
@@ -149,10 +193,11 @@ export class BonesBoundary extends Base {
     if (this.#state === "pending") {
       this.#clearTimer();
       this.#state = "idle";
-    } else if (this.showing) {
-      // Covers both "showing" and "draining": a reconnected draining element
-      // (its timer was cleared by disconnectedCallback) reschedules the
-      // remainder of its original min-duration window rather than a fresh one.
+    } else if (this.#state === "showing" || this.#state === "draining") {
+      // A reconnected draining element (its timer was cleared by
+      // disconnectedCallback) reschedules the remainder of its original
+      // min-duration window rather than a fresh one. "hiding" is left out of
+      // this branch on purpose: that hide is already in flight.
       this.#clearTimer();
       const remaining = this.#shownAt + this.minDuration - Date.now();
       if (remaining <= 0) {
@@ -164,27 +209,60 @@ export class BonesBoundary extends Base {
     }
   }
 
+  // Bones never left the screen, so this is not a fresh show: no bones:show,
+  // and shownAt keeps its original value so min-duration still counts from
+  // the first show. The output attributes are written again because whatever
+  // stripped them (React, see attributeChangedCallback) can have run while
+  // the state was "hiding", where the element does not defend them.
+  #resume(): void {
+    this.#clearTimer();
+    this.#state = "showing";
+    this.#writeOutput(true);
+  }
+
   #show(): void {
     this.#clearTimer();
     this.#state = "showing";
     this.#shownAt = Date.now();
-    this.setAttribute("aria-busy", "true");
-    this.toggleAttribute("inert", true);
+    this.#writeOutput(true);
     this.dispatchEvent(new CustomEvent("bones:show", { bubbles: true, composed: true }));
   }
 
   #hide(): void {
     this.#clearTimer();
-    this.#state = "idle";
+    this.#state = "hiding";
     const update = (): void => {
-      this.removeAttribute("aria-busy");
-      this.removeAttribute("inert");
+      // A real startViewTransition runs this a frame or more later. Anything
+      // that happened in between (busy set again, the element removed) has
+      // already moved the state off "hiding", and this stale update must not
+      // undo it.
+      if (this.#state !== "hiding") return;
+      this.#state = "idle";
+      this.#writeOutput(false);
       this.dispatchEvent(new CustomEvent("bones:hide", { bubbles: true, composed: true }));
     };
     if (this.#canTransition()) {
       document.startViewTransition(update);
     } else {
       update();
+    }
+  }
+
+  // The element's own writes to its output attributes, flagged while they run
+  // so the attributeChangedCallback that defends those attributes ignores
+  // them and cannot recurse into itself.
+  #writeOutput(shown: boolean): void {
+    this.#writingOutput = true;
+    try {
+      if (shown) {
+        this.setAttribute("aria-busy", "true");
+        this.toggleAttribute("inert", true);
+      } else {
+        this.removeAttribute("aria-busy");
+        this.removeAttribute("inert");
+      }
+    } finally {
+      this.#writingOutput = false;
     }
   }
 
