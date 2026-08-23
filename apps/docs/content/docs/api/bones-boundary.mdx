@@ -121,7 +121,7 @@ function Profile({ loading, user }: { loading: boolean; user?: User }) {
 
 The wrapper uses no hooks, so it renders inside server components. `<Bones>` and Suspense do not need it: the Suspense fallback renders `data-bone` markup that the stylesheet styles on its own.
 
-React owns none of the attributes the element writes. The wrapper sets `suppressHydrationWarning`, so a boundary that already shows bones by the time React hydrates it is not reported as a mismatch, and the element restores `aria-busy` and `inert` if a React update removes them.
+The wrapper normally leaves the output attributes to the element. When `force` is true, it renders `aria-busy` and `inert` so the server paints bones, and React then owns those two attributes and removes them on a later update. The element writes them back while bones are showing. The wrapper also sets `suppressHydrationWarning`, so a boundary that already shows bones by the time React hydrates it is not reported as a mismatch.
 
 The package augments `JSX.IntrinsicElements` with `"bones-boundary"`. A project that already declares the same tag gets a conflicting-declaration error from TypeScript. Delete the local declaration and use this one.
 

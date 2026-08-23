@@ -20,6 +20,8 @@ type UpgradeProperty = (typeof UPGRADE_PROPERTIES)[number];
 // window must cancel the hide rather than race it.
 type State = "idle" | "pending" | "showing" | "draining" | "hiding";
 
+const swallow = (): void => {};
+
 function parseMs(value: string | null, fallback: number): number {
   if (value === null || value.trim() === "") return fallback;
   const ms = Number(value);
@@ -42,6 +44,7 @@ export class BonesBoundary extends Base {
   #timer: ReturnType<typeof setTimeout> | undefined;
   #connected = false;
   #shownAt = 0;
+  #hideToken = 0;
   #writingOutput = false;
 
   get busy(): boolean {
@@ -115,10 +118,13 @@ export class BonesBoundary extends Base {
     // its state (and its aria-busy/inert attributes) across the move: it
     // already has a live skeleton on screen and must keep its original
     // min-duration clock rather than re-fire bones:show and restart the
-    // window from the reconnect time. A hiding element resets too, so the
-    // view transition's queued update finds a state it no longer owns and
-    // bails: a removed element fires no events.
-    if (this.#state === "pending" || this.#state === "hiding") this.#state = "idle";
+    // window from the reconnect time. A hiding element rolls back to showing:
+    // its attributes are still on, the queued update bails because the state
+    // is no longer "hiding" (a removed element fires no events), and a moved
+    // element re-evaluates from its original #shownAt instead of taking the
+    // adoption path and firing a second bones:show.
+    if (this.#state === "pending") this.#state = "idle";
+    else if (this.#state === "hiding") this.#state = "showing";
   }
 
   attributeChangedCallback(name: string): void {
@@ -231,18 +237,28 @@ export class BonesBoundary extends Base {
   #hide(): void {
     this.#clearTimer();
     this.#state = "hiding";
+    const token = ++this.#hideToken;
     const update = (): void => {
       // A real startViewTransition runs this a frame or more later. Anything
-      // that happened in between (busy set again, the element removed) has
-      // already moved the state off "hiding", and this stale update must not
-      // undo it.
-      if (this.#state !== "hiding") return;
+      // that happened in between (busy set again, the element removed, a
+      // newer hide started) has already moved the state off "hiding" or
+      // advanced the token, and this stale update must not undo it.
+      if (this.#state !== "hiding" || token !== this.#hideToken) return;
       this.#state = "idle";
       this.#writeOutput(false);
       this.dispatchEvent(new CustomEvent("bones:hide", { bubbles: true, composed: true }));
     };
     if (this.#canTransition()) {
-      document.startViewTransition(update);
+      const transition = document.startViewTransition(update) as
+        | Partial<ViewTransition>
+        | undefined;
+      // A transition that a newer one supersedes rejects `ready` with
+      // AbortError, and that is the normal case when two boundaries hide in
+      // the same frame. Nothing here can act on it, so swallow the rejections
+      // rather than log one per overlapping hide.
+      transition?.ready?.catch(swallow);
+      transition?.updateCallbackDone?.catch(swallow);
+      transition?.finished?.catch(swallow);
     } else {
       update();
     }

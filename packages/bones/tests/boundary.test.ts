@@ -458,6 +458,47 @@ describe("view transitions", () => {
     expect(log).toEqual(["show", "hide"]);
   });
 
+  test("an element moved while its hide is queued fires no second bones:show and hides once", () => {
+    const updates: Array<() => void> = [];
+    (document as TransitionDoc).startViewTransition = (update: () => void) => {
+      updates.push(update);
+      return {};
+    };
+    const el = mount({ delay: "0", "min-duration": "0" });
+    const log = events(el);
+    el.busy = true;
+    el.busy = false;
+    const other = document.createElement("div");
+    document.body.append(other);
+    other.append(el);
+    expect(log).toEqual(["show"]);
+    expect(el.showing).toBe(true);
+    expect(updates).toHaveLength(2);
+    updates[0]();
+    expect(shown(el)).toBe(true);
+    expect(log).toEqual(["show"]);
+    updates[1]();
+    expect(shown(el)).toBe(false);
+    expect(log).toEqual(["show", "hide"]);
+  });
+
+  test("rejected ViewTransition promises get handlers", async () => {
+    const ready = Promise.reject(new Error("AbortError"));
+    const updateCallbackDone = Promise.resolve();
+    const finished = Promise.reject(new Error("AbortError"));
+    const spies = [ready, updateCallbackDone, finished].map((p) => vi.spyOn(p, "catch"));
+    (document as TransitionDoc).startViewTransition = (update: () => void) => {
+      update();
+      return { ready, updateCallbackDone, finished };
+    };
+    const el = mount({ delay: "0", "min-duration": "0" });
+    el.busy = true;
+    el.busy = false;
+    for (const spy of spies) expect(spy).toHaveBeenCalledTimes(1);
+    await Promise.resolve();
+    expect(shown(el)).toBe(false);
+  });
+
   test("hide completes when startViewTransition is absent", () => {
     const el = mount({ delay: "0", "min-duration": "0" });
     const log = events(el);
