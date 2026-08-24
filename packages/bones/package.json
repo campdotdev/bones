@@ -25,6 +25,7 @@
     ".": "./dist/index.mjs",
     "./element": "./dist/element/index.mjs",
     "./react": "./dist/react/index.mjs",
+    "./server": "./dist/server/index.mjs",
     "./package.json": "./package.json",
     "./css": {
       "style": "./src/css/bones.css",
