@@ -39,13 +39,14 @@ The second script waits for the definition instead of trusting script order. A c
 
 ## Attributes
 
-| Attribute      | Property      | Type                 | Default  | Description                                                        |
-| -------------- | ------------- | -------------------- | -------- | ------------------------------------------------------------------ |
-| `busy`         | `busy`        | boolean              | absent   | The subtree is loading.                                            |
-| `force`        | `force`       | boolean              | absent   | Show bones now and keep them until removed. Skips both timers.     |
-| `delay`        | `delay`       | number (ms)          | `200`    | How long `busy` must stay set before bones show.                   |
-| `min-duration` | `minDuration` | number (ms)          | `400`    | Once shown, bones stay at least this long.                         |
-| `transition`   | `transition`  | `"auto"` or `"none"` | `"auto"` | Whether hiding bones runs inside `document.startViewTransition()`. |
+| Attribute      | Property      | Type                    | Default  | Description                                                                                                      |
+| -------------- | ------------- | ----------------------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| `busy`         | `busy`        | boolean                 | absent   | The subtree is loading.                                                                                          |
+| `force`        | `force`       | boolean                 | absent   | Show bones now and keep them until removed. Skips both timers.                                                   |
+| `delay`        | `delay`       | number (ms)             | `200`    | How long `busy` must stay set before bones show.                                                                 |
+| `min-duration` | `minDuration` | number (ms)             | `400`    | Once shown, bones stay at least this long.                                                                       |
+| `transition`   | `transition`  | `"auto"` or `"none"`    | `"auto"` | Whether hiding bones runs inside `document.startViewTransition()`.                                               |
+| `precision`    | `precision`   | `"css"` \| `"measured"` | `"css"`  | How bones are drawn while showing. `"measured"` draws per-line overlay bones measured from the rendered content. |
 
 Every property reflects to its attribute. A `delay` or `min-duration` that is missing, negative, or not a number falls back to the default. The read-only `showing` property is `true` while bones are visible.
 
@@ -90,6 +91,19 @@ Render the output attributes yourself when you know a region is loading at reque
 ```
 
 The stylesheet paints bones and the subtree is inert before the element upgrades. On upgrade the element adopts the showing state, and `min-duration` counts from that moment.
+
+## Measured bones
+
+With `precision="measured"`, the element measures its rendered content while bones show and draws the skeleton from the measurements: one bar per rendered line of text, one block per image or form control. Bars live in a shadow root, so page CSS and frameworks never see them; style them with `::part(bone)`, `::part(bone-text)`, `::part(bone-block)`, and `::part(overlay)`, or through the `--bone-*` custom properties, which inherit into the overlay.
+
+While the overlay shows, the element sets `data-bones-measured` and `data-bones-auto="off"` on itself, hides the content with inherited `visibility`, and re-measures whenever its size changes. When it hides, both attributes come off inside the same swap that removes `aria-busy`. If there is nothing to measure — an empty boundary, or an environment without layout — the element stays on the CSS path and `auto.css` draws leaf bones instead.
+
+A measured boundary is `display: block; position: relative` (the overlay needs a positioned block container). This applies from upgrade, not from the first show.
+
+Two edges to know about:
+
+- Content hiding uses a non-`!important` `::slotted` rule. An author rule that sets `visibility` on a direct child of the boundary wins over it and that child stays visible. The same cascade behavior is what lets `auto.css` keep `[data-bones-auto="off"]` subtrees visible under the overlay — without `auto.css` on the page, opted-out subtrees hide with everything else.
+- Re-measurement is size-driven. Content that changes while busy without resizing the boundary (a fixed-height container whose children are swapped) keeps its previous bars until the next resize. Content that scrolls inside the boundary (an `overflow: auto` box) also leaves bars at their pre-scroll positions, because scrolling fires no resize.
 
 ## React
 
