@@ -42,7 +42,7 @@ export function shell(): string {
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Bones streaming demo</title>
 <link rel="stylesheet" href="/assets/src/css/auto.css" />
-<script type="module" src="/assets/dist/element/index.mjs"></script>
+<script type="module" async src="/assets/dist/element/index.mjs"></script>
 <style>
   body { font: 16px/1.5 system-ui, sans-serif; margin: 2rem auto; max-width: 40rem; padding: 0 1rem; }
   bones-boundary { display: block; margin: 1.5rem 0; }
