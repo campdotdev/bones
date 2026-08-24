@@ -3,6 +3,7 @@ import { afterEach, expect, test } from "vite-plus/test";
 import "../../src/css/auto.css";
 import "../../src/element/index.ts";
 import type { BonesBoundary } from "../../src/element/index.ts";
+import { TEXT_BAR_SCALE } from "../../src/element/measure.ts";
 
 // ---------------------------------------------------------------------------
 // precision="measured" end to end in Chromium. Fixtures use monospace and
@@ -73,6 +74,9 @@ test("a scaled ancestor does not distort the bars", () => {
     expect(boxes[i].left).toBeCloseTo(line.left, 0);
     expect(boxes[i].width).toBeCloseTo(line.width, 0);
     expect(boxes[i].top + boxes[i].height / 2).toBeCloseTo(line.top + line.height / 2, 0);
+    // The center alone would hide a vertical-scale regression: pin the
+    // rendered height to the shrunk line box in post-transform space too.
+    expect(boxes[i].height).toBeCloseTo(line.height * TEXT_BAR_SCALE, 0);
   }
 });
 
