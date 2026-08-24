@@ -8,10 +8,19 @@
 // an author controls; aria-busy and inert are outputs the element controls.
 // ---------------------------------------------------------------------------
 
+import { MeasuredOverlay } from "./overlay.ts";
+
 export const DEFAULT_DELAY = 200;
 export const DEFAULT_MIN_DURATION = 400;
 
-const UPGRADE_PROPERTIES = ["busy", "force", "delay", "minDuration", "transition"] as const;
+const UPGRADE_PROPERTIES = [
+  "busy",
+  "force",
+  "delay",
+  "minDuration",
+  "transition",
+  "precision",
+] as const;
 type UpgradeProperty = (typeof UPGRADE_PROPERTIES)[number];
 
 // "hiding" is the window a view transition leaves open: #hide has decided to
@@ -38,7 +47,7 @@ const Base: typeof HTMLElement =
 export class BonesBoundary extends Base {
   // aria-busy and inert are outputs, observed only so the element can put
   // them back when something else strips them. See attributeChangedCallback.
-  static readonly observedAttributes = ["busy", "force", "aria-busy", "inert"];
+  static readonly observedAttributes = ["busy", "force", "aria-busy", "inert", "precision"];
 
   #state: State = "idle";
   #timer: ReturnType<typeof setTimeout> | undefined;
@@ -46,6 +55,7 @@ export class BonesBoundary extends Base {
   #shownAt = 0;
   #hideToken = 0;
   #writingOutput = false;
+  #overlay = new MeasuredOverlay(this as unknown as HTMLElement);
 
   get busy(): boolean {
     return this.hasAttribute("busy");
@@ -90,6 +100,15 @@ export class BonesBoundary extends Base {
     else this.removeAttribute("transition");
   }
 
+  get precision(): "css" | "measured" {
+    return this.getAttribute("precision") === "measured" ? "measured" : "css";
+  }
+
+  set precision(value: "css" | "measured") {
+    if (value === "measured") this.setAttribute("precision", "measured");
+    else this.removeAttribute("precision");
+  }
+
   get showing(): boolean {
     return this.#state === "showing" || this.#state === "draining" || this.#state === "hiding";
   }
@@ -97,6 +116,7 @@ export class BonesBoundary extends Base {
   connectedCallback(): void {
     for (const name of UPGRADE_PROPERTIES) this.#upgradeProperty(name);
     this.#connected = true;
+    if (this.precision === "measured") this.#overlay.prepare();
     // Server-rendered markup can carry aria-busy="true" so the CSS paints
     // bones before this script runs. Adopt that as "showing" rather than
     // re-running the delay; min-duration counts from now.
@@ -106,9 +126,13 @@ export class BonesBoundary extends Base {
       return;
     }
     this.#evaluate();
+    // A showing element that was moved re-measures at its new coordinates
+    // (#show already activated the overlay in the adopt branch above).
+    if (this.showing && this.precision === "measured") this.#overlay.activate();
   }
 
   disconnectedCallback(): void {
+    this.#overlay.pause();
     this.#connected = false;
     this.#clearTimer();
     // A pending element that gets reparented (moved with appendChild, busy
@@ -135,6 +159,10 @@ export class BonesBoundary extends Base {
       this.#defendOutput();
       return;
     }
+    if (name === "precision") {
+      this.#syncPrecision();
+      return;
+    }
     this.#evaluate();
   }
 
@@ -151,6 +179,17 @@ export class BonesBoundary extends Base {
     if (this.#state !== "showing" && this.#state !== "draining") return;
     if (this.getAttribute("aria-busy") === "true" && this.hasAttribute("inert")) return;
     this.#writeOutput(true);
+  }
+
+  // precision is not a timing input: flipping it never touches the state
+  // machine, only whether the current showing window draws measured bars.
+  #syncPrecision(): void {
+    if (this.precision === "measured") {
+      this.#overlay.prepare();
+      if (this.showing) this.#overlay.activate();
+    } else {
+      this.#overlay.deactivate();
+    }
   }
 
   // A page that assigns boundary.busy = false before this module loads writes
@@ -231,6 +270,7 @@ export class BonesBoundary extends Base {
     this.#state = "showing";
     this.#shownAt = Date.now();
     this.#writeOutput(true);
+    if (this.precision === "measured") this.#overlay.activate();
     this.dispatchEvent(new CustomEvent("bones:show", { bubbles: true, composed: true }));
   }
 
@@ -246,6 +286,7 @@ export class BonesBoundary extends Base {
       if (this.#state !== "hiding" || token !== this.#hideToken) return;
       this.#state = "idle";
       this.#writeOutput(false);
+      this.#overlay.deactivate();
       this.dispatchEvent(new CustomEvent("bones:hide", { bubbles: true, composed: true }));
     };
     if (this.#canTransition()) {

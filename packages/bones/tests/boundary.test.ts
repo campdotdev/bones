@@ -618,6 +618,43 @@ describe("disconnect", () => {
   });
 });
 
+describe("precision", () => {
+  test("reflects and parses like transition", () => {
+    const el = mount();
+    expect(el.precision).toBe("css");
+    el.precision = "measured";
+    expect(el.getAttribute("precision")).toBe("measured");
+    el.precision = "css";
+    expect(el.hasAttribute("precision")).toBe(false);
+    el.setAttribute("precision", "wat");
+    expect(el.precision).toBe("css");
+  });
+
+  test("measured precision attaches a shadow root with a slot; css does not", () => {
+    expect(mount().shadowRoot).toBeNull();
+    const el = mount({ precision: "measured" });
+    expect(el.shadowRoot).not.toBeNull();
+    expect(el.shadowRoot!.querySelector("slot")).not.toBeNull();
+  });
+
+  test("in jsdom a measured show degrades to the CSS path", () => {
+    // No layout engine: measureBones returns nothing, so the overlay never
+    // activates, no marker attributes land, and aria-busy/inert still do.
+    const el = mount({ precision: "measured", force: "" });
+    expect(shown(el)).toBe(true);
+    expect(el.hasAttribute("data-bones-measured")).toBe(false);
+    expect(el.hasAttribute("data-bones-auto")).toBe(false);
+    expect(el.shadowRoot!.querySelector('[part~="bone"]')).toBeNull();
+  });
+
+  test("an author-set data-bones-auto is never removed", () => {
+    const el = mount({ precision: "measured", "data-bones-auto": "off", force: "" });
+    el.force = false;
+    vi.runAllTimers();
+    expect(el.getAttribute("data-bones-auto")).toBe("off");
+  });
+});
+
 describe("auto.css contract", () => {
   test("a leaf inside a showing boundary matches the auto.css text-leaf selector", async () => {
     const { readFileSync } = await import("node:fs");
