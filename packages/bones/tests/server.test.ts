@@ -1,3 +1,5 @@
+// @vitest-environment node
+// The server entry must run without a DOM; this file enforces that at test time.
 import { describe, expect, test } from "vite-plus/test";
 import {
   BOOTSTRAP_SCRIPT,

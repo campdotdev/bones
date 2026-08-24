@@ -36,7 +36,7 @@ The shell never closes `body` or `html` — both closing tags are optional in HT
 - `shell` is the shell HTML, ending inside an open `<body>`. It is sent as-is, never parsed or validated. `streamBones` appends the bootstrap script and streams the concatenation as its first chunk.
 - `slots` maps slot ids to promises of HTML. Each settlement flushes one chunk immediately, in settlement order. The stream closes when all promises have settled.
 - `options.onError(id, error)` renders the error HTML for a rejected slot. Returning `undefined` (and throwing) falls back to the bare error chunk, which keeps the boundary's fallback children. Without the callback, every rejection gets the bare chunk.
-- Ids must match `[A-Za-z0-9_-]+` and be unique in the document. An invalid id throws before the stream starts.
+- Ids must match `[A-Za-z0-9_-]+` and be unique in the document. An invalid id throws before the stream starts — synchronously, before any slot promise gets a handler, so pair it with valid ids rather than relying on it at runtime: a rejecting slot promise in the same call would surface as an unhandled rejection.
 - Cancelling the stream — the client disconnected — stops all further flushes. The slot promises are not aborted; their late settlements are discarded.
 
 On Workers, Bun, and Deno, pass the stream to `Response` directly. On Node's `http` server, convert it with `Readable.fromWeb(stream).pipe(res)`.
@@ -116,7 +116,9 @@ A bare error chunk keeps the boundary's fallback children. Either form sets `dat
 
 **End of stream.** After the last chunk, close the connection. Nothing else is sent.
 
-**Constraints.** Chunk content must be balanced HTML: a nested, balanced `<template>` inside content is fine, but a stray `</template>` terminates the chunk's template early. Nothing in the protocol escapes or sanitizes content — the server owns that. Streamed content can itself contain a pending boundary whose chunk arrives later, because templates and swap calls resolve against the whole document.
+**Constraints.** Chunk content must be balanced HTML: a nested, balanced `<template>` inside content is fine, but a stray `</template>` terminates the chunk's template early. Nothing in the protocol escapes or sanitizes content — the server owns that. Streamed content can itself contain a pending boundary whose chunk arrives later, because templates and swap calls resolve against the whole document — but the order matters: an inner boundary's chunk must flush after the chunk that introduces it. A swap call whose boundary is not in the document yet discards its template, and the boundary it later arrives inside stays busy forever. With `streamBones`, derive the inner promise from the outer's: `inner: outer.then(() => loadInner())`.
+
+The protocol runs on inline scripts, so a `script-src` policy without `unsafe-inline` (or a nonce you inject yourself around the emitted strings) blocks it.
 
 ## Implementing the protocol in another stack
 
