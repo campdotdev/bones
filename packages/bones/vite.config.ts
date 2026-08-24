@@ -5,7 +5,7 @@ export default defineConfig({
     "*": "vp check --fix",
   },
   pack: {
-    entry: ["src/index.ts", "src/react/index.ts"],
+    entry: ["src/index.ts", "src/react/index.ts", "src/element/index.ts"],
     unbundle: true,
     copy: "src/css",
     dts: {

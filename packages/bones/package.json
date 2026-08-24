@@ -18,10 +18,12 @@
   ],
   "type": "module",
   "sideEffects": [
-    "*.css"
+    "*.css",
+    "./dist/element/index.mjs"
   ],
   "exports": {
     ".": "./dist/index.mjs",
+    "./element": "./dist/element/index.mjs",
     "./react": "./dist/react/index.mjs",
     "./package.json": "./package.json",
     "./css": {
