@@ -73,10 +73,10 @@ jobs:
         run: vp exec playwright install --with-deps chromium
 
       - name: Run browser tests
-        run: vp run --filter @camp.dev/bones test -- --run --update --project browser
+        run: vp run --filter @camp.dev/bones test -- --run --project browser
 
       - name: Upload screenshots
-        if: always()
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: bones-visual-output
