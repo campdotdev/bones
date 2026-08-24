@@ -43,7 +43,7 @@
     "dev": "vp pack --watch",
     "test": "vp test",
     "check": "vp check",
-    "health": "vp test --coverage && fallow health --root . --coverage coverage/coverage-final.json --format json --quiet",
+    "health": "vp test --project unit --coverage && fallow health --root . --coverage coverage/coverage-final.json --format json --quiet",
     "prepublishOnly": "vp run build"
   },
   "devDependencies": {
@@ -55,6 +55,7 @@
     "@typescript/native-preview": "7.0.0-dev.20260328.1",
     "@vitest/coverage-v8": "^4.1.5",
     "jsdom": "^29.0.2",
+    "playwright": "^1.62.1",
     "react": "^19.2.5",
     "typescript": "^6.0.2",
     "vite-plus": "^0.1.14"

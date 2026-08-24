@@ -54,7 +54,35 @@ jobs:
           cache: true
 
       - name: Run tests
-        run: vp run --filter @camp.dev/bones test -- --run
+        run: vp run --filter @camp.dev/bones test -- --run --project unit
+
+  bones-visual:
+    name: "Bones: Visual Regression"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@v1
+        with:
+          cache: true
+
+      - name: Install Playwright Chromium
+        working-directory: packages/bones
+        run: vp exec playwright install --with-deps chromium
+
+      - name: Run browser tests
+        run: vp run --filter @camp.dev/bones test -- --run --project browser
+
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bones-visual-output
+          path: |
+            packages/bones/tests/browser/__screenshots__/
+            packages/bones/.vitest-attachments/
 
   # ── Demo app ───────────────────────────────────────────────
   demo-check:
