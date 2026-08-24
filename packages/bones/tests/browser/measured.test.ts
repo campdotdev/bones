@@ -51,6 +51,31 @@ test("bars sit where the lines are", () => {
   }
 });
 
+test("a scaled ancestor does not distort the bars", () => {
+  // Measured rects are post-transform; the bars' CSS values are laid out in
+  // the host's local space and transformed again. Without compensation, a
+  // scale(2) ancestor renders every bar at twice its size and offset.
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    `<div style="transform: scale(2); transform-origin: 0 0;">
+       <bones-boundary force precision="measured" transition="none" min-duration="0"
+         style="width: 20ch; font: 16px/1.5 monospace;">${TWO_LINES}</bones-boundary>
+     </div>`,
+  );
+  const el = document.querySelector("bones-boundary")!;
+  const text = el.querySelector("p")!.firstChild!;
+  const range = document.createRange();
+  range.selectNodeContents(text);
+  const lines = Array.from(range.getClientRects());
+  const boxes = bars(el).map((bar) => bar.getBoundingClientRect());
+  expect(boxes).toHaveLength(lines.length);
+  for (const [i, line] of lines.entries()) {
+    expect(boxes[i].left).toBeCloseTo(line.left, 0);
+    expect(boxes[i].width).toBeCloseTo(line.width, 0);
+    expect(boxes[i].top + boxes[i].height / 2).toBeCloseTo(line.top + line.height / 2, 0);
+  }
+});
+
 test("content hides while the overlay shows, and returns on hide", () => {
   const el = mount(TWO_LINES);
   const p = el.querySelector("p")!;

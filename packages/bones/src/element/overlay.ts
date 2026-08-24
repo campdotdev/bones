@@ -201,15 +201,26 @@ export class MeasuredOverlay {
     const animate = this.#host.closest("[data-bone-animate]")?.getAttribute("data-bone-animate");
     if (animate) this.#container.setAttribute("data-bone-animate", animate);
     else this.#container.removeAttribute("data-bone-animate");
+    // Measured rects are post-transform viewport geometry, but the bars'
+    // CSS values are laid out in the host's local space and then transformed
+    // again — under a scale(2) ancestor a naive subtraction doubles every
+    // offset and size. Divide by the container's scale factors (transformed
+    // bounding size over untransformed layout size) to land back in local
+    // space. Rotation and skew are not compensated.
     const origin = this.#container.getBoundingClientRect();
+    const style = getComputedStyle(this.#container);
+    const layoutWidth = Number.parseFloat(style.width);
+    const layoutHeight = Number.parseFloat(style.height);
+    const scaleX = layoutWidth > 0 ? origin.width / layoutWidth : 1;
+    const scaleY = layoutHeight > 0 ? origin.height / layoutHeight : 1;
     this.#container.replaceChildren(
       ...bones.map((bone) => {
         const bar = doc.createElement("div");
         bar.setAttribute("part", `bone bone-${bone.kind}`);
-        bar.style.left = `${bone.left - origin.left}px`;
-        bar.style.top = `${bone.top - origin.top}px`;
-        bar.style.width = `${bone.width}px`;
-        bar.style.height = `${bone.height}px`;
+        bar.style.left = `${(bone.left - origin.left) / scaleX}px`;
+        bar.style.top = `${(bone.top - origin.top) / scaleY}px`;
+        bar.style.width = `${bone.width / scaleX}px`;
+        bar.style.height = `${bone.height / scaleY}px`;
         return bar;
       }),
     );

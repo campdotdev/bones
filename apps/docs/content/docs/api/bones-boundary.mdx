@@ -96,14 +96,15 @@ The stylesheet paints bones and the subtree is inert before the element upgrades
 
 With `precision="measured"`, the element measures its rendered content while bones show and draws the skeleton from the measurements: one bar per rendered line of text, one block per image or form control. Bars live in a shadow root, so page CSS and frameworks never see them; style them with `::part(bone)`, `::part(bone-text)`, `::part(bone-block)`, and `::part(overlay)`, or through the `--bone-*` custom properties, which inherit into the overlay.
 
-While the overlay shows, the element sets `data-bones-measured` and `data-bones-auto="off"` on itself, hides the content with inherited `visibility`, and re-measures whenever its size changes. When it hides, both attributes come off inside the same swap that removes `aria-busy`. If there is nothing to measure — an empty boundary, or an environment without layout — the element stays on the CSS path and `auto.css` draws leaf bones instead.
+While the overlay shows, the element sets `data-bones-measured` and, unless the author already set it, `data-bones-auto="off"` on itself. It hides the content with inherited `visibility` and re-measures whenever its size changes. When it hides, the attributes the overlay set come off inside the same swap that removes `aria-busy`; an author-set `data-bones-auto` is never touched. If there is nothing to measure — an empty boundary, or an environment without layout — the element stays on the CSS path and `auto.css` draws leaf bones instead.
 
 A measured boundary is `display: block; position: relative` (the overlay needs a positioned block container). This applies from upgrade, not from the first show.
 
-Two edges to know about:
+Three edges to know about:
 
 - Content hiding uses a non-`!important` `::slotted` rule. An author rule that sets `visibility` on a direct child of the boundary wins over it and that child stays visible. The same cascade behavior is what lets `auto.css` keep `[data-bones-auto="off"]` subtrees visible under the overlay — without `auto.css` on the page, opted-out subtrees hide with everything else.
 - Re-measurement is size-driven. Content that changes while busy without resizing the boundary (a fixed-height container whose children are swapped) keeps its previous bars until the next resize. Content that scrolls inside the boundary (an `overflow: auto` box) also leaves bars at their pre-scroll positions, because scrolling fires no resize.
+- Measurement compensates for scale transforms on the boundary or its ancestors, but not for rotation or skew. A rotated boundary draws its bars in the wrong place.
 
 ## React
 
