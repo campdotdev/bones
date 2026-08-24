@@ -93,7 +93,7 @@ function __bonesSwap(id, err) {
 </script>
 ```
 
-Content swaps in before `busy` clears, so once the element has upgraded, the reveal honors `min-duration` and runs inside a view transition. Anywhere the element is not upgraded yet — the page loads no element module, or a chunk beats the async module on first load — the attributes come off directly and the content is simply there: a boundary whose chunk wins that race skips the timing and the crossfade by design, because holding finished content hostage to a script download would be worse than an unanimated reveal.
+Content swaps in before `busy` clears, so once the element has upgraded, the reveal honors `min-duration` and — where the browser supports the View Transitions API and the user has not asked for reduced motion — runs inside a view transition; otherwise the swap applies immediately. Anywhere the element is not upgraded yet — the page loads no element module, or a chunk beats the async module on first load — the attributes come off directly and the content is simply there: a boundary whose chunk wins that race skips the timing and the crossfade by design, because holding finished content hostage to a script download would be worse than an unanimated reveal.
 
 **A content chunk.** Flushed together, template first:
 
