@@ -46,7 +46,7 @@ The second script waits for the definition instead of trusting script order. A c
 | `delay`        | `delay`       | number (ms)             | `200`    | How long `busy` must stay set before bones show.                                                                 |
 | `min-duration` | `minDuration` | number (ms)             | `400`    | Once shown, bones stay at least this long.                                                                       |
 | `transition`   | `transition`  | `"auto"` or `"none"`    | `"auto"` | Whether hiding bones runs inside `document.startViewTransition()`.                                               |
-| `precision`    | `precision`   | `"css"` \| `"measured"` | `"css"`  | How bones are drawn while showing. `"measured"` draws per-line overlay bones measured from the rendered content. |
+| `precision`    | `precision`   | `"css"` or `"measured"` | `"css"`  | How bones are drawn while showing. `"measured"` draws per-line overlay bones measured from the rendered content. |
 
 Every property reflects to its attribute. A `delay` or `min-duration` that is missing, negative, or not a number falls back to the default. The read-only `showing` property is `true` while bones are visible.
 
@@ -130,6 +130,7 @@ function Profile({ loading, user }: { loading: boolean; user?: User }) {
 | `delay`       | `delay`        |                                                                                      |
 | `minDuration` | `min-duration` |                                                                                      |
 | `transition`  | `transition`   |                                                                                      |
+| `precision`   | `precision`    | `"css"` or `"measured"`. Enables measured bones (see above).                         |
 | `onShow`      | `bones:show`   | Listener. Passing a function from a server component is an error, as with `onClick`. |
 | `onHide`      | `bones:hide`   | Same.                                                                                |
 
