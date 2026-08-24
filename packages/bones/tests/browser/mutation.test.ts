@@ -6,8 +6,12 @@ import type { BonesBoundary } from "../../src/element/index.ts";
 
 // ---------------------------------------------------------------------------
 // Mutation-driven re-measurement. The host height is pinned in every fixture,
-// so a child swap never resizes the host and the ResizeObserver cannot be the
-// thing that re-measures — these tests fail without the MutationObserver.
+// so a child swap never resizes the host. ResizeObserver also guarantees one
+// callback the first time it observes a target, even with no actual size
+// change (there is no previously reported size to compare against yet) — so
+// every fixture below settles past that guaranteed first delivery before
+// mutating. After the settle, only the MutationObserver can drive a
+// re-measure: these tests fail without it (verified — see the fix report).
 // ---------------------------------------------------------------------------
 
 afterEach(() => {
@@ -31,12 +35,21 @@ function fragment(html: string): DocumentFragment {
   return document.createRange().createContextualFragment(html);
 }
 
+// Lets ResizeObserver's guaranteed first delivery (and any other pending
+// microtask/frame work) land and settle before a test's real assertion.
+function settle(): Promise<void> {
+  return new Promise((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+  );
+}
+
 const TWO_LINES = '<p style="margin: 0">aaaa bbbb cccc dddd eeee ffff</p>';
 const ONE_LINE = '<p style="margin: 0">short</p>';
 
 test("swapping children re-measures without a resize", async () => {
   const el = mount(TWO_LINES);
   expect(bars(el)).toHaveLength(2);
+  await settle();
   el.replaceChildren(fragment(ONE_LINE));
   await expect.poll(() => bars(el).length).toBe(1);
   expect(el.hasAttribute("data-bones-measured")).toBe(true);
@@ -45,12 +58,14 @@ test("swapping children re-measures without a resize", async () => {
 test("editing text re-measures", async () => {
   const el = mount(TWO_LINES);
   expect(bars(el)).toHaveLength(2);
+  await settle();
   (el.querySelector("p")!.firstChild as Text).data = "short";
   await expect.poll(() => bars(el).length).toBe(1);
 });
 
 test("an emptied subtree deactivates to the CSS path", async () => {
   const el = mount(TWO_LINES);
+  await settle();
   el.replaceChildren();
   await expect.poll(() => el.hasAttribute("data-bones-measured")).toBe(false);
   expect(bars(el)).toHaveLength(0);
@@ -61,18 +76,22 @@ test("bar rendering does not observe itself", async () => {
   // never reports them. If it did, this would loop: each re-measure replaces
   // the bar elements, which would re-trigger the observer forever.
   const el = mount(TWO_LINES);
+  await settle();
   el.replaceChildren(fragment(ONE_LINE));
   await expect.poll(() => bars(el).length).toBe(1);
-  // ResizeObserver guarantees one callback the first time a target is
-  // observed, even with no actual size change (there is no previously
-  // reported size to compare against) — see #observe in overlay.ts. That
-  // fires once here too, harmlessly re-rendering the same content. It is
-  // bounded, not a loop: settle past it (confirmed by measurement to land
-  // within a couple of frames) before taking the identity baseline, so this
-  // assertion isolates the thing it's actually testing — no *further*
-  // self-triggered churn — from that unrelated, one-time delivery.
-  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   const bar = bars(el)[0];
-  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  await settle();
+  expect(bars(el)[0]).toBe(bar);
+});
+
+test("a class change does not re-measure", async () => {
+  // Attribute mutations are deliberately excluded from the observer config:
+  // a class or style tick anywhere in the boundary must not touch the bars.
+  const el = mount(TWO_LINES);
+  await settle();
+  const bar = bars(el)[0];
+  el.querySelector("p")!.className = "x";
+  await settle();
+  expect(bars(el)).toHaveLength(2);
   expect(bars(el)[0]).toBe(bar);
 });
