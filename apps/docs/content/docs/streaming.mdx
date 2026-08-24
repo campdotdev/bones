@@ -12,7 +12,7 @@ const shell = `<!doctype html>
 <html lang="en">
 <head>
   <link rel="stylesheet" href="https://unpkg.com/@camp.dev/bones/src/css/auto.css" />
-  <script type="module">import "https://unpkg.com/@camp.dev/bones/dist/element/index.mjs";</script>
+  <script type="module" async src="https://unpkg.com/@camp.dev/bones/dist/element/index.mjs"></script>
 </head>
 <body>
   <h1>Dashboard</h1>
@@ -69,6 +69,8 @@ This section is the protocol's specification. A server in any language can imple
 ```
 
 The ids are unique per document and match `[A-Za-z0-9_-]+`. The fallback children give the stylesheets something to skeletonize; an empty boundary shows nothing while it waits. The shell ends inside an open `<body>`, and no `</body>` or `</html>` appears anywhere in the stream.
+
+Load the element module with an async script (`<script type="module" async src="…">`): without `async`, module scripts wait for the document to finish parsing, which on a streamed page is the end of the stream — the element would upgrade only after the last chunk.
 
 **The bootstrap.** Sent once, directly after the shell, before any chunk. This is the readable form of `BOOTSTRAP_SCRIPT`:
 
