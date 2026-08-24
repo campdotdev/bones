@@ -1,0 +1,131 @@
+---
+title: Streaming
+description: Stream the shell immediately, then fill each boundary as its data resolves.
+---
+
+`@camp.dev/bones/server` streams an HTML page in two stages. The shell goes out immediately, with each slow region rendered as a busy `<bones-boundary>`, so the first paint shows skeletons. As each region's data resolves — in any order — the server flushes a chunk that swaps the real content in. The client needs no library: a small inline script sent with the shell performs the swaps. When `@camp.dev/bones/element` is on the page, each reveal also gets the element's `min-duration` timing and view-transition crossfade.
+
+```ts
+import { renderBoundary, streamBones } from "@camp.dev/bones/server";
+
+const shell = `<!doctype html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="https://unpkg.com/@camp.dev/bones/src/css/auto.css" />
+  <script type="module" async src="https://unpkg.com/@camp.dev/bones/dist/element/index.mjs"></script>
+</head>
+<body>
+  <h1>Dashboard</h1>
+  ${renderBoundary("stats", "<p>Three lines of stats load here.</p>")}`;
+
+export default {
+  fetch(): Response {
+    return new Response(streamBones(shell, { stats: loadStats().then(renderStats) }), {
+      headers: { "content-type": "text/html; charset=utf-8" },
+    });
+  },
+};
+```
+
+The shell never closes `body` or `html` — both closing tags are optional in HTML, and the end of the response ends the document. Later chunks parse inside the still-open body.
+
+## streamBones
+
+`streamBones(shell, slots, options?)` returns a `ReadableStream<Uint8Array>`.
+
+- `shell` is the shell HTML, ending inside an open `<body>`. It is sent as-is, never parsed or validated. `streamBones` appends the bootstrap script and streams the concatenation as its first chunk.
+- `slots` maps slot ids to promises of HTML. Each settlement flushes one chunk immediately, in settlement order. The stream closes when all promises have settled.
+- `options.onError(id, error)` renders the error HTML for a rejected slot. Returning `undefined` (and throwing) falls back to the bare error chunk, which keeps the boundary's fallback children. Without the callback, every rejection gets the bare chunk.
+- Ids must match `[A-Za-z0-9_-]+` and be unique in the document. An invalid id throws before the stream starts — synchronously, before any slot promise gets a handler, so pair it with valid ids rather than relying on it at runtime: a rejecting slot promise in the same call would surface as an unhandled rejection.
+- Cancelling the stream — the client disconnected — stops all further flushes. The slot promises are not aborted; their late settlements are discarded.
+
+On Workers, Bun, and Deno, pass the stream to `Response` directly. On Node's `http` server, convert it with `Readable.fromWeb(stream).pipe(res)`.
+
+Send `Content-Type: text/html; charset=utf-8`, and defeat proxy buffering where it applies — `X-Accel-Buffering: no` for nginx. Compression that buffers the whole response before sending also defeats streaming.
+
+## Primitives
+
+`streamBones` is built from four exports that each emit one protocol piece. A server that owns its response stream can call them directly and skip `streamBones`.
+
+| Export                                     | Emits                                                                                                                           |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| `BOOTSTRAP_SCRIPT`                         | The inline swap runtime in one `<script>` tag. Send once, after the shell, before any chunk.                                    |
+| `renderBoundary(id, fallbackHtml, attrs?)` | A pending boundary. `attrs` is a raw attribute string appended to the tag, such as `'precision="measured" min-duration="600"'`. |
+| `renderChunk(id, html)`                    | A content chunk: the template and the swap call.                                                                                |
+| `renderErrorChunk(id, html?)`              | An error chunk. Without `html` it is a bare swap call, and the boundary keeps its fallback children.                            |
+
+The three render functions validate their id and throw on a mismatch.
+
+## Wire protocol v1
+
+This section is the protocol's specification. A server in any language can implement it; the primitives above are the reference implementation.
+
+**The shell.** The document head and as much of the body as renders immediately. Each loading region is a pending boundary:
+
+```html
+<bones-boundary busy aria-busy="true" inert data-bones-slot="stats">
+  <p>Placeholder shaped like the real content.</p>
+</bones-boundary>
+```
+
+The ids are unique per document and match `[A-Za-z0-9_-]+`. The fallback children give the stylesheets something to skeletonize; an empty boundary shows nothing while it waits. The shell ends inside an open `<body>`, and no `</body>` or `</html>` appears anywhere in the stream.
+
+Load the element module with an async script (`<script type="module" async src="…">`): without `async`, module scripts wait for the document to finish parsing, which on a streamed page is the end of the stream — the element would upgrade only after the last chunk.
+
+**The bootstrap.** Sent once, directly after the shell, before any chunk. This is the readable form of `BOOTSTRAP_SCRIPT`:
+
+{/* prettier-ignore */}
+```html
+<script>
+function __bonesSwap(id, err) {
+  var t = document.querySelector('template[data-bones-chunk="' + id + '"]');
+  var b = document.querySelector('[data-bones-slot="' + id + '"]');
+  if (!b) { if (t) t.remove(); return; }
+  if (t) { b.replaceChildren(t.content); t.remove(); }
+  if (err) b.setAttribute("data-bones-error", "");
+  if (typeof b.busy === "boolean") b.busy = false;
+  else {
+    b.removeAttribute("busy");
+    b.removeAttribute("aria-busy");
+    b.removeAttribute("inert");
+  }
+}
+</script>
+```
+
+Content swaps in before `busy` clears, so once the element has upgraded, the reveal honors `min-duration` and — where the browser supports the View Transitions API and the user has not asked for reduced motion — runs inside a view transition; otherwise the swap applies immediately. Anywhere the element is not upgraded yet — the page loads no element module, or a chunk beats the async module on first load — the attributes come off directly and the content is simply there: a boundary whose chunk wins that race skips the timing and the crossfade by design, because holding finished content hostage to a script download would be worse than an unanimated reveal.
+
+**A content chunk.** Flushed together, template first:
+
+{/* prettier-ignore */}
+```html
+<template data-bones-chunk="stats"><section>…real content…</section></template>
+<script>__bonesSwap("stats")</script>
+```
+
+The script executes when its closing tag parses, so the template is always complete first, even if the network splits the chunk mid-tag.
+
+**An error chunk.** With author-rendered content, or bare:
+
+{/* prettier-ignore */}
+```html
+<script>__bonesSwap("stats",1)</script>
+```
+
+A bare error chunk keeps the boundary's fallback children. Either form sets `data-bones-error=""` on the boundary; style it with `bones-boundary[data-bones-error]`.
+
+**End of stream.** After the last chunk, close the connection. Nothing else is sent.
+
+**Constraints.** Chunk content must be balanced HTML: a nested, balanced `<template>` inside content is fine, but a stray `</template>` terminates the chunk's template early. Nothing in the protocol escapes or sanitizes content — the server owns that. Streamed content can itself contain a pending boundary whose chunk arrives later, because templates and swap calls resolve against the whole document — but the order matters: an inner boundary's chunk must flush after the chunk that introduces it. A swap call whose boundary is not in the document yet discards its template, and the boundary it later arrives inside stays busy forever. With `streamBones`, derive the inner promise from the outer's: `inner: outer.then(() => loadInner())`.
+
+The protocol runs on inline scripts, and neither `streamBones` nor the primitives accept a nonce yet, so it works only under a `script-src` policy that allows `unsafe-inline`. A server that implements the protocol itself can stamp its own nonce on every `<script>` tag it emits, bootstrap included.
+
+## Implementing the protocol in another stack
+
+A server in any language streams Bones by emitting five things:
+
+1. The shell, with each pending region as `<bones-boundary busy aria-busy="true" inert data-bones-slot="ID">fallback</bones-boundary>`, and no `</body>` or `</html>` anywhere.
+2. The bootstrap `<script>` above, once, directly after the shell.
+3. For each resolved region: `<template data-bones-chunk="ID">content</template><script>__bonesSwap("ID")</script>`, flushed together.
+4. For each failed region: the same shape with `__bonesSwap("ID",1)`, or the bare `<script>__bonesSwap("ID",1)</script>` to keep the fallback.
+5. Nothing else. Close the connection after the last chunk.

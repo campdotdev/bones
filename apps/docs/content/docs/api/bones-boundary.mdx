@@ -92,6 +92,10 @@ Render the output attributes yourself when you know a region is loading at reque
 
 The stylesheet paints bones and the subtree is inert before the element upgrades. On upgrade the element adopts the showing state, and `min-duration` counts from that moment. With `precision="measured"`, the leaf bones auto.css painted before JavaScript ran are replaced by measured bars at upgrade time; the swap is the enhancement taking over.
 
+## Streaming
+
+A server can stream into a boundary: render it busy in the shell with a `data-bones-slot` id, then flush the real content later in the same response. The swap script replaces the children and clears `busy`, so the reveal runs through `min-duration` and the view transition exactly as a client-side `busy = false` does. A failed region gets `data-bones-error=""` and keeps its fallback children unless the server sent error content; style it with `bones-boundary[data-bones-error]`. The element never reads either attribute — they belong to the [wire protocol](/streaming).
+
 ## Measured bones
 
 With `precision="measured"`, the element measures its rendered content while bones show and draws the skeleton from the measurements: one bar per rendered line of text, one block per image or form control. Bars live in a shadow root, so page CSS and frameworks never see them; style them with `::part(bone)`, `::part(bone-text)`, `::part(bone-block)`, and `::part(overlay)`, or through the `--bone-*` custom properties, which inherit into the overlay.

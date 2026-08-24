@@ -38,6 +38,7 @@ import "@camp.dev/bones/css";
 | `@camp.dev/bones/css`      | The skeleton stylesheet. Import once in your root layout.                                                                                                                                                                  |
 | `@camp.dev/bones/auto.css` | Skeletonizes unmarked leaves under `aria-busy="true"`. Imports the base stylesheet itself, so a separate `/css` import is optional.                                                                                        |
 | `@camp.dev/bones/element`  | `<bones-boundary>`, a custom element that sets `aria-busy` and `inert` on its subtree with `delay`, `min-duration`, and a crossfade. `precision="measured"` draws pixel-accurate per-line bones measured from the content. |
+| `@camp.dev/bones/server`   | `streamBones` and the wire-protocol primitives: stream a shell with busy boundaries, then flush each region's content out of order as it resolves.                                                                         |
 | `@camp.dev/bones`          | The framework-agnostic core (`boneAttributes`, `minMax`). You only need this to build your own renderer or adapter.                                                                                                        |
 
 React is an optional peer dependency: installing the package without React is supported and only the `/react` entry requires it.
