@@ -58,8 +58,13 @@ const OVERLAY_CSS = `
 [part~="overlay"][data-bone-animate="none"] [part~="bone"] {
   animation: none;
 }
+/* Matches the shimmer/pulse selectors above at equal (0,3,0) specificity so
+   this override always wins the cascade instead of losing to source order.
+   data-bone-animate="none" is deliberately excluded: none still means none. */
 @media (prefers-reduced-motion: reduce) {
-  [part~="overlay"] [part~="bone"] {
+  [part~="overlay"]:not([data-bone-animate]) [part~="bone"],
+  [part~="overlay"][data-bone-animate="shimmer"] [part~="bone"],
+  [part~="overlay"][data-bone-animate="pulse"] [part~="bone"] {
     animation: bone-pulse 2s ease-in-out infinite;
     background: var(--bone-base, rgba(0, 0, 0, 0.12));
     background-size: auto;
@@ -108,6 +113,10 @@ export class MeasuredOverlay {
   // upgrade time in the common case, so the :host display change settles
   // long before a show measures anything.
   prepare(): void {
+    // A boundary is not expected to carry an author shadow root, so any
+    // existing shadow root is assumed to be ours already. If an author did
+    // attach one, this leaves it alone rather than attaching a second —
+    // measured mode will not render bars into it correctly.
     if (this.#host.shadowRoot) return;
     const root = this.#host.attachShadow({ mode: "open" });
     root.append(this.#host.ownerDocument.createElement("slot"));

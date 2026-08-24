@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test";
 import { BonesBoundary } from "../src/element/index.ts";
 
@@ -652,6 +654,57 @@ describe("precision", () => {
     el.force = false;
     vi.runAllTimers();
     expect(el.getAttribute("data-bones-auto")).toBe("off");
+  });
+});
+
+describe("overlay reduced-motion contract", () => {
+  // The shimmer/pulse selectors and the reduced-motion override live in the
+  // same shadow sheet and must stay at equal specificity, or the override
+  // silently loses the cascade to source order. This pins the override's
+  // selector list against the selectors it needs to beat.
+  const overlaySource = readFileSync(
+    join(import.meta.dirname, "../src/element/overlay.ts"),
+    "utf8",
+  );
+
+  function extractReducedMotionBlock(source: string): string {
+    const marker = "@media (prefers-reduced-motion: reduce)";
+    const start = source.indexOf(marker);
+    if (start === -1) throw new Error("reduced-motion media block not found in overlay.ts");
+    const openBrace = source.indexOf("{", start);
+    let depth = 0;
+    let end = -1;
+    for (let i = openBrace; i < source.length; i++) {
+      if (source[i] === "{") depth++;
+      else if (source[i] === "}") {
+        depth--;
+        if (depth === 0) {
+          end = i;
+          break;
+        }
+      }
+    }
+    if (end === -1) throw new Error("unbalanced braces in reduced-motion media block");
+    return source
+      .slice(start, end + 1)
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  test("the override matches each shimmer/pulse selector at full specificity", () => {
+    const block = extractReducedMotionBlock(overlaySource);
+    for (const selector of [
+      '[part~="overlay"]:not([data-bone-animate]) [part~="bone"]',
+      '[part~="overlay"][data-bone-animate="shimmer"] [part~="bone"]',
+      '[part~="overlay"][data-bone-animate="pulse"] [part~="bone"]',
+    ]) {
+      expect(block).toContain(selector);
+    }
+  });
+
+  test("the override deliberately excludes data-bone-animate=none", () => {
+    const block = extractReducedMotionBlock(overlaySource);
+    expect(block).not.toContain('[data-bone-animate="none"]');
   });
 });
 

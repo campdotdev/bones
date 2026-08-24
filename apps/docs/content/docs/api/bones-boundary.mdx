@@ -90,7 +90,7 @@ Render the output attributes yourself when you know a region is loading at reque
 <bones-boundary busy aria-busy="true" inert>…</bones-boundary>
 ```
 
-The stylesheet paints bones and the subtree is inert before the element upgrades. On upgrade the element adopts the showing state, and `min-duration` counts from that moment.
+The stylesheet paints bones and the subtree is inert before the element upgrades. On upgrade the element adopts the showing state, and `min-duration` counts from that moment. With `precision="measured"`, the leaf bones auto.css painted before JavaScript ran are replaced by measured bars at upgrade time; the swap is the enhancement taking over.
 
 ## Measured bones
 

@@ -93,7 +93,8 @@ export function measureBones(root: Element): BoneRect[] {
       // jsdom's Range has no getClientRects; no layout means no measured bones.
       if (typeof range.getClientRects !== "function") return;
       for (const rect of Array.from(range.getClientRects())) {
-        if (rect.width > 0 && rect.height > 0) textRects.push(toRect(rect));
+        const converted = toRect(rect);
+        if (isVisible(converted)) textRects.push(converted);
       }
       return;
     }
@@ -110,7 +111,7 @@ export function measureBones(root: Element): BoneRect[] {
 
   for (const child of root.childNodes) visit(child);
 
-  const bones: BoneRect[] = blocks;
+  const bones: BoneRect[] = [...blocks];
   for (const line of mergeLineRects(textRects)) {
     const height = line.height * TEXT_BAR_SCALE;
     bones.push({
