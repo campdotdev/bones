@@ -25,7 +25,19 @@ describe("mergeLineRects", () => {
   test("a gap wider than half the line height stays two bars", () => {
     // Two columns 40px apart.
     const merged = mergeLineRects([rect(0, 0, 100, 16), rect(140, 0, 100, 16)]);
-    expect(merged).toHaveLength(2);
+    expect(merged).toEqual([rect(0, 0, 100, 16), rect(140, 0, 100, 16)]);
+  });
+
+  test("a gap exactly half the taller height still merges", () => {
+    // gap 8 == 16 / 2 — the boundary is inclusive.
+    const merged = mergeLineRects([rect(0, 0, 40, 16), rect(48, 0, 40, 16)]);
+    expect(merged).toEqual([rect(0, 0, 88, 16)]);
+  });
+
+  test("vertical overlap exactly half the shorter height still merges", () => {
+    // overlap 8 == 16 / 2 — the boundary is inclusive.
+    const merged = mergeLineRects([rect(0, 0, 40, 16), rect(0, 8, 40, 16)]);
+    expect(merged).toEqual([rect(0, 0, 40, 24)]);
   });
 
   test("separate lines never merge", () => {
