@@ -69,6 +69,15 @@ describe("server rendering", () => {
     expect(html.toLowerCase()).not.toContain("suppresshydrationwarning");
   });
 
+  test("precision passes through as an attribute", () => {
+    const html = renderToString(
+      <BonesBoundary busy precision="measured">
+        <p>copy</p>
+      </BonesBoundary>,
+    );
+    expect(html).toContain('precision="measured"');
+  });
+
   test("raw <bones-boundary> type-checks with the augmented intrinsic element", () => {
     const html = renderToString(
       <bones-boundary busy delay={0} min-duration={0} transition="none">

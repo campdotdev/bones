@@ -88,3 +88,19 @@ test("bare aria-busy region with auto.css", async () => {
   // @ts-expect-error — see the file-level comment above.
   await expect(page.getByTestId("bare-card")).toMatchScreenshot("bare-busy");
 });
+
+test("measured overlay over the card content", async () => {
+  mountHtml(
+    `<bones-boundary force precision="measured" data-testid="measured-card" data-bone-animate="none" style="${CARD_STYLE}">${CONTENT}</bones-boundary>`,
+  );
+  // @ts-expect-error — see the file-level comment above.
+  await expect(page.getByTestId("measured-card")).toMatchScreenshot("measured-force");
+});
+
+test("the same card content, idle, for contrast", async () => {
+  mountHtml(
+    `<bones-boundary data-testid="idle-card" style="${CARD_STYLE} display: block;">${CONTENT}</bones-boundary>`,
+  );
+  // @ts-expect-error — see the file-level comment above.
+  await expect(page.getByTestId("idle-card")).toMatchScreenshot("idle-content");
+});

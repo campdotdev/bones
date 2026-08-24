@@ -32,13 +32,13 @@ import "@camp.dev/bones/css";
 
 ## Entry points
 
-| Import                     | Contents                                                                                                                             |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `@camp.dev/bones/react`    | `createBones`, `readPromise`, `forceBones`, `minMax`, `<Bones>`, `<BonesForce>`                                                      |
-| `@camp.dev/bones/css`      | The skeleton stylesheet. Import once in your root layout.                                                                            |
-| `@camp.dev/bones/auto.css` | Skeletonizes unmarked leaves under `aria-busy="true"`. Imports the base stylesheet itself, so a separate `/css` import is optional.  |
-| `@camp.dev/bones/element`  | `<bones-boundary>`, a custom element that sets `aria-busy` and `inert` on its subtree with `delay`, `min-duration`, and a crossfade. |
-| `@camp.dev/bones`          | The framework-agnostic core (`boneAttributes`, `minMax`). You only need this to build your own renderer or adapter.                  |
+| Import                     | Contents                                                                                                                                                                                                                   |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@camp.dev/bones/react`    | `createBones`, `readPromise`, `forceBones`, `minMax`, `<Bones>`, `<BonesForce>`                                                                                                                                            |
+| `@camp.dev/bones/css`      | The skeleton stylesheet. Import once in your root layout.                                                                                                                                                                  |
+| `@camp.dev/bones/auto.css` | Skeletonizes unmarked leaves under `aria-busy="true"`. Imports the base stylesheet itself, so a separate `/css` import is optional.                                                                                        |
+| `@camp.dev/bones/element`  | `<bones-boundary>`, a custom element that sets `aria-busy` and `inert` on its subtree with `delay`, `min-duration`, and a crossfade. `precision="measured"` draws pixel-accurate per-line bones measured from the content. |
+| `@camp.dev/bones`          | The framework-agnostic core (`boneAttributes`, `minMax`). You only need this to build your own renderer or adapter.                                                                                                        |
 
 React is an optional peer dependency: installing the package without React is supported and only the `/react` entry requires it.
 
