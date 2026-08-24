@@ -116,7 +116,11 @@ export class BonesBoundary extends Base {
   connectedCallback(): void {
     for (const name of UPGRADE_PROPERTIES) this.#upgradeProperty(name);
     this.#connected = true;
-    if (this.precision === "measured") this.#overlay.prepare();
+    // Runs before both exits below: it prepares the shadow root, re-measures
+    // a moved-while-showing element at its new coordinates, and rolls the
+    // overlay back if precision flipped to "css" while disconnected (whose
+    // own attributeChangedCallback never ran, since #connected was false).
+    this.#syncPrecision();
     // Server-rendered markup can carry aria-busy="true" so the CSS paints
     // bones before this script runs. Adopt that as "showing" rather than
     // re-running the delay; min-duration counts from now.
@@ -126,9 +130,6 @@ export class BonesBoundary extends Base {
       return;
     }
     this.#evaluate();
-    // A showing element that was moved re-measures at its new coordinates
-    // (#show already activated the overlay in the adopt branch above).
-    if (this.showing && this.precision === "measured") this.#overlay.activate();
   }
 
   disconnectedCallback(): void {

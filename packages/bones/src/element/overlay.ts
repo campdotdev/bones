@@ -116,12 +116,11 @@ export class MeasuredOverlay {
 
   activate(): void {
     this.prepare();
-    if (!this.#renderBars()) {
-      // Nothing measurable (empty subtree, no layout engine): stay on the
-      // CSS path for this showing window.
-      this.deactivate();
-      return;
-    }
+    // The markers land before measuring: auto.css's leaf rules (min-width,
+    // min-height) key on their absence, and measuring while they are still
+    // active would inflate the geometry against a layout that snaps back a
+    // frame later. The ::slotted visibility rule this turns on does not
+    // affect layout, so measuring hidden content stays valid.
     if (!this.#active) {
       this.#active = true;
       if (!this.#host.hasAttribute("data-bones-auto")) {
@@ -129,6 +128,12 @@ export class MeasuredOverlay {
         this.#ownsAutoOff = true;
       }
       this.#host.setAttribute("data-bones-measured", "");
+    }
+    if (!this.#renderBars()) {
+      // Nothing measurable (empty subtree, no layout engine): roll the
+      // markers back and stay on the CSS path for this showing window.
+      this.deactivate();
+      return;
     }
     this.#observe();
   }
@@ -157,8 +162,10 @@ export class MeasuredOverlay {
     this.#observer = new ResizeObserver(() => {
       // The callback runs after layout, so re-measuring here is sound. The
       // bars are absolutely positioned in the shadow tree and never change
-      // the host's size, so this cannot loop.
-      if (this.#active) this.#renderBars();
+      // the host's size, so this cannot loop. Content that becomes
+      // unmeasurable while active (e.g. the subtree emptied out) falls back
+      // to the CSS path rather than leaving stale bars pinned in place.
+      if (this.#active && !this.#renderBars()) this.deactivate();
     });
     this.#observer.observe(this.#host);
   }
