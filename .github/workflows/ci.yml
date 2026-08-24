@@ -80,7 +80,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bones-visual-output
-          path: packages/bones/tests/browser/__screenshots__/
+          path: |
+            packages/bones/tests/browser/__screenshots__/
+            packages/bones/.vitest-attachments/
 
   # ── Demo app ───────────────────────────────────────────────
   demo-check:
