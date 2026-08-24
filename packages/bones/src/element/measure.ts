@@ -72,7 +72,54 @@ export function mergeLineRects(rects: Rect[]): Rect[] {
   return merged;
 }
 
+function isVisible(rect: Rect): boolean {
+  return rect.width > 0 && rect.height > 0;
+}
+
+function toRect(rect: DOMRect): Rect {
+  return { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+}
+
 export function measureBones(root: Element): BoneRect[] {
-  void root;
-  return [];
+  const doc = root.ownerDocument;
+  const blocks: BoneRect[] = [];
+  const textRects: Rect[] = [];
+
+  const visit = (node: Node): void => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      if ((node as Text).data.trim() === "") return;
+      const range = doc.createRange();
+      range.selectNodeContents(node);
+      // jsdom's Range has no getClientRects; no layout means no measured bones.
+      if (typeof range.getClientRects !== "function") return;
+      for (const rect of Array.from(range.getClientRects())) {
+        if (rect.width > 0 && rect.height > 0) textRects.push(toRect(rect));
+      }
+      return;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return;
+    const el = node as Element;
+    if (el.getAttribute("data-bones-auto") === "off") return;
+    if (BLOCK_TAGS.has(el.localName)) {
+      const rect = toRect(el.getBoundingClientRect());
+      if (isVisible(rect)) blocks.push({ kind: "block", ...rect });
+      return;
+    }
+    for (const child of node.childNodes) visit(child);
+  };
+
+  for (const child of root.childNodes) visit(child);
+
+  const bones: BoneRect[] = blocks;
+  for (const line of mergeLineRects(textRects)) {
+    const height = line.height * TEXT_BAR_SCALE;
+    bones.push({
+      kind: "text",
+      left: line.left,
+      top: line.top + (line.height - height) / 2,
+      width: line.width,
+      height,
+    });
+  }
+  return bones;
 }
