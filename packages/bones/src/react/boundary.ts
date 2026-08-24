@@ -25,6 +25,7 @@ interface ElementAttributes extends HTMLAttributes<HTMLElement> {
   delay?: number;
   "min-duration"?: number;
   transition?: "auto" | "none";
+  precision?: "css" | "measured";
   // React maps `className` to class on custom elements too, but a raw
   // <bones-boundary> written by hand reads better with the HTML name.
   class?: string;
