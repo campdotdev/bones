@@ -107,7 +107,7 @@ A measured boundary is `display: block; position: relative` (the overlay needs a
 Three edges to know about:
 
 - Content hiding uses a non-`!important` `::slotted` rule. An author rule that sets `visibility` on a direct child of the boundary wins over it and that child stays visible. The same cascade behavior is what lets `auto.css` keep `[data-bones-auto="off"]` subtrees visible under the overlay — without `auto.css` on the page, opted-out subtrees hide with everything else.
-- Re-measurement is size-driven. Content that changes while busy without resizing the boundary (a fixed-height container whose children are swapped) keeps its previous bars until the next resize. Content that scrolls inside the boundary (an `overflow: auto` box) also leaves bars at their pre-scroll positions, because scrolling fires no resize.
+- Re-measurement is driven by size changes and by DOM changes: children added, removed, or replaced, and text edits. An attribute change that reflows content without either — a `class` swap inside a fixed-size boundary — keeps its previous bars until the next resize or DOM change. Content that scrolls inside the boundary (an `overflow: auto` box) also leaves bars at their pre-scroll positions, because scrolling fires neither. A subtree that becomes empty while showing drops the boundary to the CSS path for the rest of that showing window, even if content is added later.
 - Measurement compensates for scale transforms on the boundary or its ancestors, but not for rotation or skew. A rotated boundary draws its bars in the wrong place.
 
 ## React

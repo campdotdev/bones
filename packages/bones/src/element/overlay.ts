@@ -96,6 +96,7 @@ export class MeasuredOverlay {
   #host: HTMLElement;
   #container: HTMLElement | undefined;
   #observer: ResizeObserver | undefined;
+  #mutations: MutationObserver | undefined;
   #active = false;
   // The author may set data-bones-auto themselves; only remove it on
   // deactivate when this overlay put it there.
@@ -167,21 +168,42 @@ export class MeasuredOverlay {
   }
 
   #observe(): void {
-    if (typeof ResizeObserver === "undefined" || this.#observer) return;
-    this.#observer = new ResizeObserver(() => {
-      // The callback runs after layout, so re-measuring here is sound. The
-      // bars are absolutely positioned in the shadow tree and never change
-      // the host's size, so this cannot loop. Content that becomes
-      // unmeasurable while active (e.g. the subtree emptied out) falls back
-      // to the CSS path rather than leaving stale bars pinned in place.
-      if (this.#active && !this.#renderBars()) this.deactivate();
-    });
-    this.#observer.observe(this.#host);
+    if (typeof ResizeObserver !== "undefined" && !this.#observer) {
+      this.#observer = new ResizeObserver(() => this.#invalidate());
+      this.#observer.observe(this.#host);
+    }
+    // Streamed swaps replace children mid-show without resizing the host, so
+    // size alone is not enough to invalidate. This observer sees only the
+    // light tree — bar rendering happens in the shadow root, which a
+    // light-tree observer never reports — so re-rendering bars cannot
+    // re-trigger it. Attribute mutations are deliberately excluded: observing
+    // them would fire on every class or style tick of anything inside the
+    // boundary, and an attribute-driven reflow inside a fixed-size host is a
+    // documented stale case instead.
+    if (typeof MutationObserver !== "undefined" && !this.#mutations) {
+      this.#mutations = new MutationObserver(() => this.#invalidate());
+      this.#mutations.observe(this.#host, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+    }
   }
 
   #unobserve(): void {
     this.#observer?.disconnect();
     this.#observer = undefined;
+    this.#mutations?.disconnect();
+    this.#mutations = undefined;
+  }
+
+  // Called after layout (ResizeObserver) or as a microtask after a DOM change
+  // (MutationObserver); re-measuring forces layout in the second case, which
+  // is fine for how rarely busy content mutates. Content that becomes
+  // unmeasurable while active (e.g. the subtree emptied out) falls back to
+  // the CSS path rather than leaving stale bars pinned in place.
+  #invalidate(): void {
+    if (this.#active && !this.#renderBars()) this.deactivate();
   }
 
   #renderBars(): boolean {
