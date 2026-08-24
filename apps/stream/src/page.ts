@@ -59,7 +59,7 @@ Reload with <a href="/?speed=0">?speed=0</a> (a fast server — no skeleton ever
 ${renderBoundary("feed", FALLBACKS.feed)}
 ${renderBoundary("profile", FALLBACKS.profile)}
 ${renderBoundary("stats", FALLBACKS.stats, 'precision="measured"')}
-<footer>View source: the shell, one bootstrap script, then one template-plus-script chunk per region,
-in arrival order. Or watch the bytes arrive: <code>curl --no-buffer localhost:3000</code>.</footer>
+<footer>View source: the shell, one bootstrap script, then one template-plus-script chunk per region, in arrival order — the <a href="https://github.com/campdotdev/bones/blob/main/apps/docs/content/docs/streaming.mdx">wire protocol</a> in the raw.
+Or watch the bytes arrive: <code>curl --no-buffer localhost:3000</code>.</footer>
 `;
 }

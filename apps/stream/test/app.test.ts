@@ -40,6 +40,9 @@ test("serves the stylesheets", async () => {
 
 test("refuses paths outside the two published subtrees", async () => {
   expect((await app.request("/assets/package.json")).status).toBe(404);
+  // WHATWG URL normalization collapses this to /assets/package.json before Hono ever sees it, so
+  // this 404 comes from the prefix allowlist, not the `rel.includes("..")` guard in app.ts — that
+  // guard is only reachable via raw HTTP requests that skip normalization (e.g. `curl --path-as-is`).
   expect((await app.request("/assets/src/css/../../package.json")).status).toBe(404);
   expect((await app.request("/assets/dist/index.mjs")).status).toBe(404);
 });
