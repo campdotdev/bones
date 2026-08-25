@@ -1,5 +1,19 @@
 # bones
 
+## 0.3.0
+
+### Minor Changes
+
+- [#34](https://github.com/campdotdev/bones/pull/34) [`7e4e1a0`](https://github.com/campdotdev/bones/commit/7e4e1a098be7acc0472e960bc185ecb09a390d86) Thanks [@hunterbecton](https://github.com/hunterbecton)! - Add `@camp.dev/bones/element`, a `<bones-boundary>` custom element that owns the loading state of its subtree. Set `busy` and the element sets `aria-busy="true"` and `inert` after a `delay` (200 ms), keeps them for at least `min-duration` (400 ms), and removes them inside a view transition where the browser supports one. It fires `bones:show` and `bones:hide`, honors `force` for demos, and adopts server-rendered `aria-busy` on upgrade. `@camp.dev/bones/react` gains a hook-free `<BonesBoundary>` wrapper.
+
+- [#37](https://github.com/campdotdev/bones/pull/37) [`b7548cc`](https://github.com/campdotdev/bones/commit/b7548cc3a482c6f3ce1859c559d69cddf193a5ba) Thanks [@hunterbecton](https://github.com/hunterbecton)! - Add `precision="measured"` to `<bones-boundary>`: the element measures its rendered content with `Range.getClientRects()` and draws pixel-accurate per-line overlay bones in a shadow root, re-measuring on resize and falling back to the `auto.css` path when there is nothing to measure. The React wrapper gains a matching `precision` prop, and `auto.css` keeps `[data-bones-auto="off"]` subtrees visible under the overlay.
+
+- [#39](https://github.com/campdotdev/bones/pull/39) [`ae5fbc6`](https://github.com/campdotdev/bones/commit/ae5fbc6afd55c73dc53acf9d424d67f25db4d852) Thanks [@hunterbecton](https://github.com/hunterbecton)! - Add `@camp.dev/bones/server`: `streamBones` streams an HTML shell with busy `<bones-boundary>` regions and flushes out-of-order `<template>` + swap-script chunks as promises settle, plus the primitives (`BOOTSTRAP_SCRIPT`, `renderBoundary`, `renderChunk`, `renderErrorChunk`) that emit each wire-protocol piece for servers in any stack.
+
+### Patch Changes
+
+- [#38](https://github.com/campdotdev/bones/pull/38) [`9361a44`](https://github.com/campdotdev/bones/commit/9361a446a58dea687ad83bca2ab2f8d128021db8) Thanks [@hunterbecton](https://github.com/hunterbecton)! - Measured bones re-measure when the boundary's children or text change while busy, not only when the boundary resizes. Streamed and htmx-style swaps mid-skeleton now update the bars instead of leaving stale ones.
+
 ## 0.2.0
 
 ### Minor Changes
