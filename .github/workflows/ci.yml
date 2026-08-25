@@ -139,6 +139,43 @@ jobs:
       - name: Run tests
         run: vp run --filter bones-demo test -- --run
 
+  # ── Streaming demo ─────────────────────────────────────────
+  stream-check:
+    name: "Stream: Types"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@v1
+        with:
+          cache: true
+
+      - name: Build bones library
+        run: vp run --filter @camp.dev/bones build
+
+      - name: Run type check
+        run: vp run --filter bones-stream check
+
+  stream-test:
+    name: "Stream: Test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@v1
+        with:
+          cache: true
+
+      - name: Build bones library
+        run: vp run --filter @camp.dev/bones build
+
+      - name: Run tests
+        run: vp run --filter bones-stream test -- --run
+
   # ── Docs site ──────────────────────────────────────────────
   docs-check:
     name: "Docs: Types"

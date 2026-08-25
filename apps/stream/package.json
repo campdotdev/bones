@@ -1,0 +1,21 @@
+{
+  "name": "bones-stream",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vp run --filter @camp.dev/bones build && node --watch src/server.ts",
+    "start": "node src/server.ts",
+    "check": "tsc --noEmit",
+    "test": "vp test"
+  },
+  "dependencies": {
+    "@camp.dev/bones": "workspace:*",
+    "@hono/node-server": "^1.19.0",
+    "hono": "^4.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "typescript": "^5.8.3"
+  }
+}
