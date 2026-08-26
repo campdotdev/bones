@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PROTOTYPE — bone color strategies (BON-13)</title>
+    <link rel="stylesheet" href="../src/css/bones.css" />
+    <style>
+      /* THROWAWAY PROTOTYPE for BON-13. Compares bone color strategies.
+         Not shipped, not imported anywhere. Delete once the decision lands. */
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 2rem auto;
+        max-width: 72rem;
+        padding: 0 1rem;
+        background: #fff;
+        color: #333;
+      }
+      h1 {
+        font-size: 1.2rem;
+      }
+      .note {
+        font-size: 0.85rem;
+        color: #666;
+        max-width: 60ch;
+      }
+
+      /* ---- Strategies: each sets the bone variables on its column ---- */
+      /* A. Published today: scheme media query. Toggled in-page instead of
+         via prefers-color-scheme so the "OS dark, page still light" bug is
+         visible on demand. */
+      .strategy-a {
+        --bone-base: rgba(0, 0, 0, 0.12);
+        --bone-highlight: rgba(0, 0, 0, 0.06);
+      }
+      html.os-dark .strategy-a {
+        --bone-base: rgba(255, 255, 255, 0.12);
+        --bone-highlight: rgba(255, 255, 255, 0.06);
+      }
+      /* B. Derived from the text color. The issue's literal option 1
+         (color-mix from currentColor) is disproved: bones.css hides content
+         with `color: transparent`, so currentColor is transparent at every
+         bone. Rescue: zero only the alpha so the channels survive, then
+         restore alpha inside the mix. */
+      .strategy-b [data-bone] {
+        color: rgb(from currentColor r g b / 0);
+      }
+      .strategy-b {
+        --bone-base: color-mix(in srgb, rgb(from currentColor r g b / 1) 12%, transparent);
+        --bone-highlight: color-mix(in srgb, rgb(from currentColor r g b / 1) 6%, transparent);
+      }
+      /* C. Fixed translucent mid-gray */
+      .strategy-c {
+        --bone-base: rgb(128 128 128 / 0.25);
+        --bone-highlight: rgb(128 128 128 / 0.12);
+      }
+      /* D. Hunter's literal suggestion: dark gray at 50% */
+      .strategy-d {
+        --bone-base: rgb(64 64 64 / 0.5);
+        --bone-highlight: rgb(64 64 64 / 0.25);
+      }
+
+      /* ---- Layout ---- */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 1rem;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 0;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+        background: #f6f6f6;
+        color: #333;
+      }
+      th.ctx {
+        width: 9rem;
+      }
+      .cell {
+        padding: 0.75rem;
+        height: 100%;
+      }
+
+      /* ---- Contexts (rows own their background + text color) ---- */
+      .ctx-light {
+        background: #fff;
+        color: #333;
+      }
+      .ctx-dark {
+        background: #111;
+        color: #e8e8e8;
+      }
+      .ctx-card-dark {
+        background: #fff;
+      }
+      .ctx-card-dark .card {
+        background: #1c1c28;
+        color: #dfe3ff;
+        border-radius: 8px;
+        padding: 0.6rem;
+      }
+      .ctx-midgray {
+        background: #808080;
+        color: #fff;
+      }
+      .ctx-colored {
+        background: #fff;
+        color: #333;
+      }
+
+      /* Mini profile card used in every cell */
+      .row {
+        display: flex;
+        gap: 0.6rem;
+        align-items: center;
+      }
+      .lines {
+        display: grid;
+        gap: 0.35rem;
+        flex: 1;
+      }
+      img.avatar {
+        border-radius: 50%;
+      }
+      .link {
+        color: #2255cc;
+      }
+      .error {
+        color: #c0392b;
+      }
+
+      /* Proposed fix for the img conflict: hide alt text without feeding currentColor */
+      img.textfill-fix {
+        color: inherit !important;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .toggle {
+        position: sticky;
+        top: 0.5rem;
+        float: right;
+      }
+    </style>
+  </head>
+  <body>
+    <button class="toggle" id="osdark">Simulate OS dark mode (affects only A)</button>
+    <h1>PROTOTYPE — bone color strategies (BON-13)</h1>
+    <p class="note">
+      Rows are page contexts, columns are color strategies. Every bone below is the real
+      <code>bones.css</code> rendering — only <code>--bone-base</code> /
+      <code>--bone-highlight</code> differ per column. The BON-13 bug is column A after clicking the
+      toggle: the light-page rows go blank.
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th class="ctx">Context</th>
+          <th>A · published (scheme query)</th>
+          <th>B · currentColor 12%</th>
+          <th>C · mid-gray 25%</th>
+          <th>D · dark gray 50%</th>
+        </tr>
+      </thead>
+      <tbody id="grid"></tbody>
+    </table>
+
+    <p class="note">
+      Findings so far: the issue's literal option 1 fails everywhere, because bones.css hides every
+      bone's content with <code>color: transparent</code> — currentColor is transparent at the bone
+      itself, not just on images. Column B instead zeroes only the alpha (<code
+        >color: rgb(from currentColor r g b / 0)</code
+      >) so the mix can restore the channels. Cost: bones take the <em>inherited</em> color, so
+      per-element tints (link blue, error red) fall back to the parent's color.
+    </p>
+
+    <script>
+      const PIXEL =
+        "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
+      const card = (extra = "") => `
+        <div class="row">
+          <img class="avatar" data-bone="block" src="${PIXEL}" alt="avatar" width="48" height="48" />
+          <div class="lines">
+            <span data-bone="text" style="--bone-length: 14"></span>
+            <span data-bone="text" style="--bone-length: 22"></span>
+            ${extra}
+          </div>
+        </div>`;
+
+      const contexts = [
+        { name: "Light page", cls: "ctx-light", html: card() },
+        { name: "Dark page", cls: "ctx-dark", html: card() },
+        {
+          name: "Dark card in light page",
+          cls: "ctx-card-dark",
+          html: `<div class="card">${card()}</div>`,
+        },
+        { name: "Mid-gray panel", cls: "ctx-midgray", html: card() },
+        {
+          name: "Colored text (link, error)",
+          cls: "ctx-colored",
+          html: card(`<span class="link" data-bone="text" style="--bone-length: 10"></span>
+                      <span class="error" data-bone="text" style="--bone-length: 16"></span>`),
+        },
+        {
+          name: "Images (stock vs fix)",
+          cls: "ctx-light",
+          html: `<div class="row">
+              <img class="avatar" data-bone="block" src="${PIXEL}" alt="stock" width="48" height="48" />
+              <img class="avatar textfill-fix" data-bone="block" src="${PIXEL}" alt="fixed" width="48" height="48" />
+            </div>`,
+        },
+      ];
+
+      document.getElementById("grid").innerHTML = contexts
+        .map(
+          (c) => `<tr>
+            <th class="ctx">${c.name}</th>
+            ${["a", "b", "c", "d"]
+              .map(
+                (s) => `<td class="${c.cls}"><div class="cell strategy-${s}">${c.html}</div></td>`,
+              )
+              .join("")}
+          </tr>`,
+        )
+        .join("");
+
+      document.getElementById("osdark").addEventListener("click", () => {
+        document.documentElement.classList.toggle("os-dark");
+      });
+    </script>
+  </body>
+</html>
