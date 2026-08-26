@@ -30,7 +30,7 @@ const OVERLAY_CSS = `
 }
 [part~="bone"] {
   position: absolute;
-  background: var(--bone-base, rgba(0, 0, 0, 0.12));
+  background: var(--bone-base, color-mix(in srgb, rgb(from currentColor r g b / 1) 12%, transparent));
   border-radius: var(--bone-radius, 4px);
 }
 @keyframes bone-shimmer {
@@ -46,9 +46,9 @@ const OVERLAY_CSS = `
   animation: bone-shimmer var(--bone-duration, 1.5s) ease-in-out infinite;
   background: linear-gradient(
     90deg,
-    var(--bone-base, rgba(0, 0, 0, 0.12)) 25%,
-    var(--bone-highlight, rgba(0, 0, 0, 0.06)) 50%,
-    var(--bone-base, rgba(0, 0, 0, 0.12)) 75%
+    var(--bone-base, color-mix(in srgb, rgb(from currentColor r g b / 1) 12%, transparent)) 25%,
+    var(--bone-highlight, color-mix(in srgb, rgb(from currentColor r g b / 1) 6%, transparent)) 50%,
+    var(--bone-base, color-mix(in srgb, rgb(from currentColor r g b / 1) 12%, transparent)) 75%
   );
   background-size: 200% 100%;
 }
@@ -66,7 +66,7 @@ const OVERLAY_CSS = `
   [part~="overlay"][data-bone-animate="shimmer"] [part~="bone"],
   [part~="overlay"][data-bone-animate="pulse"] [part~="bone"] {
     animation: bone-pulse 2s ease-in-out infinite;
-    background: var(--bone-base, rgba(0, 0, 0, 0.12));
+    background: var(--bone-base, color-mix(in srgb, rgb(from currentColor r g b / 1) 12%, transparent));
     background-size: auto;
   }
 }

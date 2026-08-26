@@ -7,12 +7,14 @@ All skeleton visuals are controlled by CSS custom properties. Override them glob
 
 ## CSS custom properties
 
-| Property           | Default (light)       | Default (dark)              | Description                    |
-| ------------------ | --------------------- | --------------------------- | ------------------------------ |
-| `--bone-base`      | `rgba(0, 0, 0, 0.12)` | `rgba(255, 255, 255, 0.12)` | Skeleton background color      |
-| `--bone-highlight` | `rgba(0, 0, 0, 0.06)` | `rgba(255, 255, 255, 0.06)` | Highlight color (for shimmer)  |
-| `--bone-radius`    | `4px`                 | `4px`                       | Border radius of skeleton bars |
-| `--bone-duration`  | `1.5s`                | `1.5s`                      | Animation duration             |
+| Property           | Default                       | Description                    |
+| ------------------ | ----------------------------- | ------------------------------ |
+| `--bone-base`      | the text color at 12% opacity | Skeleton background color      |
+| `--bone-highlight` | the text color at 6% opacity  | Highlight color (for shimmer)  |
+| `--bone-radius`    | `4px`                         | Border radius of skeleton bars |
+| `--bone-duration`  | `1.5s`                        | Animation duration             |
+
+The color defaults derive from the text color in effect at the skeleton, so bones contrast with whatever background the text around them is readable on. A `#333`-on-white article gets translucent dark bars. The same markup inside a dark card with light text gets translucent light bars.
 
 ## Theming
 
@@ -41,18 +43,18 @@ Or use a CSS class:
 
 ## Dark mode
 
-Dark mode works via `prefers-color-scheme`:
+Dark mode needs no configuration. Because bones derive from the text color, a dark theme's light text produces light bones, whether the theme comes from `prefers-color-scheme` or a class-based toggle.
+
+To give dark mode different bones anyway, override the properties in your dark styles:
 
 ```css
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bone-base: rgba(255, 255, 255, 0.12);
-    --bone-highlight: rgba(255, 255, 255, 0.06);
-  }
+.dark {
+  --bone-base: rgba(255, 255, 255, 0.2);
+  --bone-highlight: rgba(255, 255, 255, 0.1);
 }
 ```
 
-Override these in your own dark mode styles if your app uses a class-based dark mode toggle.
+One case needs a manual override: text that depends on its background for contrast, such as white text over a hero image. If the image is part of what loads, the derived white bone can vanish against the page behind it. Set `--bone-base` on that section to a color that works without the image.
 
 ## Animations
 
