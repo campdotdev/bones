@@ -6,8 +6,9 @@
     <title>bones-boundary sandbox</title>
     <link rel="stylesheet" href="../src/css/auto.css" />
     <style>
-      /* bones.css picks --bone-base from prefers-color-scheme, so the page must
-         follow the scheme too or dark-mode bones paint white on white. */
+      /* Follow the OS scheme so the sandbox exercises bones on both canvases.
+         Bone visibility no longer depends on it: colors derive from the text
+         color (BON-13). */
       :root {
         color-scheme: light dark;
       }

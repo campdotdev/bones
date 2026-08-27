@@ -1,19 +1,18 @@
 :root {
-  --bone-base: rgba(0, 0, 0, 0.12);
-  --bone-highlight: rgba(0, 0, 0, 0.06);
+  /* Bones derive their color from the text color in effect at the bone, so
+     they inherit the page's own contrast guarantee on any background in any
+     scheme (BON-13). currentColor resolves where var() is used, not here.
+     The alpha reset matters: bones hide their content by zeroing the alpha
+     of the color property (never with the transparent keyword, which would
+     discard the channels), and the mix restores it. */
+  --bone-base: color-mix(in srgb, rgb(from currentcolor r g b / 1) 12%, transparent);
+  --bone-highlight: color-mix(in srgb, rgb(from currentcolor r g b / 1) 6%, transparent);
   --bone-radius: 4px;
   --bone-duration: 1.5s;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bone-base: rgba(255, 255, 255, 0.12);
-    --bone-highlight: rgba(255, 255, 255, 0.06);
-  }
-}
-
 [data-bone="text"] {
-  color: transparent;
+  color: rgb(from currentcolor r g b / 0);
   position: relative;
   min-width: 4ch;
   min-height: 1lh;
@@ -72,7 +71,7 @@
 
 img[data-bone="block"],
 video[data-bone="block"] {
-  color: transparent;
+  color: rgb(from currentcolor r g b / 0);
 }
 
 [data-bone="container"] {
