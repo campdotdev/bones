@@ -110,11 +110,15 @@ video[data-bone="block"] {
   }
 }
 
+/* :is(:scope, :scope *) lets the attribute work from the bone itself, not
+   only from a wrapper: a scoped selector's implicit :scope prefix matches
+   strict descendants only, so a plain compound never matches the scope root
+   (BON-17). */
 @scope ([data-bone-animate="shimmer"]) to ([data-bone-animate]:not([data-bone-animate="shimmer"])) {
-  [data-bone="text"]::after,
-  [data-bone="text"]::before,
-  [data-bone="block"],
-  [data-bone="container"]::before {
+  [data-bone="text"]:is(:scope, :scope *)::after,
+  [data-bone="text"]:is(:scope, :scope *)::before,
+  [data-bone="block"]:is(:scope, :scope *),
+  [data-bone="container"]:is(:scope, :scope *)::before {
     animation: bone-shimmer var(--bone-duration) ease-in-out infinite;
     background: linear-gradient(
       90deg,
@@ -127,10 +131,10 @@ video[data-bone="block"] {
 }
 
 @scope ([data-bone-animate="pulse"]) to ([data-bone-animate]:not([data-bone-animate="pulse"])) {
-  [data-bone="text"]::after,
-  [data-bone="text"]::before,
-  [data-bone="block"],
-  [data-bone="container"]::before {
+  [data-bone="text"]:is(:scope, :scope *)::after,
+  [data-bone="text"]:is(:scope, :scope *)::before,
+  [data-bone="block"]:is(:scope, :scope *),
+  [data-bone="container"]:is(:scope, :scope *)::before {
     animation: bone-pulse var(--bone-duration) ease-in-out infinite;
     background: var(--bone-base);
     background-size: auto;
@@ -138,10 +142,10 @@ video[data-bone="block"] {
 }
 
 @scope ([data-bone-animate="none"]) to ([data-bone-animate]:not([data-bone-animate="none"])) {
-  [data-bone="text"]::after,
-  [data-bone="text"]::before,
-  [data-bone="block"],
-  [data-bone="container"]::before {
+  [data-bone="text"]:is(:scope, :scope *)::after,
+  [data-bone="text"]:is(:scope, :scope *)::before,
+  [data-bone="block"]:is(:scope, :scope *),
+  [data-bone="container"]:is(:scope, :scope *)::before {
     animation: none;
     background: var(--bone-base);
     background-size: auto;

@@ -286,7 +286,9 @@
   /* Auto bones default to shimmer. bones.css only animates inside a
      [data-bone-animate] scope; a zero-markup page has no such attribute, so
      the default lives here and the scopes below mirror bones.css for pages
-     that do set it. */
+     that do set it. In those scopes, :is(:scope, :scope *) lets the attribute
+     sit on the aria-busy element itself: a scoped selector's implicit :scope
+     prefix matches strict descendants only (BON-17). */
   [aria-busy="true"]
     :not(:has(*)):not(
       [data-bone],
@@ -374,7 +376,7 @@
   }
 
   @scope ([data-bone-animate="shimmer"]) to ([data-bone-animate]:not([data-bone-animate="shimmer"])) {
-    [aria-busy="true"]
+    [aria-busy="true"]:is(:scope, :scope *)
       :not(:has(*)):not(
         [data-bone],
         [data-bone] *,
@@ -403,7 +405,7 @@
         select *,
         object *
       )::before,
-    [aria-busy="true"]
+    [aria-busy="true"]:is(:scope, :scope *)
       :not(:has(*)):not(
         [data-bone],
         [data-bone] *,
@@ -432,7 +434,7 @@
         select *,
         object *
       )::after,
-    [aria-busy="true"]
+    [aria-busy="true"]:is(:scope, :scope *)
       :is(
         img,
         svg,
@@ -461,7 +463,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      [aria-busy="true"]
+      [aria-busy="true"]:is(:scope, :scope *)
         :not(:has(*)):not(
           [data-bone],
           [data-bone] *,
@@ -490,7 +492,7 @@
           select *,
           object *
         )::before,
-      [aria-busy="true"]
+      [aria-busy="true"]:is(:scope, :scope *)
         :not(:has(*)):not(
           [data-bone],
           [data-bone] *,
@@ -519,7 +521,7 @@
           select *,
           object *
         )::after,
-      [aria-busy="true"]
+      [aria-busy="true"]:is(:scope, :scope *)
         :is(
           img,
           svg,
@@ -544,7 +546,7 @@
     }
 
     @media (forced-colors: active) {
-      [aria-busy="true"]
+      [aria-busy="true"]:is(:scope, :scope *)
         :not(:has(*)):not(
           [data-bone],
           [data-bone] *,
@@ -573,7 +575,7 @@
           select *,
           object *
         )::after,
-      [aria-busy="true"]
+      [aria-busy="true"]:is(:scope, :scope *)
         :is(
           img,
           svg,
@@ -598,7 +600,7 @@
   }
 
   @scope ([data-bone-animate="pulse"]) to ([data-bone-animate]:not([data-bone-animate="pulse"])) {
-    [aria-busy="true"]
+    [aria-busy="true"]:is(:scope, :scope *)
       :not(:has(*)):not(
         [data-bone],
         [data-bone] *,
@@ -627,7 +629,7 @@
         select *,
         object *
       )::before,
-    [aria-busy="true"]
+    [aria-busy="true"]:is(:scope, :scope *)
       :not(:has(*)):not(
         [data-bone],
         [data-bone] *,
@@ -656,7 +658,7 @@
         select *,
         object *
       )::after,
-    [aria-busy="true"]
+    [aria-busy="true"]:is(:scope, :scope *)
       :is(
         img,
         svg,
@@ -680,7 +682,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      [aria-busy="true"]
+      [aria-busy="true"]:is(:scope, :scope *)
         :not(:has(*)):not(
           [data-bone],
           [data-bone] *,
@@ -709,7 +711,7 @@
           select *,
           object *
         )::before,
-      [aria-busy="true"]
+      [aria-busy="true"]:is(:scope, :scope *)
         :not(:has(*)):not(
           [data-bone],
           [data-bone] *,
@@ -738,7 +740,7 @@
           select *,
           object *
         )::after,
-      [aria-busy="true"]
+      [aria-busy="true"]:is(:scope, :scope *)
         :is(
           img,
           svg,
@@ -763,7 +765,7 @@
     }
 
     @media (forced-colors: active) {
-      [aria-busy="true"]
+      [aria-busy="true"]:is(:scope, :scope *)
         :not(:has(*)):not(
           [data-bone],
           [data-bone] *,
@@ -792,7 +794,7 @@
           select *,
           object *
         )::after,
-      [aria-busy="true"]
+      [aria-busy="true"]:is(:scope, :scope *)
         :is(
           img,
           svg,
@@ -817,7 +819,7 @@
   }
 
   @scope ([data-bone-animate="none"]) to ([data-bone-animate]:not([data-bone-animate="none"])) {
-    [aria-busy="true"]
+    [aria-busy="true"]:is(:scope, :scope *)
       :not(:has(*)):not(
         [data-bone],
         [data-bone] *,
@@ -846,7 +848,7 @@
         select *,
         object *
       )::before,
-    [aria-busy="true"]
+    [aria-busy="true"]:is(:scope, :scope *)
       :not(:has(*)):not(
         [data-bone],
         [data-bone] *,
@@ -875,7 +877,7 @@
         select *,
         object *
       )::after,
-    [aria-busy="true"]
+    [aria-busy="true"]:is(:scope, :scope *)
       :is(
         img,
         svg,
@@ -899,7 +901,7 @@
     }
 
     @media (forced-colors: active) {
-      [aria-busy="true"]
+      [aria-busy="true"]:is(:scope, :scope *)
         :not(:has(*)):not(
           [data-bone],
           [data-bone] *,
@@ -928,7 +930,7 @@
           select *,
           object *
         )::after,
-      [aria-busy="true"]
+      [aria-busy="true"]:is(:scope, :scope *)
         :is(
           img,
           svg,
