@@ -108,6 +108,12 @@ To force a subtree into skeleton mode at once, pass `forceBones` to each compone
 <PostList posts={forceBones} />
 ```
 
+`forceBones` only forces the component it's passed to. A component that derives child props from its own data must forward it itself, such as `PostList` mapping items into cards. `repeat` yields `undefined` for items that don't exist yet:
+
+```tsx
+<PostCard key={item?.id ?? i} post={item ?? forceBones} />
+```
+
 For content that has no bone markup at all, wrap it in [`<bones-boundary force>`](https://github.com/campdotdev/bones/blob/main/apps/docs/content/docs/api/bones-boundary.mdx) and let `auto.css` draw leaf bones.
 
 ## Automatic skeletons
