@@ -1,0 +1,19 @@
+{
+  "name": "bones-vanilla",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vp run --filter @camp.dev/bones build && vp dev",
+    "build": "vp run --filter @camp.dev/bones build && vp build",
+    "check": "tsc --noEmit",
+    "test": "vp test"
+  },
+  "dependencies": {
+    "@camp.dev/bones": "workspace:*"
+  },
+  "devDependencies": {
+    "jsdom": "^29.0.2",
+    "typescript": "^5.8.3"
+  }
+}

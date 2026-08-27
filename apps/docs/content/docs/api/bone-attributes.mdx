@@ -1,0 +1,155 @@
+---
+title: boneAttributes
+description: Returns the attributes that mark an element as a skeleton.
+---
+
+```ts
+import { boneAttributes, minMax } from "@camp.dev/bones";
+
+const attrs = boneAttributes(type, options?, callIndex?);
+```
+
+The root entry is the framework-agnostic core. `boneAttributes` returns the attributes that mark an element as a skeleton for the stylesheet: `data-bone` names the shape, `aria-busy="true"` marks the state. The entry contains no framework code and no DOM code, so it runs anywhere. [`createBones`](/api/create-bones) sets the same attributes through it; you only need this entry to build your own renderer or adapter.
+
+## Usage
+
+A card skeleton with no framework. A small helper copies the returned attributes onto an element while loading and takes them off when the data arrives.
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/@camp.dev/bones/src/css/bones.css" />
+
+<article data-bone-animate="shimmer">
+  <img id="avatar" width="72" height="72" alt="" />
+  <h2 id="name"></h2>
+  <p id="bio"></p>
+</article>
+
+<script type="module">
+  import {
+    boneAttributes,
+    minMax,
+    TRANSPARENT_PIXEL,
+  } from "https://unpkg.com/@camp.dev/bones/dist/index.mjs";
+
+  function applyBone(el, attrs) {
+    el.setAttribute("data-bone", attrs["data-bone"]);
+    el.setAttribute("aria-busy", "true");
+    if (attrs.src) el.setAttribute("src", attrs.src);
+    for (const [property, value] of Object.entries(attrs.style ?? {})) {
+      el.style.setProperty(property, String(value));
+    }
+  }
+
+  function clearBone(el) {
+    el.removeAttribute("data-bone");
+    el.removeAttribute("aria-busy");
+    if (el.getAttribute("src") === TRANSPARENT_PIXEL) el.removeAttribute("src");
+    el.style.removeProperty("--bone-length");
+    el.style.removeProperty("--bone-contained");
+  }
+
+  function lineBones(el, count) {
+    el.replaceChildren();
+    for (let i = 0; i < count; i++) {
+      const span = document.createElement("span");
+      span.setAttribute("data-bone-line", "");
+      applyBone(span, boneAttributes("text"));
+      el.append(span);
+    }
+  }
+
+  const avatar = document.getElementById("avatar");
+  const name = document.getElementById("name");
+  const bio = document.getElementById("bio");
+
+  applyBone(avatar, boneAttributes("block"));
+  applyBone(name, boneAttributes("text", { length: minMax(8, 16) }));
+  lineBones(bio, 2);
+
+  const profile = await (await fetch("/api/profile")).json();
+
+  for (const el of [avatar, name]) clearBone(el);
+  avatar.src = profile.avatar;
+  name.textContent = profile.name;
+  bio.textContent = profile.bio;
+</script>
+```
+
+The bio wraps, so a single text bone would draw one bar where the loaded text takes two lines. `lineBones` gives the paragraph one child `<span data-bone-line>` per expected line, each carrying the text-bone attributes. The stylesheet displays each span as its own bar and shortens the last one. Writing `textContent` replaces the spans, so the paragraph needs no `clearBone`. This is the markup the React entry's `lines()` helper renders.
+
+The repository runs this example as an app: `apps/vanilla` imports the same functions from the workspace build. Start it with `vp run --filter bones-vanilla dev`.
+
+## Parameters
+
+| Parameter   | Type                               | Description                                                             |
+| ----------- | ---------------------------------- | ----------------------------------------------------------------------- |
+| `type`      | `"text" \| "block" \| "container"` | The skeleton shape                                                      |
+| `options`   | `BoneOptions`                      | `length` and `contained`. Only read for `"text"`                        |
+| `callIndex` | `number`                           | Position in a repeated list. Resolves `minMax` lengths. Defaults to `0` |
+
+## Return value
+
+The return value depends on the type:
+
+| Type          | Attributes                                                                                                                                       |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `"text"`      | `data-bone`, `aria-busy`, and a `style` object when `length` or `contained` is set: `--bone-length` (width in `ch`) and `--bone-contained` (`1`) |
+| `"block"`     | `data-bone`, `aria-busy`, and `src` set to `TRANSPARENT_PIXEL`                                                                                   |
+| `"container"` | `data-bone` and `aria-busy`                                                                                                                      |
+
+The `style` value maps custom-property names to numbers. React accepts it in the `style` prop unchanged. On a raw DOM element, set each entry with `el.style.setProperty(property, String(value))`, as in the example above. A `length` of `0` is ignored.
+
+The `src` placeholder keeps an `<img>` without a real source from showing the broken-image glyph while it loads.
+
+## `minMax(min, max)`
+
+Creates a variable-length descriptor for the `length` option, so repeated text bones do not all render the same width.
+
+| Parameter | Type     | Description                 |
+| --------- | -------- | --------------------------- |
+| `min`     | `number` | Minimum width in `ch` units |
+| `max`     | `number` | Maximum width in `ch` units |
+
+## `resolveLength(length, callIndex)`
+
+Turns a `length` option into a number. A plain number passes through. A `MinMax` resolves to `min + ((callIndex * 7 + 3) % (max - min + 1))`. The result depends only on `callIndex`, so a server render and a client render of the same list agree on every width. `undefined` in, `undefined` out.
+
+`boneAttributes` calls this internally. Call it yourself when your renderer needs the resolved width for something other than the `--bone-length` property.
+
+## `isMinMax(value)`
+
+Type guard for `MinMax`. `minMax` brands its return value with a private symbol, so a plain `{ min, max }` object is not a `MinMax`.
+
+## `TRANSPARENT_PIXEL`
+
+A 1×1 transparent GIF as a `data:` URI. `boneAttributes("block")` returns it as `src`.
+
+## Type signature
+
+```ts
+type BoneType = "text" | "block" | "container";
+
+interface BoneOptions {
+  length?: number | MinMax;
+  contained?: boolean;
+}
+
+interface BoneAttributes {
+  "data-bone": BoneType;
+  "aria-busy": true;
+  src?: string;
+  style?: Record<string, number>;
+}
+
+// Also carries a private symbol brand: only minMax() creates one.
+interface MinMax {
+  readonly min: number;
+  readonly max: number;
+}
+
+function boneAttributes(type: BoneType, options?: BoneOptions, callIndex?: number): BoneAttributes;
+function minMax(min: number, max: number): MinMax;
+function isMinMax(value: unknown): value is MinMax;
+function resolveLength(length: number | MinMax | undefined, callIndex: number): number | undefined;
+const TRANSPARENT_PIXEL: string;
+```
