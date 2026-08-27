@@ -42,8 +42,7 @@ test("image block bone hides its alt text but keeps the inherited channels", () 
 test("auto.css text leaf bar derives from the inherited text color", () => {
   // The data-bone-animate="none" wrapper collapses the shimmer gradient to a
   // solid background-color; without it the bar's paint lives in
-  // background-image. The attribute must wrap the busy region — its @scope
-  // does not take effect from the aria-busy element itself.
+  // background-image.
   const root = mount(
     `<div data-bone-animate="none"><section aria-busy="true" style="${DARK_PAGE_TEXT}"><p>some copy</p></section></div>`,
   );

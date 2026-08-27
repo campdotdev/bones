@@ -129,7 +129,7 @@ Set `aria-busy="true"` on the loading region and every unmarked leaf inside it b
 
 `[data-bones-auto="off"]` opts a subtree out — useful for a status message you want to stay readable while its container skeletonizes. Explicit `data-bone` markup is left alone; `auto.css` only styles elements neither `bone()` nor a manual `data-bone` attribute has already claimed.
 
-Auto rules live in `@layer bones-auto`, so any page CSS that sets `color` on an element outranks the bone's transparent text, and that text stays visible over its skeleton bar. `data-bone-animate` also has to sit on an ancestor of the `aria-busy` element — set directly on it, it has no effect. The `data-bone-animate` overrides rely on `@scope`. In a browser without `@scope`, auto bones always shimmer, and `data-bone-animate="pulse"` and `"none"` cannot change that. The `prefers-reduced-motion` fallback to pulse still applies.
+Auto rules live in `@layer bones-auto`, so any page CSS that sets `color` on an element outranks the bone's transparent text, and that text stays visible over its skeleton bar. `data-bone-animate` works on the `aria-busy` element itself or on any ancestor. The `data-bone-animate` overrides rely on `@scope`. In a browser without `@scope`, auto bones always shimmer, and `data-bone-animate="pulse"` and `"none"` cannot change that. The `prefers-reduced-motion` fallback to pulse still applies.
 
 ## Without React
 
