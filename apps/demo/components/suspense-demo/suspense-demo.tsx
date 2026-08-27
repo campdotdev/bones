@@ -1,4 +1,5 @@
-import { Bones } from "@camp.dev/bones/react";
+import { Suspense } from "react";
+import { forceBones } from "@camp.dev/bones/react";
 import { delay } from "@/lib/delay";
 import { fetchPokemonList } from "@/lib/pokeapi";
 import { DemoSection } from "@/components/demo-section/demo-section";
@@ -10,16 +11,16 @@ export function SuspenseDemo() {
       title="Streaming with Suspense"
       description={
         <>
-          Wrap a component in <code>{"<Bones>"}</code> and pass a promise as data. The same
-          component renders as skeletons while the data streams in, then swaps to content when it
-          resolves.
+          Pass a promise as data and let the fallback be the same component with{" "}
+          <code>forceBones</code>. The same component renders as skeletons while the data streams
+          in, then swaps to content when it resolves.
         </>
       }
       hint="Refresh the page to see the skeleton → content transition."
     >
-      <Bones>
+      <Suspense fallback={<PokemonGrid pokemon={forceBones} />}>
         <PokemonGrid pokemon={delay(fetchPokemonList(12), 3000)} />
-      </Bones>
+      </Suspense>
     </DemoSection>
   );
 }

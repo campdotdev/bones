@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
-import { BonesForce } from "@camp.dev/bones/react";
 import { BonesDevTool } from "@/components/bones-devtool/bones-devtool";
 import "@camp.dev/bones/css";
 import "./globals.css";
@@ -19,7 +18,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en">
       <body data-bone-animate={animate}>
-        {isCompareFrame ? <BonesForce>{children}</BonesForce> : children}
+        {children}
         {!isCompareFrame && <BonesDevTool />}
       </body>
     </html>

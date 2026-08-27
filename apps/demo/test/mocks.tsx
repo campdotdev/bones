@@ -1,10 +1,13 @@
 import type { ReactNode } from "react";
 
+const mockForceBones = Object.freeze({});
+
 export function bonesMockFactory() {
   return {
+    forceBones: mockForceBones,
     createBones: <T,>(data: T) => ({
       bone: () => ({}),
-      data: data ?? undefined,
+      data: data === mockForceBones ? undefined : (data ?? undefined),
       repeat: <U,>(
         arr: U[] | undefined,
         count: number,
@@ -22,16 +25,15 @@ export function bonesMockFactory() {
         return [render(value)];
       },
     }),
-    BonesForce: ({ children }: { children: ReactNode }) => <>{children}</>,
-    Bones: ({ children }: { children: ReactNode }) => <>{children}</>,
   };
 }
 
 export function bonesWithDataMockFactory() {
   return {
+    forceBones: mockForceBones,
     createBones: <T,>(data: T) => ({
       bone: () => ({}),
-      data: data ?? undefined,
+      data: data === mockForceBones ? undefined : (data ?? undefined),
       repeat: <U,>(
         arr: U[] | undefined,
         count: number,

@@ -8,38 +8,38 @@
 
 /* Catppuccin Latte (light) */
 :root {
-  --bg: rgb(239, 241, 245);       /* Base */
-  --fg: rgb(76, 79, 105);         /* Text */
-  --muted: rgb(108, 111, 133);    /* Subtext0 */
-  --border: rgb(188, 192, 204);   /* Surface1 */
-  --card-bg: rgb(230, 233, 239);  /* Mantle */
-  --accent: rgb(136, 57, 239);    /* Mauve */
+  --bg: rgb(239, 241, 245); /* Base */
+  --fg: rgb(76, 79, 105); /* Text */
+  --muted: rgb(108, 111, 133); /* Subtext0 */
+  --border: rgb(188, 192, 204); /* Surface1 */
+  --card-bg: rgb(230, 233, 239); /* Mantle */
+  --accent: rgb(136, 57, 239); /* Mauve */
   --radius: 12px;
 
   --card-border: rgb(204, 208, 218); /* Surface0 */
   --card-radius: 10px;
   --card-padding: 14px;
   --label-color: rgb(156, 160, 176); /* Overlay0 */
-  --value-color: rgb(92, 95, 119);   /* Subtext1 */
-  --stat-fill: rgb(136, 57, 239);    /* Mauve */
-  --stat-track: rgb(204, 208, 218);  /* Surface0 */
+  --value-color: rgb(92, 95, 119); /* Subtext1 */
+  --stat-fill: rgb(136, 57, 239); /* Mauve */
+  --stat-track: rgb(204, 208, 218); /* Surface0 */
 }
 
 /* Catppuccin Mocha (dark) */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: rgb(30, 30, 46);          /* Base */
-    --fg: rgb(205, 214, 244);       /* Text */
-    --muted: rgb(166, 173, 200);    /* Subtext0 */
-    --border: rgb(69, 71, 90);      /* Surface1 */
-    --card-bg: rgb(24, 24, 37);     /* Mantle */
-    --accent: rgb(203, 166, 247);   /* Mauve */
+    --bg: rgb(30, 30, 46); /* Base */
+    --fg: rgb(205, 214, 244); /* Text */
+    --muted: rgb(166, 173, 200); /* Subtext0 */
+    --border: rgb(69, 71, 90); /* Surface1 */
+    --card-bg: rgb(24, 24, 37); /* Mantle */
+    --accent: rgb(203, 166, 247); /* Mauve */
 
-    --card-border: rgb(49, 50, 68);    /* Surface0 */
+    --card-border: rgb(49, 50, 68); /* Surface0 */
     --label-color: rgb(108, 112, 134); /* Overlay0 */
     --value-color: rgb(186, 194, 222); /* Subtext1 */
-    --stat-fill: rgb(203, 166, 247);   /* Mauve */
-    --stat-track: rgb(49, 50, 68);     /* Surface0 */
+    --stat-fill: rgb(203, 166, 247); /* Mauve */
+    --stat-track: rgb(49, 50, 68); /* Surface0 */
   }
 }
 

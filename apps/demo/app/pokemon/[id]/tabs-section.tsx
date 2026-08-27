@@ -1,4 +1,5 @@
-import { Bones } from "@camp.dev/bones/react";
+import { Suspense } from "react";
+import { forceBones } from "@camp.dev/bones/react";
 import type { PokemonMoveEntry, MoveDetail, EncounterLocation } from "@/lib/pokeapi";
 import { DetailTabs } from "@/components/detail-tabs/detail-tabs";
 import { MovesPanel } from "@/components/moves-panel/moves-panel";
@@ -27,27 +28,27 @@ export function TabsSection({
           id: "moves",
           label: "Moves",
           content: (
-            <Bones>
+            <Suspense fallback={<MovesPanel moves={forceBones} moveDetails={forceBones} />}>
               <MovesPanel moves={moves} moveDetails={moveDetails} />
-            </Bones>
+            </Suspense>
           ),
         },
         {
           id: "dex-entries",
           label: "Dex Entries",
           content: (
-            <Bones>
+            <Suspense fallback={<DexEntriesPanel entries={forceBones} />}>
               <DexEntriesPanel entries={flavorTextEntries} />
-            </Bones>
+            </Suspense>
           ),
         },
         {
           id: "locations",
           label: "Locations",
           content: (
-            <Bones>
+            <Suspense fallback={<LocationsPanel locations={forceBones} />}>
               <LocationsPanel locations={encounters} />
-            </Bones>
+            </Suspense>
           ),
         },
       ]}

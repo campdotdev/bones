@@ -1,4 +1,5 @@
-import { Bones } from "@camp.dev/bones/react";
+import { Suspense } from "react";
+import { forceBones } from "@camp.dev/bones/react";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { delay } from "@/lib/delay";
@@ -115,47 +116,71 @@ export default async function PokemonPage({ params }: { params: Promise<{ id: st
         </Link>
       </div>
 
-      <Bones>
+      <Suspense fallback={<PokemonHero pokemon={forceBones} species={forceBones} />}>
         <PokemonHero pokemon={pokemonPromise} species={speciesPromise} />
-      </Bones>
+      </Suspense>
 
       <div className={styles.bentoGrid}>
         <div className={styles.bentoRow1}>
-          <Bones>
+          <Suspense fallback={<BaseStatsCard pokemon={forceBones} />}>
             <BaseStatsCard pokemon={pokemonPromise} />
-          </Bones>
-          <Bones>
+          </Suspense>
+          <Suspense fallback={<TypeDefenseCard typeDefense={forceBones} />}>
             <TypeDefenseCard typeDefense={typeDefensePromise} />
-          </Bones>
+          </Suspense>
         </div>
 
         <div className={styles.bentoRow2}>
-          <Bones>
+          <Suspense
+            fallback={
+              <InfoCard
+                title="Training"
+                labels={["EV Yield", "Catch Rate", "Base Exp", "Growth"]}
+                rows={forceBones}
+              />
+            }
+          >
             <InfoCard
               title="Training"
               labels={["EV Yield", "Catch Rate", "Base Exp", "Growth"]}
               rows={trainingPromise}
             />
-          </Bones>
-          <Bones>
+          </Suspense>
+          <Suspense
+            fallback={
+              <InfoCard
+                title="Breeding"
+                labels={["Egg Groups", "Gender", "Egg Cycles", "Friendship"]}
+                rows={forceBones}
+              />
+            }
+          >
             <InfoCard
               title="Breeding"
               labels={["Egg Groups", "Gender", "Egg Cycles", "Friendship"]}
               rows={breedingPromise}
             />
-          </Bones>
-          <Bones>
+          </Suspense>
+          <Suspense
+            fallback={
+              <InfoCard
+                title="Pokedex Data"
+                labels={["Species", "Generation", "Habitat", "Shape"]}
+                rows={forceBones}
+              />
+            }
+          >
             <InfoCard
               title="Pokedex Data"
               labels={["Species", "Generation", "Habitat", "Shape"]}
               rows={pokedexPromise}
             />
-          </Bones>
+          </Suspense>
         </div>
 
-        <Bones>
+        <Suspense fallback={<EvolutionChainCard chain={forceBones} currentName={id} />}>
           <EvolutionChainCard chain={evolutionPromise} currentName={id} />
-        </Bones>
+        </Suspense>
       </div>
 
       <TabsSection
