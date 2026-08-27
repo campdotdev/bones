@@ -1,14 +1,7 @@
-import {
-  Suspense,
-  Children,
-  Component,
-  cloneElement,
-  isValidElement,
-  createElement,
-  Fragment,
-} from "react";
+import { Suspense, Children, cloneElement, isValidElement, createElement, Fragment } from "react";
 import type { ReactNode } from "react";
 import { forceBones, getBonesContext, isRequestScopedContext } from "./create-bones.ts";
+import { BonesRecover, type BracketRecord } from "./recover.ts";
 
 // ---------------------------------------------------------------------------
 // BonesStart / BonesEnd — bracket the fallback tree to scope the loading flag
@@ -31,47 +24,11 @@ function BonesEnd(): null {
   return null;
 }
 
-// ---------------------------------------------------------------------------
-// BonesRecover — undo a bracket a thrown child tore open
-//
-// A child that throws between BonesStart and BonesEnd unwinds past BonesEnd,
-// leaving the module context's depth raised for every render that follows the
-// error boundary (the request context cannot leak this way — it dies with its
-// request, which is also why this class is skipped there: class components
-// cannot render in Server Components). On catch, the re-render restores the
-// depth captured before the bracket opened and rethrows for the app's own
-// boundary. The restore lives in render, not componentDidCatch, because a
-// boundary whose render rethrows never commits; the assignment is idempotent,
-// so React re-invoking the render is harmless. A suspended (not thrown)
-// child still bypasses this — error boundaries never see promises.
-// ---------------------------------------------------------------------------
-
-type BracketRecord = { prev: number };
-
-class BonesRecover extends Component<
-  { record: BracketRecord; children: ReactNode },
-  { caught: boolean; error?: unknown }
-> {
-  override state: { caught: boolean; error?: unknown } = { caught: false };
-
-  static getDerivedStateFromError(error: unknown): { caught: boolean; error?: unknown } {
-    return { caught: true, error };
-  }
-
-  override render(): ReactNode {
-    if (this.state.caught) {
-      getBonesContext().depth = this.props.record.prev;
-      throw this.state.error;
-    }
-    return this.props.children;
-  }
-}
-
 function bracket(children: ReactNode): ReactNode {
   const record: BracketRecord = { prev: getBonesContext().depth };
   const guarded = isRequestScopedContext()
     ? children
-    : createElement(BonesRecover, { record }, children);
+    : createElement(BonesRecover, { record, children });
   return createElement(Fragment, null, createElement(BonesStart), guarded, createElement(BonesEnd));
 }
 
