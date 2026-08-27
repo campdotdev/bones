@@ -5,17 +5,21 @@ import { forceBones, getBonesContext } from "./create-bones.ts";
 // ---------------------------------------------------------------------------
 // BonesStart / BonesEnd — bracket the fallback tree to scope the loading flag
 //
-// React renders fragment children in order (depth-first), so BonesStart sets
-// the flag before the skeleton tree renders, and BonesEnd clears it after.
+// React renders fragment children in order (depth-first), so BonesStart runs
+// before the skeleton tree renders and BonesEnd after. Increment/decrement
+// rather than set/clear so nested boundaries restore the outer level instead
+// of clobbering it (BON-11), and so StrictMode's symmetric double render
+// stays balanced.
 // ---------------------------------------------------------------------------
 
 function BonesStart(): null {
-  getBonesContext().loading = true;
+  getBonesContext().depth += 1;
   return null;
 }
 
 function BonesEnd(): null {
-  getBonesContext().loading = false;
+  const context = getBonesContext();
+  if (context.depth > 0) context.depth -= 1;
   return null;
 }
 
