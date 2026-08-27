@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bones — vanilla core demo</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 28rem;
+        margin: 4rem auto;
+        padding: 0 1rem;
+      }
+      .card {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+        border: 1px solid color-mix(in srgb, currentcolor 20%, transparent);
+        border-radius: 8px;
+        padding: 1.25rem;
+      }
+      .card img {
+        border-radius: 50%;
+      }
+      .card h2 {
+        margin: 0 0 0.5rem;
+        font-size: 1.1rem;
+      }
+      .card p {
+        margin: 0.25rem 0;
+        font-size: 0.9rem;
+      }
+      button {
+        margin-top: 1.5rem;
+        font: inherit;
+        padding: 0.4rem 1rem;
+      }
+    </style>
+  </head>
+  <body data-bone-animate="shimmer">
+    <article class="card">
+      <img id="avatar" width="72" height="72" alt="" />
+      <div>
+        <h2 id="name"></h2>
+        <p id="role"></p>
+        <p id="bio"></p>
+      </div>
+    </article>
+    <button id="toggle" type="button">Toggle loading</button>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

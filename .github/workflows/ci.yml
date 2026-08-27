@@ -176,6 +176,58 @@ jobs:
       - name: Run tests
         run: vp run --filter bones-stream test -- --run
 
+  # ── Vanilla demo ───────────────────────────────────────────
+  vanilla-check:
+    name: "Vanilla: Types"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@v1
+        with:
+          cache: true
+
+      - name: Build bones library
+        run: vp run --filter @camp.dev/bones build
+
+      - name: Run type check
+        run: vp run --filter bones-vanilla check
+
+  vanilla-test:
+    name: "Vanilla: Test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@v1
+        with:
+          cache: true
+
+      - name: Build bones library
+        run: vp run --filter @camp.dev/bones build
+
+      - name: Run tests
+        run: vp run --filter bones-vanilla test -- --run
+
+  vanilla-build:
+    name: "Vanilla: Build"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@v1
+        with:
+          cache: true
+
+      - name: Build vanilla demo
+        run: vp run --filter bones-vanilla build
+
   # ── Docs site ──────────────────────────────────────────────
   docs-check:
     name: "Docs: Types"
