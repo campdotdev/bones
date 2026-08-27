@@ -94,14 +94,25 @@ function Dashboard() {
 </div>
 <div>
 
-```tsx title="Bones — no skeletons to maintain"
+```tsx title="Bones — the fallback is the same components"
 function Dashboard() {
+  const user = fetchUser();
+  const stats = fetchStats();
+  const feed = fetchFeed();
   return (
-    <Bones>
-      <UserCard />
-      <Stats />
-      <ActivityFeed />
-    </Bones>
+    <Suspense
+      fallback={
+        <>
+          <UserCard user={forceBones} />
+          <Stats stats={forceBones} />
+          <ActivityFeed feed={forceBones} />
+        </>
+      }
+    >
+      <UserCard user={user} />
+      <Stats stats={stats} />
+      <ActivityFeed feed={feed} />
+    </Suspense>
   );
 }
 ```
@@ -111,9 +122,7 @@ function Dashboard() {
 
 ## How Bones works
 
-`<Bones>` renders the same component tree as its own Suspense fallback. It sets a loading flag via `React.cache()`, and every `createBones()` call in the tree checks that flag. While loading, `bone()` returns HTML attributes that apply skeleton styles with CSS. Once the data resolves, it returns an empty object and your component renders normally.
-
-Why `React.cache()` instead of React Context? A context provider is a client component. Adding `'use client'` to a shared provider defeats the purpose of keeping your components on the server.
+Every `createBones()` call decides between two renders of the same markup. Given data, `bone()` returns an empty object and the component renders normally. Given the `forceBones` sentinel, `bone()` returns HTML attributes that apply skeleton styles with CSS — so a Suspense fallback is just the same component with `forceBones` in the promise's place. Given a pending promise, `createBones` suspends to the nearest boundary. No context, no hooks, no `'use client'`.
 
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 comparison-grid">
 <div>
@@ -121,8 +130,8 @@ Why `React.cache()` instead of React Context? A context provider is a client com
 ```tsx title="PokemonCard.tsx"
 import { createBones } from "@camp.dev/bones/react";
 
-function PokemonCard() {
-  const { bone, data, repeat } = createBones(fetchPokemon());
+function PokemonCard({ pokemon }: { pokemon?: PokemonData | Promise<PokemonData> }) {
+  const { bone, data, repeat } = createBones(pokemon);
 
   return (
     <div className="card">
@@ -161,27 +170,30 @@ Same component, same markup. The skeleton can't get out of sync with the real UI
 
 - Works in Server Components without hooks, context, or `'use client'`.
 - One component handles both loading and loaded states.
-- Pass data or a promise. Bones wires up Suspense for you.
+- Pass data or a promise. A pending promise suspends to your `<Suspense>` boundary; `forceBones` renders the skeleton.
 - Skeletons are pure CSS, themed with custom properties.
 - Loading elements get `aria-busy="true"` automatically.
 
 ## Nested and independent loading
 
-All components inside a `<Bones>` boundary show skeletons until the slowest promise resolves. If you want components to load independently, wrap each one in its own `<Bones>`:
+All components inside one `<Suspense>` boundary show skeletons until the slowest promise resolves. If you want components to load independently, give each one its own boundary:
 
 ```tsx
 function Dashboard() {
+  const user = fetchUser();
+  const stats = fetchStats();
+  const feed = fetchFeed();
   return (
     <>
-      <Bones>
-        <UserCard />
-      </Bones>
-      <Bones>
-        <Stats />
-      </Bones>
-      <Bones>
-        <ActivityFeed />
-      </Bones>
+      <Suspense fallback={<UserCard user={forceBones} />}>
+        <UserCard user={user} />
+      </Suspense>
+      <Suspense fallback={<Stats stats={forceBones} />}>
+        <Stats stats={stats} />
+      </Suspense>
+      <Suspense fallback={<ActivityFeed feed={forceBones} />}>
+        <ActivityFeed feed={feed} />
+      </Suspense>
     </>
   );
 }
@@ -251,8 +263,8 @@ function Page() {
 <div>
 
 ```tsx title="Bones — single code path"
-function PokemonCard() {
-  const { bone, data, repeat } = createBones(fetchPokemon());
+function PokemonCard({ pokemon }: { pokemon?: PokemonData | Promise<PokemonData> }) {
+  const { bone, data, repeat } = createBones(pokemon);
 
   return (
     <div className="card">
@@ -267,12 +279,12 @@ function PokemonCard() {
   );
 }
 
-// Page.tsx — no loading prop, no separate fallback
+// Page.tsx — the fallback is the same component
 function Page() {
   return (
-    <Bones>
-      <PokemonCard />
-    </Bones>
+    <Suspense fallback={<PokemonCard pokemon={forceBones} />}>
+      <PokemonCard pokemon={fetchPokemon()} />
+    </Suspense>
   );
 }
 ```

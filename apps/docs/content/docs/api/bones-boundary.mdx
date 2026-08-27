@@ -139,7 +139,7 @@ function Profile({ loading, user }: { loading: boolean; user?: User }) {
 | `onShow`      | `bones:show`   | Listener. Passing a function from a server component is an error, as with `onClick`. |
 | `onHide`      | `bones:hide`   | Same.                                                                                |
 
-The wrapper uses no hooks, so it renders inside server components. `<Bones>` and Suspense do not need it: the Suspense fallback renders `data-bone` markup that the stylesheet styles on its own.
+The wrapper uses no hooks, so it renders inside server components. Suspense does not need it: a fallback built from the same components with `forceBones` renders `data-bone` markup that the stylesheet styles on its own.
 
 The wrapper normally leaves the output attributes to the element. When `force` is true, it renders `aria-busy` and `inert` so the server paints bones, and React then owns those two attributes and removes them on a later update. The element writes them back while bones are showing. The wrapper also sets `suppressHydrationWarning`, so a boundary that already shows bones by the time React hydrates it is not reported as a mismatch.
 

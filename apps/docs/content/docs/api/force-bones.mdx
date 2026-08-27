@@ -7,7 +7,7 @@ description: Sentinel value for forcing skeleton mode on individual components.
 import { forceBones } from "@camp.dev/bones/react";
 ```
 
-`forceBones` is a frozen empty object typed as `Promise<never>`. Pass it as data to `createBones` to trigger skeleton mode for a single component without a Suspense boundary or `<BonesForce>` wrapper.
+`forceBones` is a frozen empty object typed as `Promise<never>`. Pass it in place of a data promise to render a component's skeleton state — in a Suspense fallback, a Storybook story, or a test.
 
 ## Usage
 
@@ -27,13 +27,24 @@ function UserCard({ user }: { user: Promise<User> }) {
 <UserCard user={forceBones} />;
 ```
 
+## Suspense fallbacks
+
+The fallback is the same component with `forceBones` where the pending prop goes. It renders `data-bone` markup that the stylesheet styles — no client JavaScript involved:
+
+```tsx
+<Suspense fallback={<UserCard user={forceBones} />}>
+  <UserCard user={fetchUser()} />
+</Suspense>
+```
+
 ## How it works
 
-`createBones` checks for `forceBones` by identity (`===`). When matched, it sets `isLoading = true` and `data = undefined` without throwing a promise or reading the loading context.
+`createBones` checks for `forceBones` by identity (`===`). When matched, it sets `isLoading = true` and `data = undefined` without throwing a promise.
 
 Typed as `Promise<never>` so it's assignable to any `Promise<T>` prop.
 
 ## When to use
 
-- Force skeleton mode on a single component (use `<BonesForce>` for an entire subtree).
-- Used internally by `<Bones>` to swap promise props in the Suspense fallback.
+- Preview a skeleton without real data.
+- Build a Suspense fallback from the real component.
+- Force a subtree by passing `forceBones` to each component in it. For unmarked content, use [`<bones-boundary force>`](/api/bones-boundary) instead.

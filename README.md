@@ -34,7 +34,7 @@ import "@camp.dev/bones/css";
 
 | Import                     | Contents                                                                                                                                                                                                                   |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@camp.dev/bones/react`    | `createBones`, `readPromise`, `forceBones`, `minMax`, `<Bones>`, `<BonesForce>`                                                                                                                                            |
+| `@camp.dev/bones/react`    | `createBones`, `readPromise`, `forceBones`, `minMax`, `BonesBoundary`                                                                                                                                                      |
 | `@camp.dev/bones/css`      | The skeleton stylesheet. Import once in your root layout.                                                                                                                                                                  |
 | `@camp.dev/bones/auto.css` | Skeletonizes unmarked leaves under `aria-busy="true"`. Imports the base stylesheet itself, so a separate `/css` import is optional.                                                                                        |
 | `@camp.dev/bones/element`  | `<bones-boundary>`, a custom element that sets `aria-busy` and `inert` on its subtree with `delay`, `min-duration`, and a crossfade. `precision="measured"` draws pixel-accurate per-line bones measured from the content. |
@@ -65,21 +65,23 @@ function ProfileCard({ user }: { user: Promise<User> | User }) {
 }
 ```
 
-Wrap components that receive promises in `<Bones>`. It creates a Suspense boundary and generates the skeleton fallback for you:
+Pass the promise to the component, and reuse the same component with `forceBones` as the fallback:
 
 ```tsx
-import { Bones } from "@camp.dev/bones/react";
+import { forceBones } from "@camp.dev/bones/react";
+import { Suspense } from "react";
 
 export default function Page() {
+  const user = fetchUser();
   return (
-    <Bones>
-      <ProfileCard user={fetchUser()} />
-    </Bones>
+    <Suspense fallback={<ProfileCard user={forceBones} />}>
+      <ProfileCard user={user} />
+    </Suspense>
   );
 }
 ```
 
-While the promise is pending, `<Bones>` renders the same `<ProfileCard>` tree with skeletons visible. Once it resolves, the real content swaps in.
+While the promise is pending, the fallback renders `<ProfileCard>` with skeletons visible. Once it resolves, the real content swaps in. There is no separate skeleton component to keep in sync — the fallback is the component.
 
 ## Bone types
 
@@ -99,16 +101,14 @@ import { createBones, forceBones } from "@camp.dev/bones/react";
 <ProfileCard user={forceBones} />;
 ```
 
-To force an entire subtree into skeleton mode at once, wrap it with `<BonesForce>`:
+To force a subtree into skeleton mode at once, pass `forceBones` to each component in it:
 
 ```tsx
-import { BonesForce } from "@camp.dev/bones/react";
-
-<BonesForce>
-  <ProfileCard />
-  <PostList />
-</BonesForce>;
+<ProfileCard user={forceBones} />
+<PostList posts={forceBones} />
 ```
+
+For content that has no bone markup at all, wrap it in [`<bones-boundary force>`](apps/docs/content/docs/api/bones-boundary.mdx) and let `auto.css` draw leaf bones.
 
 ## Automatic skeletons
 
