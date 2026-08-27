@@ -25,11 +25,6 @@ jobs:
         with:
           cache: true
 
-      - name: Setup npm registry
-        uses: actions/setup-node@v7
-        with:
-          registry-url: "https://registry.npmjs.org"
-
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
