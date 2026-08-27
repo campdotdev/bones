@@ -8,13 +8,45 @@ export { minMax, isMinMax } from "../core/attributes.ts";
 export type { BoneOptions, BoneType, MinMax };
 
 // ---------------------------------------------------------------------------
-// Server-safe loading context via React.cache
+// Loading context: React.cache per request, with a module fallback
 //
-// cache() returns the same value per request (server) or per render (client),
-// so a flag set by a parent is visible to all descendants in the same pass.
+// cache() memoizes per request only inside React Server Components. In client
+// renders and non-RSC server rendering it returns a fresh value per call, so
+// a flag set by a parent would be written to an object no descendant ever
+// reads (BON-14). Calling the getter twice tells the two worlds apart:
+// identical objects mean a request-scoped context (safe under concurrent
+// requests), different objects mean the passthrough, where a module-level
+// context is the sharing mechanism — fine because those render passes are
+// synchronous, with brackets balanced within the pass.
+//
+// `depth` instead of a boolean so boundaries nest (BON-11): an inner
+// boundary's end decrements back to the outer boundary's level instead of
+// clearing the flag for the outer boundary's later siblings. A counter also
+// survives StrictMode's double render, which invokes each bracket twice.
 // ---------------------------------------------------------------------------
 
-export const getBonesContext = cache(() => ({ loading: false }));
+type BonesContext = { depth: number; readonly loading: boolean };
+
+function createBonesContext(): BonesContext {
+  return {
+    depth: 0,
+    get loading() {
+      return this.depth > 0;
+    },
+  };
+}
+
+const moduleContext = createBonesContext();
+const getRequestContext = cache(createBonesContext);
+
+export function getBonesContext(): BonesContext {
+  const context = getRequestContext();
+  return context === getRequestContext() ? context : moduleContext;
+}
+
+export function isRequestScopedContext(): boolean {
+  return getRequestContext() === getRequestContext();
+}
 
 function withKey(node: ReactNode, key: string | number): ReactNode {
   return isValidElement(node) ? cloneElement(node, { key }) : node;
