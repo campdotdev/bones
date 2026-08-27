@@ -1,6 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
+import { Component, type ReactNode } from "react";
 import { renderToString } from "react-dom/server";
-import { afterEach, expect, test } from "vite-plus/test";
+import { afterEach, expect, test, vi } from "vite-plus/test";
 import { Bones, BonesForce } from "../src/react/bones.ts";
 import { createBones } from "../src/react/create-bones.ts";
 
@@ -64,6 +65,40 @@ test("the flag clears after the boundary", () => {
   );
   expect(screen.getByTestId("inside").getAttribute("data-bone")).toBe("text");
   expect(screen.getByTestId("outside").getAttribute("data-bone")).toBeNull();
+});
+
+test("a child that throws inside BonesForce does not leak the flag", () => {
+  class Catcher extends Component<
+    { children: ReactNode; fallback: ReactNode },
+    { caught: boolean }
+  > {
+    override state = { caught: false };
+    static getDerivedStateFromError() {
+      return { caught: true };
+    }
+    override render() {
+      return this.state.caught ? this.props.fallback : this.props.children;
+    }
+  }
+  function Bomb(): never {
+    throw new Error("boom");
+  }
+  const silenced = vi.spyOn(console, "error").mockImplementation(() => {});
+  try {
+    render(
+      <>
+        <Catcher fallback={<p>failed</p>}>
+          <BonesForce>
+            <Bomb />
+          </BonesForce>
+        </Catcher>
+        <Card id="after" data={user} />
+      </>,
+    );
+  } finally {
+    silenced.mockRestore();
+  }
+  expect(screen.getByTestId("after").getAttribute("data-bone")).toBeNull();
 });
 
 test("a later sibling of a nested Bones keeps its skeleton in the outer fallback", () => {

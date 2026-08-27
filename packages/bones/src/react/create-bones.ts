@@ -44,6 +44,10 @@ export function getBonesContext(): BonesContext {
   return context === getRequestContext() ? context : moduleContext;
 }
 
+export function isRequestScopedContext(): boolean {
+  return getRequestContext() === getRequestContext();
+}
+
 function withKey(node: ReactNode, key: string | number): ReactNode {
   return isValidElement(node) ? cloneElement(node, { key }) : node;
 }
