@@ -25,6 +25,25 @@ describe("applyBone", () => {
 });
 
 describe("clearBone", () => {
+  test("removes the placeholder src from a block bone", () => {
+    const img = document.createElement("img");
+    applyBone(img, boneAttributes("block"));
+
+    clearBone(img);
+
+    expect(img.hasAttribute("src")).toBe(false);
+  });
+
+  test("leaves a real src alone", () => {
+    const img = document.createElement("img");
+    applyBone(img, boneAttributes("block"));
+    img.src = "https://example.com/avatar.png";
+
+    clearBone(img);
+
+    expect(img.src).toBe("https://example.com/avatar.png");
+  });
+
   test("removes everything applyBone set", () => {
     const heading = document.createElement("h2");
     applyBone(heading, boneAttributes("text", { length: 10 }));

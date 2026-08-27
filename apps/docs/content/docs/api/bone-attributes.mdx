@@ -25,7 +25,11 @@ A card skeleton with no framework. A small helper copies the returned attributes
 </article>
 
 <script type="module">
-  import { boneAttributes, minMax } from "https://unpkg.com/@camp.dev/bones/dist/index.mjs";
+  import {
+    boneAttributes,
+    minMax,
+    TRANSPARENT_PIXEL,
+  } from "https://unpkg.com/@camp.dev/bones/dist/index.mjs";
 
   function applyBone(el, attrs) {
     el.setAttribute("data-bone", attrs["data-bone"]);
@@ -39,6 +43,7 @@ A card skeleton with no framework. A small helper copies the returned attributes
   function clearBone(el) {
     el.removeAttribute("data-bone");
     el.removeAttribute("aria-busy");
+    if (el.getAttribute("src") === TRANSPARENT_PIXEL) el.removeAttribute("src");
     el.style.removeProperty("--bone-length");
     el.style.removeProperty("--bone-contained");
   }
@@ -124,6 +129,7 @@ interface BoneAttributes {
   style?: Record<string, number>;
 }
 
+// Also carries a private symbol brand: only minMax() creates one.
 interface MinMax {
   readonly min: number;
   readonly max: number;
