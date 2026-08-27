@@ -9,6 +9,7 @@ Pass a promise to the component and reuse it, fed `forceBones`, as the fallback.
 
 ```tsx
 import { createBones, forceBones } from "@camp.dev/bones/react";
+import { Suspense } from "react";
 
 async function fetchUser(): Promise<User> {
   const res = await fetch("/api/user");

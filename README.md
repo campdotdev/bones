@@ -14,7 +14,7 @@ Bones skips the duplication. You write your markup once and it handles both stat
 
 - Works in Server Components. No hooks, no context, no `'use client'`.
 - One component handles both loading and loaded states.
-- Pass a promise as a prop. Bones wires up Suspense for you.
+- Pass data or a promise. A pending promise suspends to your `<Suspense>` boundary; `forceBones` renders the skeleton.
 - Skeletons are pure CSS, themed with custom properties.
 - Loading elements get `aria-busy="true"` automatically.
 
