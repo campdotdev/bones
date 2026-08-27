@@ -44,7 +44,7 @@
       select *,
       object *
     ) {
-    color: rgb(from currentColor r g b / 0);
+    color: rgb(from currentcolor r g b / 0);
     position: relative;
     min-width: 4ch;
     min-height: 1lh;
@@ -144,7 +144,7 @@
       progress,
       meter
     ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
-    color: rgb(from currentColor r g b / 0);
+    color: rgb(from currentcolor r g b / 0);
     background-color: var(--bone-base);
     border-radius: var(--bone-radius);
     border-color: transparent;
