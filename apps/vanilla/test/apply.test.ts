@@ -1,7 +1,7 @@
 import { boneAttributes, TRANSPARENT_PIXEL } from "@camp.dev/bones";
 import { describe, expect, test } from "vite-plus/test";
 
-import { applyBone, clearBone } from "../src/apply.ts";
+import { applyBone, clearBone, lineBones } from "../src/apply.ts";
 
 describe("applyBone", () => {
   test("marks a text bone with its length on the element", () => {
@@ -21,6 +21,23 @@ describe("applyBone", () => {
 
     expect(img.getAttribute("data-bone")).toBe("block");
     expect(img.getAttribute("src")).toBe(TRANSPARENT_PIXEL);
+  });
+});
+
+describe("lineBones", () => {
+  test("fills the element with one text bone per line", () => {
+    const paragraph = document.createElement("p");
+    paragraph.textContent = "stale content";
+
+    lineBones(paragraph, 3);
+
+    const spans = paragraph.querySelectorAll("span[data-bone-line]");
+    expect(spans).toHaveLength(3);
+    expect(paragraph.childNodes).toHaveLength(3);
+    for (const span of spans) {
+      expect(span.getAttribute("data-bone")).toBe("text");
+      expect(span.getAttribute("aria-busy")).toBe("true");
+    }
   });
 });
 

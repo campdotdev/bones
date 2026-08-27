@@ -1,7 +1,7 @@
 import { boneAttributes, minMax } from "@camp.dev/bones";
 import "@camp.dev/bones/css";
 
-import { applyBone, clearBone } from "./apply.ts";
+import { applyBone, clearBone, lineBones } from "./apply.ts";
 
 const AVATAR =
   "data:image/svg+xml," +
@@ -17,7 +17,8 @@ const profile = {
 };
 
 const avatar = document.querySelector("img")!;
-const fields = ["name", "role", "bio"] as const;
+const bio = document.getElementById("bio")!;
+const fields = ["name", "role"] as const;
 const text = fields.map((id, index) => ({
   el: document.getElementById(id)!,
   attrs: boneAttributes("text", { length: minMax(12, 32) }, index),
@@ -32,6 +33,8 @@ function render() {
       el.textContent = "";
       applyBone(el, attrs);
     }
+    // The bio wraps, so it gets one bar per expected line.
+    lineBones(bio, 2);
   } else {
     clearBone(avatar);
     avatar.src = profile.avatar;
@@ -39,6 +42,7 @@ function render() {
       clearBone(el);
       el.textContent = profile[fields[index]];
     }
+    bio.textContent = profile.bio;
   }
 }
 

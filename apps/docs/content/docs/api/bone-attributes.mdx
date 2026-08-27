@@ -48,22 +48,34 @@ A card skeleton with no framework. A small helper copies the returned attributes
     el.style.removeProperty("--bone-contained");
   }
 
+  function lineBones(el, count) {
+    el.replaceChildren();
+    for (let i = 0; i < count; i++) {
+      const span = document.createElement("span");
+      span.setAttribute("data-bone-line", "");
+      applyBone(span, boneAttributes("text"));
+      el.append(span);
+    }
+  }
+
   const avatar = document.getElementById("avatar");
   const name = document.getElementById("name");
   const bio = document.getElementById("bio");
 
   applyBone(avatar, boneAttributes("block"));
-  applyBone(name, boneAttributes("text", { length: 12 }));
-  applyBone(bio, boneAttributes("text", { length: minMax(18, 28) }, 1));
+  applyBone(name, boneAttributes("text", { length: minMax(8, 16) }));
+  lineBones(bio, 2);
 
   const profile = await (await fetch("/api/profile")).json();
 
-  for (const el of [avatar, name, bio]) clearBone(el);
+  for (const el of [avatar, name]) clearBone(el);
   avatar.src = profile.avatar;
   name.textContent = profile.name;
   bio.textContent = profile.bio;
 </script>
 ```
+
+The bio wraps, so a single text bone would draw one bar where the loaded text takes two lines. `lineBones` gives the paragraph one child `<span data-bone-line>` per expected line, each carrying the text-bone attributes. The stylesheet displays each span as its own bar and shortens the last one. Writing `textContent` replaces the spans, so the paragraph needs no `clearBone`. This is the markup the React entry's `lines()` helper renders.
 
 The repository runs this example as an app: `apps/vanilla` imports the same functions from the workspace build. Start it with `vp run --filter bones-vanilla dev`.
 
