@@ -110,13 +110,41 @@ video[data-bone="block"] {
   }
 }
 
+/* Marked bones shimmer by default, the same as auto bones and the measured
+   overlay (BON-16). data-bone-animate="none" is the opt-out; the @scope
+   blocks below override this at higher specificity, so their order relative
+   to this rule does not matter. */
+[data-bone="text"]::after,
+[data-bone="block"],
+[data-bone="container"]::before {
+  animation: bone-shimmer var(--bone-duration) ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    var(--bone-base) 25%,
+    var(--bone-highlight) 50%,
+    var(--bone-base) 75%
+  );
+  background-size: 200% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-bone="text"]::after,
+  [data-bone="block"],
+  [data-bone="container"]::before {
+    animation: bone-pulse 2s ease-in-out infinite;
+    background: var(--bone-base);
+    background-size: auto;
+  }
+}
+
 /* :is(:scope, :scope *) lets the attribute work from the bone itself, not
    only from a wrapper: a scoped selector's implicit :scope prefix matches
    strict descendants only, so a plain compound never matches the scope root
-   (BON-17). */
+   (BON-17). The reduced-motion override sits inside each animated scope so it
+   matches at the scope's own specificity; "none" has no override because none
+   still means none. */
 @scope ([data-bone-animate="shimmer"]) to ([data-bone-animate]:not([data-bone-animate="shimmer"])) {
   [data-bone="text"]:is(:scope, :scope *)::after,
-  [data-bone="text"]:is(:scope, :scope *)::before,
   [data-bone="block"]:is(:scope, :scope *),
   [data-bone="container"]:is(:scope, :scope *)::before {
     animation: bone-shimmer var(--bone-duration) ease-in-out infinite;
@@ -128,32 +156,42 @@ video[data-bone="block"] {
     );
     background-size: 200% 100%;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-bone="text"]:is(:scope, :scope *)::after,
+    [data-bone="block"]:is(:scope, :scope *),
+    [data-bone="container"]:is(:scope, :scope *)::before {
+      animation: bone-pulse 2s ease-in-out infinite;
+      background: var(--bone-base);
+      background-size: auto;
+    }
+  }
 }
 
 @scope ([data-bone-animate="pulse"]) to ([data-bone-animate]:not([data-bone-animate="pulse"])) {
   [data-bone="text"]:is(:scope, :scope *)::after,
-  [data-bone="text"]:is(:scope, :scope *)::before,
   [data-bone="block"]:is(:scope, :scope *),
   [data-bone="container"]:is(:scope, :scope *)::before {
     animation: bone-pulse var(--bone-duration) ease-in-out infinite;
     background: var(--bone-base);
     background-size: auto;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-bone="text"]:is(:scope, :scope *)::after,
+    [data-bone="block"]:is(:scope, :scope *),
+    [data-bone="container"]:is(:scope, :scope *)::before {
+      animation: bone-pulse 2s ease-in-out infinite;
+    }
+  }
 }
 
 @scope ([data-bone-animate="none"]) to ([data-bone-animate]:not([data-bone-animate="none"])) {
   [data-bone="text"]:is(:scope, :scope *)::after,
-  [data-bone="text"]:is(:scope, :scope *)::before,
   [data-bone="block"]:is(:scope, :scope *),
   [data-bone="container"]:is(:scope, :scope *)::before {
     animation: none;
     background: var(--bone-base);
     background-size: auto;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  [aria-busy="true"] {
-    animation: bone-pulse 2s ease-in-out infinite;
   }
 }

@@ -58,19 +58,20 @@ One case needs a manual override: text that depends on its background for contra
 
 ## Animations
 
-Add `data-bone-animate` to an element to animate the bones inside it. The attribute also works on a bone itself and on the `aria-busy` element of an automatic region.
+Bones shimmer by default. Set `data-bone-animate` on an element to change the animation for the bones inside it. The attribute also works on a bone itself and on the `aria-busy` element of an automatic region.
 
-- `shimmer` - horizontal highlight sweep
+- `shimmer` - horizontal highlight sweep (the default)
 - `pulse` - gentle opacity fade (also kicks in automatically for `prefers-reduced-motion: reduce`)
+- `none` - no animation
 
 ```tsx
-{/* Animate a section */}
-<div data-bone-animate="shimmer">
+{/* Pulse one section */}
+<div data-bone-animate="pulse">
   <UserCard user={fetchUser()} />
 </div>
 
-{/* Animate the entire app */}
-<body data-bone-animate="shimmer">
+{/* Keep every skeleton in the app still */}
+<body data-bone-animate="none">
 ```
 
 Speed is controlled by `--bone-duration`. Shimmer colors use `--bone-base` and `--bone-highlight`.
@@ -78,5 +79,5 @@ Speed is controlled by `--bone-duration`. Shimmer colors use `--bone-base` and `
 ## Accessibility
 
 - Skeleton elements get `aria-busy="true"` automatically.
-- `pulse` animation activates for users who prefer reduced motion.
+- `pulse` replaces `shimmer` for users who prefer reduced motion. `none` stays still.
 - Skeleton pseudo-elements have `pointer-events: none`.
