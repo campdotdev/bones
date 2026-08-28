@@ -9,8 +9,9 @@ export function AnimationsDemo() {
       title="Animations"
       description={
         <>
-          Add <code>data-bone-animate</code> to any parent element. Set it on{" "}
-          <code>&lt;body&gt;</code> for app-wide animation, or scope it to individual sections.
+          Bones shimmer by default. Set <code>data-bone-animate</code> on any parent element to
+          switch to <code>pulse</code> or <code>none</code>. Use it on <code>&lt;body&gt;</code> for
+          the whole app, or scope it to individual sections.
         </>
       }
     >

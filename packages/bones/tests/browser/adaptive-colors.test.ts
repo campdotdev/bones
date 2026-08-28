@@ -23,14 +23,19 @@ function mount(html: string): HTMLElement {
 const DARK_PAGE_TEXT = "color: rgb(238, 238, 238)";
 
 test("text bone bar derives from the inherited text color", () => {
-  const root = mount(`<div style="${DARK_PAGE_TEXT}"><span data-bone="text">hidden</span></div>`);
+  // Marked bones shimmer by default (BON-16). The data-bone-animate="none"
+  // wrapper collapses the gradient to a solid background-color; without it
+  // the bar's paint lives in background-image.
+  const root = mount(
+    `<div data-bone-animate="none" style="${DARK_PAGE_TEXT}"><span data-bone="text">hidden</span></div>`,
+  );
   const bar = getComputedStyle(root.querySelector("span")!, "::after");
   expectColor(bar.backgroundColor, [238, 238, 238, 0.12]);
 });
 
 test("image block bone hides its alt text but keeps the inherited channels", () => {
   const root = mount(
-    `<div style="color: rgb(51, 51, 51)"><img data-bone="block" alt="avatar" width="48" height="48" /></div>`,
+    `<div data-bone-animate="none" style="color: rgb(51, 51, 51)"><img data-bone="block" alt="avatar" width="48" height="48" /></div>`,
   );
   const img = getComputedStyle(root.querySelector("img")!);
   // Alt text stays invisible…
@@ -40,9 +45,6 @@ test("image block bone hides its alt text but keeps the inherited channels", () 
 });
 
 test("auto.css text leaf bar derives from the inherited text color", () => {
-  // The data-bone-animate="none" wrapper collapses the shimmer gradient to a
-  // solid background-color; without it the bar's paint lives in
-  // background-image.
   const root = mount(
     `<div data-bone-animate="none"><section aria-busy="true" style="${DARK_PAGE_TEXT}"><p>some copy</p></section></div>`,
   );
@@ -61,7 +63,7 @@ test("auto.css block bone derives from the inherited text color", () => {
 test("default text color keeps today's black-at-12% bones", () => {
   // Chromium's default color is black, so pages that never set a color get
   // exactly the value the library shipped before the derivation change.
-  const root = mount(`<div><span data-bone="text">hidden</span></div>`);
+  const root = mount(`<div data-bone-animate="none"><span data-bone="text">hidden</span></div>`);
   const bar = getComputedStyle(root.querySelector("span")!, "::after");
   expectColor(bar.backgroundColor, [0, 0, 0, 0.12]);
 });

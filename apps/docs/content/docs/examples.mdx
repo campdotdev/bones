@@ -157,7 +157,7 @@ function TagList({ pokemon }: { pokemon: Promise<Pokemon> }) {
 
 ## Skeleton animations
 
-Skeletons are static by default. Add `data-bone-animate` to an element to animate the bones inside it. The attribute also works on a bone itself and on the `aria-busy` element of an automatic region.
+Skeletons shimmer by default. Set `data-bone-animate` on an element to change the animation for the bones inside it, or to `none` to keep them still. The attribute also works on a bone itself and on the `aria-busy` element of an automatic region.
 
 ### Shimmer
 
@@ -183,10 +183,10 @@ Bones uses `pulse` automatically when `prefers-reduced-motion: reduce` is active
 
 ### Global animation
 
-Set it on `<body>` to animate every skeleton in your app:
+Set it on `<body>` to change every skeleton in your app:
 
 ```tsx
-<body data-bone-animate="shimmer">
+<body data-bone-animate="pulse">
 ```
 
 Individual sections can override the global animation:
