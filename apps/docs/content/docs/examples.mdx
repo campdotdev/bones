@@ -5,10 +5,11 @@ description: Common patterns for using bones.
 
 ## Suspense streaming
 
-Pass a promise to a component wrapped in `<Bones>`.
+Pass a promise to the component and reuse it, fed `forceBones`, as the fallback.
 
 ```tsx
-import { Bones, createBones } from "@camp.dev/bones/react";
+import { createBones, forceBones } from "@camp.dev/bones/react";
+import { Suspense } from "react";
 
 async function fetchUser(): Promise<User> {
   const res = await fetch("/api/user");
@@ -16,10 +17,11 @@ async function fetchUser(): Promise<User> {
 }
 
 export default function Page() {
+  const user = fetchUser();
   return (
-    <Bones>
-      <UserCard user={fetchUser()} />
-    </Bones>
+    <Suspense fallback={<UserCard user={forceBones} />}>
+      <UserCard user={user} />
+    </Suspense>
   );
 }
 
@@ -40,10 +42,10 @@ function UserCard({ user }: { user: Promise<User> }) {
 
 ## Forced skeletons
 
-`<BonesForce>` shows skeleton states without real data:
+`forceBones` shows skeleton states without real data:
 
 ```tsx
-import { BonesForce } from "@camp.dev/bones/react";
+import { forceBones } from "@camp.dev/bones/react";
 
 function SkeletonDemo() {
   return (
@@ -52,9 +54,7 @@ function SkeletonDemo() {
       <UserCard user={Promise.resolve(mockUser)} />
 
       {/* Skeleton state */}
-      <BonesForce>
-        <UserCard />
-      </BonesForce>
+      <UserCard user={forceBones} />
     </div>
   );
 }
@@ -165,9 +165,7 @@ A horizontal highlight sweep:
 
 ```tsx
 <div data-bone-animate="shimmer">
-  <Bones>
-    <UserCard user={fetchUser()} />
-  </Bones>
+  <UserCard user={forceBones} />
 </div>
 ```
 
@@ -177,9 +175,7 @@ A gentle opacity fade:
 
 ```tsx
 <div data-bone-animate="pulse">
-  <Bones>
-    <UserCard user={fetchUser()} />
-  </Bones>
+  <UserCard user={forceBones} />
 </div>
 ```
 

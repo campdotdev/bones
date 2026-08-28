@@ -7,7 +7,7 @@ import type { BonesBoundary as BonesBoundaryElement } from "../element/boundary.
 // ---------------------------------------------------------------------------
 // <BonesBoundary> — typed wrapper for the <bones-boundary> element
 //
-// No hooks, so it renders inside server components like <Bones> does. The
+// No hooks, so it renders inside server components. The
 // attribute names are spelled out because React 19 serializes unknown props
 // on a custom element by their prop name, and the element observes
 // `min-duration`, not `minDuration`. Event props use React 19's rule for

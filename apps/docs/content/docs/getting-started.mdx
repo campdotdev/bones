@@ -41,21 +41,23 @@ function ProfileCard({ user }: { user: Promise<User> | User }) {
 
 ## Add a Suspense boundary
 
-Wrap components that receive promises in `<Bones>`. It creates a Suspense boundary and generates the skeleton fallback for you:
+Pass the promise to the component, and reuse the same component with `forceBones` as the fallback:
 
 ```tsx
-import { Bones } from "@camp.dev/bones/react";
+import { forceBones } from "@camp.dev/bones/react";
+import { Suspense } from "react";
 
 export default function Page() {
+  const user = fetchUser();
   return (
-    <Bones>
-      <ProfileCard user={fetchUser()} />
-    </Bones>
+    <Suspense fallback={<ProfileCard user={forceBones} />}>
+      <ProfileCard user={user} />
+    </Suspense>
   );
 }
 ```
 
-While the promise is pending, `<Bones>` renders the same `<ProfileCard>` tree with skeletons visible. Once it resolves, the real content swaps in.
+While the promise is pending, the fallback renders `<ProfileCard>` with skeletons visible. Once it resolves, the real content swaps in. There is no separate skeleton component to keep in sync — the fallback is the component.
 
 ## Bone types
 
@@ -76,15 +78,4 @@ import { createBones, forceBones } from "@camp.dev/bones/react";
 <ProfileCard user={forceBones} />;
 ```
 
-To force an entire subtree into skeleton mode at once, wrap it with `<BonesForce>`:
-
-```tsx
-import { BonesForce } from "@camp.dev/bones/react";
-
-<BonesForce>
-  <ProfileCard />
-  <PostList />
-</BonesForce>;
-```
-
-Neither approach needs a Suspense boundary or async data. Just render and you'll see skeletons immediately. Useful for tweaking styles or demoing loading states in Storybook.
+For content that has no bone markup at all, wrap it in [`<bones-boundary force>`](/api/bones-boundary) and let `auto.css` draw leaf bones. No Suspense boundary or async data required either way — render and you'll see skeletons immediately, which is what you want in Storybook or a visual test.

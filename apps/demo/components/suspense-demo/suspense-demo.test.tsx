@@ -19,9 +19,7 @@ afterEach(cleanup);
 describe("SuspenseDemo", () => {
   test("renders the section title", () => {
     render(<SuspenseDemo />);
-    expect(screen.getByRole("heading", { level: 2 }).textContent).toBe(
-      "Streaming with Suspense",
-    );
+    expect(screen.getByRole("heading", { level: 2 }).textContent).toBe("Streaming with Suspense");
   });
 
   test("renders pokemon names", () => {

@@ -1,4 +1,4 @@
-import { BonesForce } from "@camp.dev/bones/react";
+import { forceBones } from "@camp.dev/bones/react";
 import { fetchPokemonList } from "@/lib/pokeapi";
 import { DemoSection } from "@/components/demo-section/demo-section";
 import { PokemonGrid } from "@/components/pokemon-grid/pokemon-grid";
@@ -10,15 +10,9 @@ export async function ForcedSkeletonsDemo() {
   return (
     <DemoSection
       title="Forced Skeletons"
-      description="Wrap with BonesForce to force skeleton mode. Toggle to see the same loaded cards switch to skeletons."
+      description="Pass forceBones as a component's data to force its skeleton state. Toggle to see the same loaded cards switch to skeletons."
     >
-      <SkeletonToggle
-        skeleton={
-          <BonesForce>
-            <PokemonGrid />
-          </BonesForce>
-        }
-      >
+      <SkeletonToggle skeleton={<PokemonGrid pokemon={forceBones} />}>
         <PokemonGrid pokemon={pokemon} />
       </SkeletonToggle>
     </DemoSection>
