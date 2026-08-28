@@ -2,7 +2,7 @@
 "@camp.dev/bones": minor
 ---
 
-The React entry no longer ships skeleton components. `<bones-boundary>` is the one skeleton component. React keeps helpers only: `createBones`, `forceBones`, `readPromise`, `minMax`, `isMinMax`, and the `BonesBoundary` wrapper.
+`<bones-boundary>` is now the sole skeleton component. The React entry removes `<Bones>` and `<BonesForce>` and keeps `createBones`, `forceBones`, `readPromise`, `minMax`, `isMinMax`, and the `BonesBoundary` wrapper for `<bones-boundary>`.
 
 `<Bones>` is gone. Write the Suspense boundary yourself. Pass `forceBones` where the fallback needs a pending prop:
 
