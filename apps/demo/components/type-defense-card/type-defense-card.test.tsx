@@ -1,8 +1,7 @@
+import { forceBones } from "@camp.dev/bones/react";
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, test, vi } from "vite-plus/test";
+import { afterEach, describe, expect, test } from "vite-plus/test";
 import { TypeDefenseCard } from "./type-defense-card";
-
-vi.mock("bones", async () => (await import("@/test/mocks")).bonesWithDataMockFactory());
 
 afterEach(cleanup);
 
@@ -45,5 +44,15 @@ describe("TypeDefenseCard", () => {
     render(<TypeDefenseCard typeDefense={withImmunity} />);
     expect(screen.getByText(/ghost/i)).toBeDefined();
     expect(screen.getByText("Immune to")).toBeDefined();
+  });
+
+  test("renders placeholder groups under forceBones", () => {
+    const { container } = render(<TypeDefenseCard typeDefense={forceBones} />);
+    expect(screen.getByText("Weak to")).toBeDefined();
+    expect(screen.getByText("Resistant to")).toBeDefined();
+    expect(screen.getByText("Neutral")).toBeDefined();
+    expect(screen.queryByText("Immune to")).toBeNull();
+    // three weak, four resistant, and five neutral pills
+    expect(container.querySelectorAll("[data-bone]").length).toBe(12);
   });
 });

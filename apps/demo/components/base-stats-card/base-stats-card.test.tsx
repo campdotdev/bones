@@ -1,8 +1,7 @@
+import { forceBones } from "@camp.dev/bones/react";
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, test, vi } from "vite-plus/test";
+import { afterEach, describe, expect, test } from "vite-plus/test";
 import { BaseStatsCard } from "./base-stats-card";
-
-vi.mock("bones", async () => (await import("@/test/mocks")).bonesWithDataMockFactory());
 
 afterEach(cleanup);
 
@@ -47,5 +46,11 @@ describe("BaseStatsCard", () => {
   test("renders total", () => {
     render(<BaseStatsCard pokemon={pokemon} />);
     expect(screen.getByText("318")).toBeDefined();
+  });
+
+  test("renders a full skeleton under forceBones", () => {
+    const { container } = render(<BaseStatsCard pokemon={forceBones} />);
+    // a bar and a value for each of the six stats, plus the total
+    expect(container.querySelectorAll("[data-bone]").length).toBe(13);
   });
 });

@@ -1,8 +1,6 @@
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, test, vi } from "vite-plus/test";
+import { afterEach, describe, expect, test } from "vite-plus/test";
 import { MultiLineTextDemo } from "./multi-line-text-demo";
-
-vi.mock("bones", async () => (await import("@/test/mocks")).bonesMockFactory());
 
 afterEach(cleanup);
 
@@ -21,5 +19,10 @@ describe("MultiLineTextDemo", () => {
     const { container } = render(<MultiLineTextDemo />);
     const headings = container.querySelectorAll("h3");
     expect(headings.length).toBe(2);
+  });
+
+  test("renders the forced preview as four skeleton lines", () => {
+    const { container } = render(<MultiLineTextDemo />);
+    expect(container.querySelectorAll("[data-bone-line]").length).toBe(4);
   });
 });

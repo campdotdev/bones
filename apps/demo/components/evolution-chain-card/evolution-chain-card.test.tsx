@@ -1,8 +1,7 @@
+import { forceBones } from "@camp.dev/bones/react";
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, test, vi } from "vite-plus/test";
+import { afterEach, describe, expect, test } from "vite-plus/test";
 import { EvolutionChainCard } from "./evolution-chain-card";
-
-vi.mock("bones", async () => (await import("@/test/mocks")).bonesWithDataMockFactory());
 
 afterEach(cleanup);
 
@@ -46,5 +45,12 @@ describe("EvolutionChainCard", () => {
     render(<EvolutionChainCard chain={chain} currentName="ditto" />);
     expect(screen.getByText("ditto")).toBeDefined();
     expect(screen.queryByText("→")).toBeNull();
+  });
+
+  test("renders a three-stage skeleton under forceBones", () => {
+    const { container } = render(<EvolutionChainCard chain={forceBones} />);
+    expect(screen.getAllByText("→").length).toBe(2);
+    // a sprite and a name for each of three stages, plus two triggers
+    expect(container.querySelectorAll("[data-bone]").length).toBe(8);
   });
 });

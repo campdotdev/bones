@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { createBones } from "@camp.dev/bones/react";
+import { createBones, forceBones } from "@camp.dev/bones/react";
 import type { PokemonDetail } from "@/lib/pokeapi";
 import { StatBar } from "@/components/stat-bar/stat-bar";
 import { TypeBadge } from "@/components/type-badge/type-badge";
@@ -54,7 +54,7 @@ export function PokemonDetailView({
         <h2>Base Stats</h2>
         <div className={styles.stats}>
           {repeat(data?.stats, 6, (item, i) => (
-            <StatBar key={item?.name ?? i} stat={item} />
+            <StatBar key={item?.name ?? i} stat={item ?? forceBones} />
           ))}
         </div>
       </section>

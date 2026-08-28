@@ -1,8 +1,7 @@
+import { forceBones } from "@camp.dev/bones/react";
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, test, vi } from "vite-plus/test";
+import { afterEach, describe, expect, test } from "vite-plus/test";
 import { ArticlePreview } from "./article-preview";
-
-vi.mock("bones", async () => (await import("@/test/mocks")).bonesMockFactory());
 
 afterEach(cleanup);
 
@@ -32,5 +31,12 @@ describe("ArticlePreview", () => {
     const heading = container.querySelector("h3");
     expect(heading).not.toBeNull();
     expect(heading?.textContent).toBe("");
+  });
+
+  test("renders a full skeleton under forceBones", () => {
+    const { container } = render(<ArticlePreview article={forceBones} />);
+    // title, four excerpt lines, author, and date
+    expect(container.querySelectorAll("[data-bone-line]").length).toBe(4);
+    expect(container.querySelectorAll("[data-bone]").length).toBe(7);
   });
 });
