@@ -1,1 +1,1 @@
-apps/demo/data/*.json linguist-generated=true
+apps/demo/data/*.json linguist-generated=true -diff

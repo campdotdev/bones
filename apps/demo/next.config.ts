@@ -10,13 +10,6 @@ const nextConfig: NextConfig = {
     // Sprites load in the browser straight from GitHub. The optimizer would
     // fetch them server-side, which was the other half of BON-23's timeouts.
     unoptimized: true,
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "raw.githubusercontent.com",
-        pathname: "/PokeAPI/**",
-      },
-    ],
   },
 };
 

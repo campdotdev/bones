@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vite-plus/test";
 import {
+  hasPokemon,
   fetchEncounters,
   fetchEvolutionChain,
   fetchMoveDetails,
@@ -48,6 +49,19 @@ describe("fetchPokemon", () => {
 
   test("rejects an id outside the snapshot", async () => {
     await expect(fetchPokemon("152")).rejects.toThrow(/152/);
+  });
+
+  test("does not resolve keys inherited from Object.prototype", async () => {
+    await expect(fetchPokemon("constructor")).rejects.toThrow(/not in the snapshot/);
+  });
+});
+
+describe("hasPokemon", () => {
+  test("is true inside the snapshot and false outside it", async () => {
+    expect(await hasPokemon("1")).toBe(true);
+    expect(await hasPokemon("151")).toBe(true);
+    expect(await hasPokemon("152")).toBe(false);
+    expect(await hasPokemon("toString")).toBe(false);
   });
 });
 

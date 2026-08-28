@@ -53,12 +53,16 @@ function loadTable<T>(file: string): Promise<Record<string, T>> {
       (json) => JSON.parse(json) as Record<string, unknown>,
     );
     tables.set(file, table);
+    // A transient read failure should not poison every later request.
+    table.catch(() => tables.delete(file));
   }
   return table as Promise<Record<string, T>>;
 }
 
 async function lookup<T>(file: string, key: string, what: string): Promise<T> {
-  const value = (await loadTable<T>(file))[key];
+  const table = await loadTable<T>(file);
+  // hasOwn keeps "constructor" and friends from resolving through the prototype.
+  const value = Object.hasOwn(table, key) ? table[key] : undefined;
   if (value === undefined) {
     throw new Error(
       `${what} ${key} is not in the snapshot. Rerun scripts/snapshot-pokeapi.mts with a range that covers it.`,
@@ -78,6 +82,10 @@ export async function fetchPokemonList(limit = 12, offset = 0): Promise<PokemonL
     .sort((a, b) => a.id - b.id)
     .slice(offset, offset + limit)
     .map(({ id, name, sprite, types }) => ({ id, name, sprite, types }));
+}
+
+export async function hasPokemon(id: string): Promise<boolean> {
+  return Object.hasOwn(await loadTable<PokemonData>("pokemon.json"), id);
 }
 
 export async function fetchPokemon(id: string): Promise<PokemonData> {

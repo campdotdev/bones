@@ -4,6 +4,7 @@
 //   node scripts/snapshot-pokeapi.mts            # Gen 1 (ids 1-151)
 //   node scripts/snapshot-pokeapi.mts 1 151      # explicit id range
 //
+// Needs Node 23.6+ (unflagged TypeScript type stripping).
 // Only the shapes in lib/pokeapi-types.ts are written, not the raw responses.
 // Files are minified: lib/pokeapi.ts reads them with fs at runtime, and the
 // pretty-printed form was three times the size.
@@ -61,15 +62,23 @@ const ALL_TYPES = [
 
 let requests = 0;
 
+class NotFoundError extends Error {
+  constructor(url: string) {
+    super(`404 for ${url}`);
+  }
+}
+
 async function fetchJson<T>(url: string): Promise<T> {
   let lastError: unknown;
   for (let attempt = 0; attempt < RETRIES; attempt++) {
     try {
       const res = await fetch(url, { signal: AbortSignal.timeout(15_000) });
+      if (res.status === 404) throw new NotFoundError(url);
       if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
       requests++;
       return (await res.json()) as T;
     } catch (error) {
+      if (error instanceof NotFoundError) throw error;
       lastError = error;
       const wait = 500 * 2 ** attempt;
       console.warn(`retry ${attempt + 1}/${RETRIES} in ${wait}ms: ${url} (${String(error)})`);
@@ -80,7 +89,7 @@ async function fetchJson<T>(url: string): Promise<T> {
 }
 
 async function mapLimit<T, R>(items: T[], fn: (item: T) => Promise<R>): Promise<R[]> {
-  const results: R[] = new Array(items.length);
+  const results: R[] = Array.from({ length: items.length });
   let next = 0;
   async function worker() {
     while (next < items.length) {
@@ -242,6 +251,9 @@ async function main() {
   const [fromArg, toArg] = process.argv.slice(2);
   const from = Number(fromArg ?? 1);
   const to = Number(toArg ?? 151);
+  if (!Number.isInteger(from) || !Number.isInteger(to) || from < 1 || to < from) {
+    throw new Error(`expected an id range like "1 151", got "${fromArg} ${toArg}"`);
+  }
   const ids = Array.from({ length: to - from + 1 }, (_, i) => String(from + i));
   console.log(`snapshotting ids ${from}-${to} into ${OUT_DIR}`);
 

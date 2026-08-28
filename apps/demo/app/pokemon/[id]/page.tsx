@@ -2,9 +2,11 @@ import { Suspense } from "react";
 import { forceBones } from "@camp.dev/bones/react";
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
 import { delay } from "@/lib/delay";
 import { getDelays } from "@/lib/demo-delays";
 import {
+  hasPokemon,
   fetchPokemon,
   fetchSpecies,
   fetchEvolutionChain,
@@ -76,6 +78,7 @@ function pokedexRows(species: SpeciesData) {
 
 export default async function PokemonPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (!(await hasPokemon(id))) notFound();
   const cookieStore = await cookies();
   const delays = getDelays(cookieStore.get("bones-delays")?.value);
 
