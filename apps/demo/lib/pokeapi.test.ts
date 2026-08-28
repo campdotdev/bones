@@ -1,3 +1,5 @@
+import { access } from "node:fs/promises";
+import path from "node:path";
 import { describe, expect, test } from "vite-plus/test";
 import {
   hasPokemon,
@@ -17,7 +19,7 @@ describe("fetchPokemonList", () => {
     const list = await fetchPokemonList(12);
     expect(list.map((p) => p.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
     expect(list[0]).toMatchObject({ id: 1, name: "bulbasaur", types: ["grass", "poison"] });
-    expect(list[0].sprite).toMatch(/^https:\/\//);
+    expect(list[0].sprite).toBe("/artwork/1.webp");
   });
 
   test("honors limit and offset", async () => {
@@ -29,7 +31,13 @@ describe("fetchPokemonList", () => {
 describe("fetchPokemon", () => {
   test("returns pikachu with stats and moves", async () => {
     const p = await fetchPokemon("25");
-    expect(p).toMatchObject({ id: 25, name: "pikachu", types: ["electric"] });
+    expect(p).toMatchObject({
+      id: 25,
+      name: "pikachu",
+      types: ["electric"],
+      sprite: "/artwork/25.webp",
+      artwork: "/artwork/25.webp",
+    });
     expect(p.stats.map((s) => s.name)).toEqual([
       "hp",
       "attack",
@@ -81,6 +89,11 @@ describe("fetchEvolutionChain", () => {
     const species = await fetchSpecies("25");
     const chain = await fetchEvolutionChain(species.evolutionChainUrl);
     expect(chain.stages[0].map((s) => s.name)).toEqual(["pichu", "pikachu", "raichu"]);
+    expect(chain.stages[0].map((s) => s.spriteUrl)).toEqual([
+      "/artwork/172.webp",
+      "/artwork/25.webp",
+      "/artwork/26.webp",
+    ]);
     expect(chain.stages[0][1].trigger).toBe("Friendship");
     expect(chain.stages[0][2].trigger).toBe("Thunder Stone");
   });
@@ -140,6 +153,22 @@ describe("fetchMoveDetails", () => {
 });
 
 describe("snapshot coverage", () => {
+  test("every artwork path in the snapshot exists under public/artwork", async () => {
+    const paths = new Set<string>();
+    for (const id of GEN1_IDS) {
+      const [p, s] = await Promise.all([fetchPokemon(id), fetchSpecies(id)]);
+      paths.add(p.sprite);
+      paths.add(p.artwork);
+      const chain = await fetchEvolutionChain(s.evolutionChainUrl);
+      for (const branch of chain.stages) for (const stage of branch) paths.add(stage.spriteUrl);
+    }
+    expect(paths.size).toBeGreaterThan(151);
+    for (const p of paths) {
+      expect(p).toMatch(/^\/artwork\/\d+\.webp$/);
+      await expect(access(path.join(process.cwd(), "public", p))).resolves.toBeUndefined();
+    }
+  });
+
   test("every gen 1 id resolves through every reader", async () => {
     for (const id of GEN1_IDS) {
       const [p, s, encounters] = await Promise.all([
