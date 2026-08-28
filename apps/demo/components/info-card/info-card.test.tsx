@@ -24,6 +24,7 @@ describe("InfoCard", () => {
       <InfoCard title="Training" labels={["Catch Rate", "Base Exp"]} rows={forceBones} />,
     );
     expect(screen.getByText("Catch Rate")).toBeDefined();
+    expect(screen.getByText("Base Exp")).toBeDefined();
     expect(container.querySelectorAll("[data-bone]").length).toBe(2);
   });
 });
