@@ -283,10 +283,11 @@
 }
 
 @layer bones-auto {
-  /* Auto bones default to shimmer. bones.css only animates inside a
-     [data-bone-animate] scope; a zero-markup page has no such attribute, so
-     the default lives here and the scopes below mirror bones.css for pages
-     that do set it. In those scopes, :is(:scope, :scope *) lets the attribute
+  /* Auto bones default to shimmer. bones.css has its own default, but its
+     rules match [data-bone] elements only and never the unmarked leaves
+     targeted here, so the default is restated for them, and the scopes below
+     mirror bones.css for pages that set the attribute (BON-16). In those
+     scopes, :is(:scope, :scope *) lets the attribute
      sit on the aria-busy element itself: a scoped selector's implicit :scope
      prefix matches strict descendants only (BON-17). */
   [aria-busy="true"]

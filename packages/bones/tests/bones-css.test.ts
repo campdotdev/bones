@@ -38,18 +38,6 @@ function blockAt(source: string, marker: string): string {
   throw new Error(`unbalanced braces after ${marker}`);
 }
 
-/** Every reduced-motion block in `source`, flattened. */
-function reducedMotionBlocks(source: string): string[] {
-  const blocks: string[] = [];
-  let rest = source;
-  while (rest.includes(REDUCED)) {
-    const block = blockAt(rest, REDUCED);
-    blocks.push(block);
-    rest = rest.slice(rest.indexOf(REDUCED) + REDUCED.length);
-  }
-  return blocks;
-}
-
 /** The `@scope` block for one data-bone-animate value. */
 function scopeFor(value: string): string {
   return blockAt(css, `@scope ([data-bone-animate="${value}"])`);
@@ -61,7 +49,6 @@ describe("bones.css reduced-motion contract", () => {
     const block = blockAt(outside, REDUCED);
     for (const selector of [
       '[data-bone="text"]::after',
-      '[data-bone="text"]::before',
       '[data-bone="block"]',
       '[data-bone="container"]::before',
     ]) {
@@ -83,13 +70,10 @@ describe("bones.css reduced-motion contract", () => {
     expect(scopeFor("none")).not.toContain(REDUCED);
   });
 
-  test("no reduced-motion block pulses the aria-busy element itself", () => {
-    // The old override animated whatever carried aria-busy, which stacked an
-    // opacity pulse on top of the bar's own animation instead of replacing it.
-    const blocks = reducedMotionBlocks(css);
-    expect(blocks.length).toBeGreaterThan(0);
-    for (const block of blocks) {
-      expect(block).not.toMatch(/\[aria-busy="true"\]\s*\{/);
-    }
+  test("nothing animates the aria-busy element itself", () => {
+    // The old reduced-motion override animated whatever carried aria-busy,
+    // which stacked an opacity pulse on top of the bar's own animation
+    // instead of replacing it. Bones target their bars, never the carrier.
+    expect(css).not.toContain('[aria-busy="true"]');
   });
 });

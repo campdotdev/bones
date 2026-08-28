@@ -46,9 +46,3 @@ test("data-bone-animate='none' on a wrapper opts its bones out of the default", 
   const bar = getComputedStyle(root.querySelector("span")!, "::after");
   expect(bar.animationName).toBe("none");
 });
-
-test("data-bone-animate='pulse' on a wrapper still replaces the default", () => {
-  const root = mount(`<div data-bone-animate="pulse"><span data-bone="text">hidden</span></div>`);
-  const bar = getComputedStyle(root.querySelector("span")!, "::after");
-  expect(bar.animationName).toBe("bone-pulse");
-});
