@@ -1,8 +1,8 @@
+import { forceBones } from "@camp.dev/bones/react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vite-plus/test";
 import { PokemonDetailView } from "./pokemon-detail-view";
 
-vi.mock("bones", async () => (await import("@/test/mocks")).bonesMockFactory());
 vi.mock("next/image", async () => (await import("@/test/mocks")).nextImageMockFactory());
 
 afterEach(cleanup);
@@ -71,5 +71,19 @@ describe("PokemonDetailView", () => {
     expect(container.querySelector("h1")?.textContent).toBe("");
     // lines() returns empty when data is undefined, so no <p> is rendered
     expect(container.querySelectorAll("p").length).toBe(0);
+  });
+
+  test("renders a full skeleton under forceBones", () => {
+    const { container } = render(<PokemonDetailView pokemon={forceBones} />);
+    // artwork, name, two types, height, weight, three description lines,
+    // and six stat bars with a name, a value, and a bar each
+    expect(container.querySelectorAll("[data-bone-line]").length).toBe(3);
+    expect(container.querySelectorAll("[data-bone]").length).toBe(27);
+  });
+
+  test("forwards forceBones to every StatBar", () => {
+    const { container } = render(<PokemonDetailView pokemon={forceBones} />);
+    const stats = container.querySelectorAll("section")[1];
+    expect(stats?.querySelectorAll("[data-bone]").length).toBe(18);
   });
 });

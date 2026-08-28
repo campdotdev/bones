@@ -1,8 +1,8 @@
+import { forceBones } from "@camp.dev/bones/react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vite-plus/test";
 import { PokemonHero } from "./pokemon-hero";
 
-vi.mock("bones", async () => (await import("@/test/mocks")).bonesWithDataMockFactory());
 vi.mock("next/image", async () => (await import("@/test/mocks")).nextImageMockFactory());
 
 afterEach(cleanup);
@@ -69,5 +69,17 @@ describe("PokemonHero", () => {
   test("renders description", () => {
     render(<PokemonHero pokemon={pokemon} species={species} />);
     expect(screen.getByText(species.description)).toBeDefined();
+  });
+
+  test("renders a full skeleton when both sources are forced", () => {
+    const { container } = render(<PokemonHero pokemon={forceBones} species={forceBones} />);
+    // artwork, name, number, two types, meta line, and description
+    expect(container.querySelectorAll("[data-bone]").length).toBe(7);
+  });
+
+  test("skeletons only the species fields when species alone is forced", () => {
+    const { container } = render(<PokemonHero pokemon={pokemon} species={forceBones} />);
+    expect(screen.getByText("bulbasaur")).toBeDefined();
+    expect(container.querySelectorAll("[data-bone]").length).toBe(2);
   });
 });

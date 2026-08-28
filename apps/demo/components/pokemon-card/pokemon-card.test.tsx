@@ -1,8 +1,8 @@
+import { forceBones } from "@camp.dev/bones/react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vite-plus/test";
 import { PokemonCard } from "./pokemon-card";
 
-vi.mock("bones", async () => (await import("@/test/mocks")).bonesMockFactory());
 vi.mock("next/image", async () => (await import("@/test/mocks")).nextImageMockFactory());
 vi.mock("next/link", async () => (await import("@/test/mocks")).nextLinkMockFactory());
 
@@ -49,5 +49,13 @@ describe("PokemonCard", () => {
   test("falls back to 'Pokemon' alt text when no data", () => {
     render(<PokemonCard />);
     expect(screen.getByAltText("Pokemon")).toBeDefined();
+  });
+
+  test("renders a full skeleton under forceBones", () => {
+    const { container } = render(<PokemonCard pokemon={forceBones} />);
+    // image, name, and two type badges
+    expect(container.querySelectorAll("[data-bone]").length).toBe(4);
+    expect(container.querySelector("a")).toBeNull();
+    expect(container.textContent).toBe("");
   });
 });

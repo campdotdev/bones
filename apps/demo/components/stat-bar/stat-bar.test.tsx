@@ -1,8 +1,7 @@
+import { forceBones } from "@camp.dev/bones/react";
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, test, vi } from "vite-plus/test";
+import { afterEach, describe, expect, test } from "vite-plus/test";
 import { StatBar } from "./stat-bar";
-
-vi.mock("bones", async () => (await import("@/test/mocks")).bonesMockFactory());
 
 afterEach(cleanup);
 
@@ -37,5 +36,11 @@ describe("StatBar", () => {
     for (const span of spans) {
       expect(span.textContent).toBe("");
     }
+  });
+
+  test("renders a full skeleton under forceBones", () => {
+    const { container } = render(<StatBar stat={forceBones} />);
+    // name, value, and bar
+    expect(container.querySelectorAll("[data-bone]").length).toBe(3);
   });
 });
