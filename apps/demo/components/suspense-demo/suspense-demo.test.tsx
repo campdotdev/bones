@@ -2,7 +2,6 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vite-plus/test";
 import { SuspenseDemo } from "./suspense-demo";
 
-vi.mock("next/image", async () => (await import("@/test/mocks")).nextImageMockFactory());
 vi.mock("next/link", async () => (await import("@/test/mocks")).nextLinkMockFactory());
 vi.mock("@/lib/delay", () => ({
   delay: <T,>(value: T) => value,
@@ -24,6 +23,9 @@ vi.mock("@/lib/pokeapi", () => ({
 }));
 
 afterEach(cleanup);
+afterEach(() => {
+  pokeapi.pending = false;
+});
 
 describe("SuspenseDemo", () => {
   test("renders the section title", () => {
@@ -39,11 +41,7 @@ describe("SuspenseDemo", () => {
 
   test("renders the fallback as twelve skeleton cards while the list is pending", () => {
     pokeapi.pending = true;
-    try {
-      const { container } = render(<SuspenseDemo />);
-      expect(container.querySelectorAll('img[alt="Pokemon"][data-bone]').length).toBe(12);
-    } finally {
-      pokeapi.pending = false;
-    }
+    const { container } = render(<SuspenseDemo />);
+    expect(container.querySelectorAll('img[alt="Pokemon"][data-bone]').length).toBe(12);
   });
 });

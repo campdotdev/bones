@@ -14,6 +14,7 @@ describe("PokemonGrid", () => {
     // Every card renders an image with the "Pokemon" fallback alt text when
     // it has no data, so this counts how many of the 12 slots became cards.
     expect(container.querySelectorAll('img[alt="Pokemon"]').length).toBe(12);
-    expect(container.querySelectorAll("[data-bone]").length).toBeGreaterThan(0);
+    // four bones per card: image, name, and two type badges
+    expect(container.querySelectorAll("[data-bone]").length).toBe(48);
   });
 });

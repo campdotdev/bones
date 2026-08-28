@@ -2,7 +2,6 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vite-plus/test";
 import { ForcedSkeletonsDemo } from "./forced-skeletons-demo";
 
-vi.mock("next/image", async () => (await import("@/test/mocks")).nextImageMockFactory());
 vi.mock("next/link", async () => (await import("@/test/mocks")).nextLinkMockFactory());
 vi.mock("@/lib/pokeapi", () => ({
   fetchPokemonList: () =>

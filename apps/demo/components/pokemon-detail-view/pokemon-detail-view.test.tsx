@@ -82,8 +82,8 @@ describe("PokemonDetailView", () => {
   });
 
   test("forwards forceBones to every StatBar", () => {
-    const { container } = render(<PokemonDetailView pokemon={forceBones} />);
-    const stats = container.querySelectorAll("section")[1];
+    render(<PokemonDetailView pokemon={forceBones} />);
+    const stats = screen.getByRole("heading", { name: "Base Stats" }).closest("section");
     expect(stats?.querySelectorAll("[data-bone]").length).toBe(18);
   });
 });
