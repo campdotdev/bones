@@ -1,1 +1,2 @@
 apps/demo/data/*.json linguist-generated=true -diff
+apps/demo/public/artwork/*.webp linguist-generated=true

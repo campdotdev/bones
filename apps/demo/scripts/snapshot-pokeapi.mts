@@ -1,5 +1,7 @@
-// Fetches PokeAPI once and writes trimmed JSON under apps/demo/data/.
-// The demo's lib/pokeapi.ts reads those files instead of calling the network.
+// Fetches PokeAPI once and writes trimmed JSON under apps/demo/data/, plus the
+// official artwork resized to WebP under apps/demo/public/artwork/. The demo's
+// lib/pokeapi.ts reads the JSON instead of calling the network, and next/image
+// serves the artwork from disk.
 //
 //   node scripts/snapshot-pokeapi.mts            # Gen 1 (ids 1-151)
 //   node scripts/snapshot-pokeapi.mts 1 151      # explicit id range
@@ -12,6 +14,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import sharp from "sharp";
 import type {
   EvolutionChain,
   EvolutionChainLink,
@@ -31,7 +34,12 @@ import type {
 import type { DamageRelations } from "../lib/type-defense.ts";
 
 const BASE = "https://pokeapi.co/api/v2";
-const OUT_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "data");
+const APP_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
+const OUT_DIR = path.join(APP_DIR, "data");
+const ARTWORK_DIR = path.join(APP_DIR, "public", "artwork");
+const ARTWORK_SOURCE =
+  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork";
+const ARTWORK_SIZE = 480;
 const CONCURRENCY = 8;
 const RETRIES = 6;
 
@@ -68,7 +76,7 @@ class NotFoundError extends Error {
   }
 }
 
-async function fetchJson<T>(url: string): Promise<T> {
+async function fetchWithRetry(url: string): Promise<Response> {
   let lastError: unknown;
   for (let attempt = 0; attempt < RETRIES; attempt++) {
     try {
@@ -76,7 +84,7 @@ async function fetchJson<T>(url: string): Promise<T> {
       if (res.status === 404) throw new NotFoundError(url);
       if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
       requests++;
-      return (await res.json()) as T;
+      return res;
     } catch (error) {
       if (error instanceof NotFoundError) throw error;
       lastError = error;
@@ -86,6 +94,28 @@ async function fetchJson<T>(url: string): Promise<T> {
     }
   }
   throw lastError;
+}
+
+async function fetchJson<T>(url: string): Promise<T> {
+  return (await (await fetchWithRetry(url)).json()) as T;
+}
+
+async function fetchBytes(url: string): Promise<Buffer> {
+  return Buffer.from(await (await fetchWithRetry(url)).arrayBuffer());
+}
+
+function artworkPath(id: string | number): string {
+  return `/artwork/${id}.webp`;
+}
+
+async function saveArtwork(id: string): Promise<number> {
+  const png = await fetchBytes(`${ARTWORK_SOURCE}/${id}.png`);
+  const webp = await sharp(png)
+    .resize(ARTWORK_SIZE, ARTWORK_SIZE, { fit: "inside", withoutEnlargement: true })
+    .webp({ quality: 82 })
+    .toBuffer();
+  await writeFile(path.join(ARTWORK_DIR, `${id}.webp`), webp);
+  return webp.length;
 }
 
 async function mapLimit<T, R>(items: T[], fn: (item: T) => Promise<R>): Promise<R[]> {
@@ -114,8 +144,8 @@ function toPokemon(p: PokeAPIPokemonResponse): PokemonData {
   return {
     id: p.id,
     name: p.name,
-    sprite: p.sprites.other["official-artwork"].front_default || p.sprites.front_default,
-    artwork: p.sprites.other["official-artwork"].front_default,
+    sprite: artworkPath(p.id),
+    artwork: artworkPath(p.id),
     types: p.types.map((t) => t.type.name),
     height: p.height,
     weight: p.weight,
@@ -182,7 +212,7 @@ function flattenChain(link: EvolutionChainLink): EvolutionStage[][] {
   const speciesId = idFromUrl(link.species.url);
   const stage: EvolutionStage = {
     name: link.species.name,
-    spriteUrl: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${speciesId}.png`,
+    spriteUrl: artworkPath(speciesId),
     trigger:
       link.evolution_details.length > 0 ? formatEvolutionTrigger(link.evolution_details[0]) : "",
   };
@@ -281,10 +311,14 @@ async function main() {
   });
   console.log(`evolution chains: ${chainUrls.length}`);
 
-  const types: Record<string, DamageRelations> = {};
-  await mapLimit(ALL_TYPES, async (name) => {
-    types[name] = toDamageRelations(await fetchJson<PokeAPITypeResponse>(`${BASE}/type/${name}`));
-  });
+  // Keyed by name, so insert in ALL_TYPES order rather than completion order
+  // to keep the file stable across runs.
+  const typeRelations = await mapLimit(ALL_TYPES, async (name) =>
+    toDamageRelations(await fetchJson<PokeAPITypeResponse>(`${BASE}/type/${name}`)),
+  );
+  const types: Record<string, DamageRelations> = Object.fromEntries(
+    ALL_TYPES.map((name, i) => [name, typeRelations[i]]),
+  );
   console.log(`types: ${ALL_TYPES.length}`);
 
   const moveUrls = [...new Set(Object.values(pokemon).flatMap((p) => p.moves.map((m) => m.url)))];
@@ -300,6 +334,19 @@ async function main() {
     moves[idFromUrl(moveUrls[i])] = toMoveDetail(move, machineItem);
   });
   console.log(`moves: ${moveUrls.length}, machines: ${machineUrls.length}`);
+
+  // Every Pokémon in range, plus every species its evolution chains reach
+  // (pichu, the eeveelutions, and so on), so no stage renders a broken image.
+  const artworkIds = new Set(ids);
+  for (const chain of Object.values(evolutionChains)) {
+    for (const branch of chain.stages) {
+      for (const stage of branch) artworkIds.add(idFromUrl(stage.spriteUrl).replace(".webp", ""));
+    }
+  }
+  await mkdir(ARTWORK_DIR, { recursive: true });
+  const sizes = await mapLimit([...artworkIds], saveArtwork);
+  const artworkBytes = sizes.reduce((sum, n) => sum + n, 0);
+  console.log(`artwork: ${artworkIds.size} files, ${(artworkBytes / 1024).toFixed(0)} KB`);
 
   await mkdir(OUT_DIR, { recursive: true });
   const files: Record<string, unknown> = {
