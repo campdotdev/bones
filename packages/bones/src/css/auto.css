@@ -148,6 +148,11 @@
     background-color: var(--bone-base);
     border-radius: var(--bone-radius);
     border-color: transparent;
+    /* A loaded image paints over its own background, so the bone color alone
+       does not cover it. Pushing the picture out of its content box leaves
+       the box and its background in place (BON-15). Only img, video, and
+       canvas honor this; a loaded iframe, embed, or object still shows. */
+    object-position: 9999px 0;
   }
 
   /* Width variance: text leaves cycle 85 / 100 / 92 / 60 so runs of lines
