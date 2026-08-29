@@ -11,3 +11,4 @@ docs/superpowers/
 .superpowers
 .worktrees
 packages/bones/tests/browser/__screenshots__/**/*-darwin.png
+packages/bones/.vitest-attachments/
