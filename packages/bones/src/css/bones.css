@@ -70,11 +70,15 @@
 }
 
 img[data-bone="block"],
-video[data-bone="block"] {
+video[data-bone="block"],
+canvas[data-bone="block"] {
   color: rgb(from currentcolor r g b / 0);
   /* A loaded picture paints over the bone's background-color; pushing it out
-     of the content box keeps the box and background visible (BON-15). */
+     of the content box keeps the box and background visible (BON-15).
+     transition: none keeps a page `transition: all` from sliding the picture
+     out on the way in; see the matching comment in auto.css. */
   object-position: 9999px 0;
+  transition: none;
 }
 
 [data-bone="container"] {
