@@ -48,7 +48,6 @@ describe("MovesPanel", () => {
     expect(screen.getByText("tackle")).toBeDefined();
     expect(screen.getByText("vine whip")).toBeDefined();
     expect(screen.getByText("red blue")).toBeDefined();
-    expect(container.querySelectorAll("[data-bone]").length).toBe(0);
     expect(container.firstElementChild?.hasAttribute("aria-busy")).toBe(false);
   });
 

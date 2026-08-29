@@ -76,6 +76,9 @@ export function MovesInteractive({ moves = [], moveDetails, ...rest }: MovesInte
 
   return (
     <div className={styles.panel} aria-busy={moveDetails ? undefined : "true"} {...rest}>
+      {/* The panel stays busy until the move details arrive, even when the
+          move list is already here, so this is the one place a component sets
+          its own aria-busy. A caller's aria-busy still wins through ...rest. */}
       <div className={styles.gamePills}>
         {(versionGroups.length
           ? versionGroups

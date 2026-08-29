@@ -11,7 +11,7 @@ export async function ForcedSkeletonsDemo() {
       title="Forced Skeletons"
       description="Render a component with aria-busy and no data to see its skeleton. Toggle to see the same loaded cards switch to skeletons."
     >
-      <SkeletonToggle skeleton={<PokemonGrid aria-busy="true" />}>
+      <SkeletonToggle skeleton={<PokemonGrid pokemon={pokemon} aria-busy="true" />}>
         <PokemonGrid pokemon={pokemon} />
       </SkeletonToggle>
     </DemoSection>

@@ -6,7 +6,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Bones Demo — Pokédex",
-  description: "Inline skeleton loaders for React, powered by the PokeAPI.",
+  description: "Automatic skeleton loaders for any stack, powered by the PokeAPI.",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
