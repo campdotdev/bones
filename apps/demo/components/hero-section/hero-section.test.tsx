@@ -12,7 +12,7 @@ describe("HeroSection", () => {
 
   test("renders the subtitle text", () => {
     render(<HeroSection />);
-    expect(screen.getByText(/Skeleton loaders designed for React Server Components/)).toBeDefined();
+    expect(screen.getByText(/Automatic skeleton loaders for any stack/)).toBeDefined();
   });
 
   test("renders docs and github links", () => {

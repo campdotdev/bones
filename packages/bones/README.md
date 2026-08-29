@@ -2,21 +2,13 @@
 
 [![Bundle Size](https://deno.bundlejs.com/badge?q=@camp.dev/bones)](https://bundlejs.com/?q=%40camp.dev%2Fbones)
 
-Skeleton loaders designed for React Server Components and streaming. ~2.7 kB gzipped, 0 dependencies.
+Automatic skeleton loaders for any stack. One stylesheet, one custom element. ~8.5 kB gzipped, 0 dependencies.
 
-With React Server Components, your component renders once on the server. There's no re-render from "loading" to "loaded," so `{data || <Skeleton />}` doesn't work anymore. The typical workaround is writing a separate skeleton component for every piece of UI and passing it as a Suspense fallback.
-
-Bones skips the duplication. You write your markup once and it handles both states. The skeleton and the real UI are the same component, so they can't drift apart.
+Set `aria-busy="true"` on a region and its content becomes a skeleton: a bar for every leaf, a box for every image and control. No skeleton components, no placeholder markup, no JavaScript in the loading path. When inference gets something wrong, a `data-bones-*` attribute on the real markup fixes it, and the attribute does nothing once the region is not busy.
 
 ## How it works
 
-`createBones` accepts data or a promise of data. While loading, its `bone` function returns HTML attributes that style elements as skeletons via CSS. Once the data resolves, `bone` returns an empty object and your component renders normally. There are no hooks and no context providers.
-
-- Works in Server Components. No hooks, no context, no `'use client'`.
-- One component handles both loading and loaded states.
-- Pass data or a promise. A pending promise suspends to your `<Suspense>` boundary; `forceBones` renders the skeleton.
-- Skeletons are pure CSS, themed with custom properties.
-- Loading elements get `aria-busy="true"` automatically.
+The stylesheet keys on `aria-busy="true"`. On that element and under it, an element with no element children paints as a text bar and an image or form control paints as a block. Text hides by zeroing the alpha of its own color, so bones take their color from the text around them and contrast on any background. `data-bones-type`, `data-bones-lines`, `data-bones-auto`, and `data-bones-animate` adjust the result. That is the whole API.
 
 ## Installation
 
@@ -24,7 +16,7 @@ Bones skips the duplication. You write your markup once and it handles both stat
 npm install @camp.dev/bones
 ```
 
-Import the CSS once in your root layout or entry point:
+Import the stylesheet once in your root layout or entry point:
 
 ```tsx
 import "@camp.dev/bones/css";
@@ -32,111 +24,84 @@ import "@camp.dev/bones/css";
 
 ## Entry points
 
-| Import                    | Contents                                                                                                                                                                                                                   |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@camp.dev/bones/react`   | `createBones`, `readPromise`, `forceBones`, `minMax`, `isMinMax`, `BonesBoundary`                                                                                                                                          |
-| `@camp.dev/bones/css`     | The stylesheet. Styles `data-bone` markup and, under any `aria-busy="true"` region, unmarked leaves. Import once in your root layout.                                                                                      |
-| `@camp.dev/bones/element` | `<bones-boundary>`, a custom element that sets `aria-busy` and `inert` on its subtree with `delay`, `min-duration`, and a crossfade. `precision="measured"` draws pixel-accurate per-line bones measured from the content. |
-| `@camp.dev/bones/server`  | `streamBones` and the wire-protocol primitives: stream a shell with busy boundaries, then flush each region's content out of order as it resolves.                                                                         |
-| `@camp.dev/bones`         | The framework-agnostic core (`boneAttributes`, `minMax`). You only need this to build your own renderer or adapter.                                                                                                        |
+| Import                   | Contents                                                                                                                                                                                                    |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@camp.dev/bones/css`    | The stylesheet. Paints every leaf under `aria-busy="true"` and honors the `data-bones-*` attributes. Import once.                                                                                           |
+| `@camp.dev/bones`        | `<bones-boundary>`, a custom element that sets `aria-busy` and `inert` on its subtree with `delay`, `min-duration`, and a crossfade. `precision="measured"` draws per-line bones measured from the content. |
+| `@camp.dev/bones/server` | `streamBones` and the wire-protocol primitives: stream a shell with busy boundaries, then flush each region's content out of order as it resolves.                                                          |
 
-React is an optional peer dependency: installing the package without React is supported and only the `/react` entry requires it.
+Zero dependencies. No framework is required or assumed.
 
 ## Basic usage
 
-Pass data (or a promise of data) to `createBones`. Spread the `bone` function's return value onto elements that should show skeletons while loading.
-
-```tsx
-import { createBones } from "@camp.dev/bones/react";
-
-function ProfileCard({ user }: { user: Promise<User> | User }) {
-  const { bone, data, lines } = createBones(user);
-
-  return (
-    <div>
-      <img src={data?.avatar} width={80} height={80} {...bone("block")} />
-      <h3 {...bone("text", { length: 10 })}>{data?.name}</h3>
-      {lines(data?.bio, 3, (item) => (
-        <p>{item}</p>
-      ))}
-    </div>
-  );
-}
-```
-
-Pass the promise to the component, and reuse the same component with `forceBones` as the fallback:
-
-```tsx
-import { forceBones } from "@camp.dev/bones/react";
-import { Suspense } from "react";
-
-export default function Page() {
-  const user = fetchUser();
-  return (
-    <Suspense fallback={<ProfileCard user={forceBones} />}>
-      <ProfileCard user={user} />
-    </Suspense>
-  );
-}
-```
-
-While the promise is pending, the fallback renders `<ProfileCard>` with skeletons visible. Once it resolves, the real content swaps in. There is no separate skeleton component to keep in sync — the fallback is the component.
-
-## Bone types
-
-| Type          | Use for                        | Example                              |
-| ------------- | ------------------------------ | ------------------------------------ |
-| `"text"`      | Headings, paragraphs, labels   | `<h2 {...bone("text")}>`             |
-| `"block"`     | Images, avatars, thumbnails    | `<img src={…} {...bone("block")} />` |
-| `"container"` | Wrappers with complex children | `<div {...bone("container")}>`       |
-
-## Previewing skeletons
-
-Use `forceBones` to see a component's skeleton state without setting up real data:
-
-```tsx
-import { createBones, forceBones } from "@camp.dev/bones/react";
-
-<ProfileCard user={forceBones} />;
-```
-
-To force a subtree into skeleton mode at once, pass `forceBones` to each component in it:
-
-```tsx
-<ProfileCard user={forceBones} />
-<PostList posts={forceBones} />
-```
-
-`forceBones` only forces the component it's passed to. A component that derives child props from its own data must forward it itself, such as `PostList` mapping items into cards. `repeat` yields `undefined` for items that don't exist yet:
-
-```tsx
-<PostCard key={item?.id ?? i} post={item ?? forceBones} />
-```
-
-For content that has no bone markup at all, wrap it in [`<bones-boundary force>`](https://github.com/campdotdev/bones/blob/main/apps/docs/content/docs/api/bones-boundary.mdx) and the stylesheet draws leaf bones.
-
-## Automatic skeletons
-
-For markup you haven't wired up with `bone()` — third-party components, server-rendered HTML, anything without explicit attributes — set `aria-busy="true"` on the loading region. Every unmarked leaf inside it becomes a skeleton, no `bone()` calls required:
+Plain HTML:
 
 ```html
 <section aria-busy="true">
-  <h2>Title</h2>
-  <p>Summary text goes here.</p>
+  <img src="/avatar.png" width="64" height="64" alt="" />
+  <h2>Sasha Greenfield</h2>
+  <p>Collects tape loops, birdsong, and the hum of old refrigerators.</p>
 </section>
 ```
 
-`[data-bones-auto="off"]` opts a subtree out — useful for a status message you want to stay readable while its container skeletonizes. Set it on `<body>` to turn auto bones off for the whole page. Images, canvas, and video without native controls get a solid bone even after they have loaded, unless page CSS sets `object-position` on them, which outranks the layered rule the same way `color` does. A loaded `iframe`, `embed`, or `object` still shows its content, because those elements ignore `object-position`. Explicit `data-bone` markup is left alone. The stylesheet only styles elements neither `bone()` nor a manual `data-bone` attribute has already claimed.
+In a framework, write the component so it renders its shell when the data is missing and forwards its props to the root. The skeleton is then the component with `aria-busy` and no data:
 
-Auto rules live in `@layer bones-auto`, so any page CSS that sets `color` on an element outranks the bone's transparent text, and that text stays visible over its skeleton bar. `data-bone-animate` works on the `aria-busy` element itself or on any ancestor. The `data-bone-animate` overrides rely on `@scope`. In a browser without `@scope`, every bone shimmers, and `data-bone-animate="pulse"` and `"none"` cannot change that. The `prefers-reduced-motion` fallback to pulse still applies.
+```tsx
+import type { ComponentProps } from "react";
 
-## Without React
+function ProfileCard({ user, ...rest }: { user?: User } & ComponentProps<"div">) {
+  return (
+    <div {...rest}>
+      <img src={user?.avatar} width={80} height={80} alt="" />
+      <h3>{user?.name}</h3>
+      <p data-bones-lines="3">{user?.bio}</p>
+      <ul>
+        {(user?.posts ?? Array.from({ length: 3 })).map((post, i) => (
+          <li key={post?.id ?? i}>{post?.title}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+async function Profile() {
+  return <ProfileCard user={await fetchUser()} />;
+}
+
+<Suspense fallback={<ProfileCard aria-busy="true" />}>
+  <Profile />
+</Suspense>;
+```
+
+The fallback is the component, and the async child is what suspends. `data-bones-lines="3"` says the bio is three lines tall while empty, and `Array.from` gives the list three placeholder rows, since CSS cannot add elements.
+
+## Adjust a bone
+
+| Attribute                                   | Effect                                                                                        |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `data-bones-type="text"`                    | Paint a text bar regardless of inference.                                                     |
+| `data-bones-type="block"`                   | Paint one filled box and hide descendants. A `div` avatar, a card.                            |
+| `data-bones-lines="3"`                      | Paint three stacked bars in one element. 2 to 8 everywhere; any integer with modern `attr()`. |
+| `data-bones-auto="off"`                     | Keep this subtree readable. On `<body>`, only explicit markup paints.                         |
+| `data-bones-animate="shimmer\|pulse\|none"` | Pick the animation for the bones inside, or on the bone itself.                               |
+
+Explicit attributes are unlayered, so page CSS cannot keep their text visible. Inferred bones live in `@layer bones-auto`, so a page rule that sets `color` on a leaf keeps that text visible over its bar; that is the one thing to know when a bar looks wrong.
+
+## Previewing skeletons
+
+Render the component busy with no data. No promise, no boundary, no Storybook addon:
+
+```tsx
+<ProfileCard aria-busy="true" />
+```
+
+## Timing the swap
 
 `<bones-boundary>` manages the loading state for any stack. Set `busy` when a request starts and clear it when the response lands. The element waits 200 ms before showing bones and keeps them for at least 400 ms, then crossfades to content with the View Transitions API where available.
 
 ```html
 <script type="module">
-  import "@camp.dev/bones/element";
+  import "@camp.dev/bones";
 </script>
 
 <bones-boundary busy>
@@ -145,9 +110,11 @@ Auto rules live in `@layer bones-auto`, so any page CSS that sets `color` on an 
 </bones-boundary>
 ```
 
-`@camp.dev/bones/element` is a bare specifier. A browser cannot resolve it on its own, so this snippet needs a bundler or an import map. To load the element straight from a CDN in a plain HTML file, see the URL form on the [bones-boundary docs page](https://github.com/campdotdev/bones/blob/main/apps/docs/content/docs/api/bones-boundary.mdx).
+`@camp.dev/bones` is a bare specifier. A browser cannot resolve it on its own, so this snippet needs a bundler or an import map. To load the element straight from a CDN in a plain HTML file, see the URL form on the [bones-boundary docs page](https://github.com/campdotdev/bones/blob/main/apps/docs/content/docs/api/bones-boundary.mdx).
 
-It works with zero-markup content out of the box, or with `data-bone` markup from `boneAttributes`. The element is also exported for React as `<BonesBoundary>` from `@camp.dev/bones/react`.
+## Theming
+
+`--bone-base`, `--bone-highlight`, `--bone-radius`, and `--bone-duration` are CSS custom properties; set them on any ancestor. `--bone-radius` must carry a unit. `prefers-reduced-motion` turns shimmer into a slow pulse; `data-bones-animate="none"` stays still.
 
 ## Development
 
