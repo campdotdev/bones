@@ -1,4 +1,3 @@
-import { forceBones } from "@camp.dev/bones/react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vite-plus/test";
 import { DexEntriesPanel } from "./dex-entries-panel";
@@ -20,10 +19,9 @@ describe("DexEntriesPanel", () => {
     expect(screen.getByText("gold")).toBeDefined();
   });
 
-  test("renders three placeholder generations under forceBones", () => {
-    const { container } = render(<DexEntriesPanel entries={forceBones} />);
-    // three generations, each a header plus three entries with a version and a text
-    expect(container.querySelectorAll("[data-bone]").length).toBe(21);
+  test("renders three placeholder generations with three empty entries each", () => {
+    const { container } = render(<DexEntriesPanel aria-busy="true" />);
+    expect(container.querySelectorAll("span").length).toBe(3 + 9 * 2);
     expect(container.textContent).toBe("");
   });
 });

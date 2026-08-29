@@ -1,43 +1,39 @@
 import Image from "next/image";
-import { createBones } from "@camp.dev/bones/react";
+import type { ComponentProps } from "react";
 import type { EvolutionChain } from "@/lib/pokeapi";
 import styles from "./styles.module.css";
 
 export function EvolutionChainCard({
   chain,
   currentName,
-}: {
-  chain?: EvolutionChain | Promise<EvolutionChain>;
-  currentName?: string;
-}) {
-  const { bone, data, repeat } = createBones(chain);
+  ...rest
+}: { chain?: EvolutionChain; currentName?: string } & ComponentProps<"div">) {
+  const branches = chain?.stages ?? [undefined];
 
   return (
-    <div className={styles.card}>
-      <div className={styles.label}>Evolution Chain</div>
+    <div className={styles.card} {...rest}>
+      <div className={styles.label} data-bones-auto="off">
+        Evolution Chain
+      </div>
       <div className={styles.chains}>
-        {repeat(data?.stages, 1, (branch, bi) => (
+        {branches.map((branch, bi) => (
           <div key={bi} className={styles.branch}>
-            {repeat(branch, 3, (item, si) => (
+            {(branch ?? Array.from({ length: 3 })).map((item, si) => (
               <div key={item?.name ?? si} className={styles.stageGroup}>
                 {si > 0 && (
                   <div className={styles.arrow}>
-                    <span>→</span>
-                    <span className={styles.trigger} {...bone("text")}>
-                      {item?.trigger}
-                    </span>
+                    <span data-bones-auto="off">→</span>
+                    <span className={styles.trigger}>{item?.trigger}</span>
                   </div>
                 )}
                 <div
                   className={styles.stage}
                   data-current={item?.name === currentName ? "true" : undefined}
                 >
-                  <div className={styles.sprite} {...bone("block")}>
+                  <div className={styles.sprite} data-bones-type="block">
                     {item && <Image src={item.spriteUrl} alt={item.name} width={96} height={96} />}
                   </div>
-                  <span className={styles.stageName} {...bone("text", { length: 6 })}>
-                    {item?.name}
-                  </span>
+                  <span className={styles.stageName}>{item?.name}</span>
                 </div>
               </div>
             ))}

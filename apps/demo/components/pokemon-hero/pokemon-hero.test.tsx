@@ -1,4 +1,3 @@
-import { forceBones } from "@camp.dev/bones/react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vite-plus/test";
 import { PokemonHero } from "./pokemon-hero";
@@ -71,15 +70,13 @@ describe("PokemonHero", () => {
     expect(screen.getByText(species.description)).toBeDefined();
   });
 
-  test("renders a full skeleton when both sources are forced", () => {
-    const { container } = render(<PokemonHero pokemon={forceBones} species={forceBones} />);
-    // artwork, name, number, two types, meta line, and description
-    expect(container.querySelectorAll("[data-bone]").length).toBe(7);
-  });
-
-  test("skeletons only the species fields when species alone is forced", () => {
-    const { container } = render(<PokemonHero pokemon={pokemon} species={forceBones} />);
-    expect(screen.getByText("bulbasaur")).toBeDefined();
-    expect(container.querySelectorAll("[data-bone]").length).toBe(2);
+  test("renders the shell with no data", () => {
+    const { container } = render(<PokemonHero aria-busy="true" />);
+    expect(container.firstElementChild?.getAttribute("aria-busy")).toBe("true");
+    expect(container.querySelector("h1")?.textContent).toBe("");
+    // name, number, two type badges
+    expect(container.querySelectorAll("span").length).toBe(4);
+    expect(container.querySelector("[data-bones-lines='2']")).not.toBeNull();
+    expect((screen.getByAltText("Pokemon") as HTMLImageElement).src.startsWith("data:")).toBe(true);
   });
 });

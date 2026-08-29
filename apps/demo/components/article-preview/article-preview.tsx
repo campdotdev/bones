@@ -1,4 +1,4 @@
-import { createBones } from "@camp.dev/bones/react";
+import type { ComponentProps } from "react";
 import styles from "./styles.module.css";
 
 interface Article {
@@ -8,21 +8,22 @@ interface Article {
   date: string;
 }
 
-export function ArticlePreview({ article }: { article?: Article | Promise<Article> }) {
-  const { bone, data, lines } = createBones(article);
-
+export function ArticlePreview({
+  article,
+  ...rest
+}: { article?: Article } & ComponentProps<"div">) {
   return (
-    <div className={styles.articlePreview}>
-      <h3 className={styles.articleTitle} {...bone("text", { length: 24 })}>
-        {data?.title}
-      </h3>
-      {lines(data?.excerpt, 4, (item) => (
-        <p className={styles.articleExcerpt}>{item}</p>
-      ))}
+    <div className={styles.articlePreview} {...rest}>
+      <h3 className={styles.articleTitle}>{article?.title}</h3>
+      <p className={styles.articleExcerpt} data-bones-lines="4">
+        {article?.excerpt}
+      </p>
       <div className={styles.articleMeta}>
-        <span {...bone("text", { length: 12 })}>{data?.author}</span>
-        <span className={styles.articleDot}>&middot;</span>
-        <span {...bone("text", { length: 10 })}>{data?.date}</span>
+        <span>{article?.author}</span>
+        <span className={styles.articleDot} data-bones-auto="off">
+          &middot;
+        </span>
+        <span>{article?.date}</span>
       </div>
     </div>
   );

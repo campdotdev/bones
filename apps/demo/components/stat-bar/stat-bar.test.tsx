@@ -1,4 +1,3 @@
-import { forceBones } from "@camp.dev/bones/react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vite-plus/test";
 import { StatBar } from "./stat-bar";
@@ -38,9 +37,10 @@ describe("StatBar", () => {
     }
   });
 
-  test("renders a full skeleton under forceBones", () => {
-    const { container } = render(<StatBar stat={forceBones} />);
-    // name, value, and bar
-    expect(container.querySelectorAll("[data-bone]").length).toBe(3);
+  test("the fill is an explicit block so it paints as a box, not a text bar", () => {
+    const { container } = render(<StatBar aria-busy="true" />);
+    const fill = container.querySelector("[data-bones-type='block']") as HTMLElement;
+    expect(fill.style.width).toBe("60%");
+    expect(container.firstElementChild?.getAttribute("aria-busy")).toBe("true");
   });
 });

@@ -1,52 +1,45 @@
 import Image from "next/image";
-import { createBones } from "@camp.dev/bones/react";
+import type { ComponentProps } from "react";
 import type { PokemonData, SpeciesData } from "@/lib/pokeapi";
+import { TRANSPARENT_PIXEL } from "@/lib/pixel";
 import { TypeBadge } from "@/components/type-badge/type-badge";
 import styles from "./styles.module.css";
 
 export function PokemonHero({
   pokemon,
   species,
-}: {
-  pokemon?: PokemonData | Promise<PokemonData>;
-  species?: SpeciesData | Promise<SpeciesData>;
-}) {
-  const { bone: pokeBone, data: poke, repeat } = createBones(pokemon);
-  const { bone: specBone, data: spec } = createBones(species);
-
+  ...rest
+}: { pokemon?: PokemonData; species?: SpeciesData } & ComponentProps<"div">) {
   return (
-    <div className={styles.hero}>
+    <div className={styles.hero} {...rest}>
       <div className={styles.imageBox}>
         <Image
           className={styles.artwork}
-          src={poke?.artwork ?? ""}
-          alt={poke?.name ?? "Pokemon"}
+          src={pokemon?.artwork ?? TRANSPARENT_PIXEL}
+          alt={pokemon?.name ?? "Pokemon"}
           width={475}
           height={475}
-          {...pokeBone("block")}
         />
       </div>
       <div className={styles.info}>
         <h1 className={styles.name}>
-          <span {...pokeBone("text")}>{poke?.name}</span>
-          <span className={styles.number} {...pokeBone("text", { length: 4 })}>
-            {poke && `#${String(poke.id).padStart(3, "0")}`}
+          <span>{pokemon?.name}</span>
+          <span className={styles.number}>
+            {pokemon && `#${String(pokemon.id).padStart(3, "0")}`}
           </span>
         </h1>
         <div className={styles.types}>
-          {repeat(poke?.types, 2, (item, i) => (
-            <TypeBadge
-              key={item ?? i}
-              type={item}
-              {...pokeBone("text", { contained: true, length: 7 })}
-            />
+          {(pokemon?.types ?? Array.from({ length: 2 })).map((type, i) => (
+            <TypeBadge key={type ?? i} type={type} />
           ))}
         </div>
-        <p className={styles.meta} {...specBone("text")}>
-          {spec && poke && `${spec.genus} · ${poke.height / 10} m · ${poke.weight / 10} kg`}
+        <p className={styles.meta}>
+          {species &&
+            pokemon &&
+            `${species.genus} · ${pokemon.height / 10} m · ${pokemon.weight / 10} kg`}
         </p>
-        <p className={styles.description} {...specBone("text")}>
-          {spec?.description}
+        <p className={styles.description} data-bones-lines="2">
+          {species?.description}
         </p>
       </div>
     </div>
