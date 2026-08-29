@@ -78,4 +78,4 @@ import { createBones, forceBones } from "@camp.dev/bones/react";
 <ProfileCard user={forceBones} />;
 ```
 
-For content that has no bone markup at all, wrap it in [`<bones-boundary force>`](/api/bones-boundary) and let `auto.css` draw leaf bones. No Suspense boundary or async data required either way — render and you'll see skeletons immediately, which is what you want in Storybook or a visual test.
+For content that has no bone markup at all, wrap it in [`<bones-boundary force>`](/api/bones-boundary) and the stylesheet draws leaf bones. No Suspense boundary or async data required either way — render and you'll see skeletons immediately, which is what you want in Storybook or a visual test.

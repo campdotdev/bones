@@ -7,14 +7,14 @@ description: A custom element that manages the loading state of its subtree.
 import "@camp.dev/bones/element";
 ```
 
-`<bones-boundary>` sets `aria-busy="true"` and `inert` on itself while its subtree is loading, and removes them when it is not. It draws nothing. `@camp.dev/bones/css` styles `data-bone` markup and `@camp.dev/bones/auto.css` styles unmarked leaves, and both key on `aria-busy="true"`.
+`<bones-boundary>` sets `aria-busy="true"` and `inert` on itself while its subtree is loading, and removes them when it is not. It draws nothing. `@camp.dev/bones/css` styles `data-bone` markup and unmarked leaves, both keyed on `aria-busy="true"`.
 
 Set `busy` when loading starts and remove it when loading ends. The element waits `delay` before it shows bones, so a fast response never flashes a skeleton, and it keeps bones for at least `min-duration`, so a slow one never strobes.
 
 ## Usage
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/@camp.dev/bones/src/css/auto.css" />
+<link rel="stylesheet" href="https://unpkg.com/@camp.dev/bones/src/css/bones.css" />
 <script type="module">
   import "https://unpkg.com/@camp.dev/bones/dist/element/index.mjs";
 </script>
@@ -90,7 +90,7 @@ Render the output attributes yourself when you know a region is loading at reque
 <bones-boundary busy aria-busy="true" inert>…</bones-boundary>
 ```
 
-The stylesheet paints bones and the subtree is inert before the element upgrades. On upgrade the element adopts the showing state, and `min-duration` counts from that moment. With `precision="measured"`, the leaf bones auto.css painted before JavaScript ran are replaced by measured bars at upgrade time; the swap is the enhancement taking over.
+The stylesheet paints bones and the subtree is inert before the element upgrades. On upgrade the element adopts the showing state, and `min-duration` counts from that moment. With `precision="measured"`, the leaf bones the stylesheet painted before JavaScript ran are replaced by measured bars at upgrade time; the swap is the enhancement taking over.
 
 ## Streaming
 
@@ -100,13 +100,13 @@ A server can stream into a boundary: render it busy in the shell with a `data-bo
 
 With `precision="measured"`, the element measures its rendered content while bones show and draws the skeleton from the measurements: one bar per rendered line of text, one block per image or form control. Bars live in a shadow root, so page CSS and frameworks never see them; style them with `::part(bone)`, `::part(bone-text)`, `::part(bone-block)`, and `::part(overlay)`, or through the `--bone-*` custom properties, which inherit into the overlay.
 
-While the overlay shows, the element sets `data-bones-measured` and, unless the author already set it, `data-bones-auto="off"` on itself. It hides the content with inherited `visibility` and re-measures whenever its size changes. When it hides, the attributes the overlay set come off inside the same swap that removes `aria-busy`; an author-set `data-bones-auto` is never touched. If there is nothing to measure — an empty boundary, or an environment without layout — the element stays on the CSS path and `auto.css` draws leaf bones instead.
+While the overlay shows, the element sets `data-bones-measured` and, unless the author already set it, `data-bones-auto="off"` on itself. It hides the content with inherited `visibility` and re-measures whenever its size changes. When it hides, the attributes the overlay set come off inside the same swap that removes `aria-busy`; an author-set `data-bones-auto` is never touched. If there is nothing to measure — an empty boundary, or an environment without layout — the element stays on the CSS path and the stylesheet draws leaf bones instead.
 
 A measured boundary is `display: block; position: relative` (the overlay needs a positioned block container). This applies from upgrade, not from the first show.
 
 Three edges to know about:
 
-- Content hiding uses a non-`!important` `::slotted` rule. An author rule that sets `visibility` on a direct child of the boundary wins over it and that child stays visible. The same cascade behavior is what lets `auto.css` keep `[data-bones-auto="off"]` subtrees visible under the overlay — without `auto.css` on the page, opted-out subtrees hide with everything else.
+- Content hiding uses a non-`!important` `::slotted` rule. An author rule that sets `visibility` on a direct child of the boundary wins over it and that child stays visible. The same cascade behavior is what lets the stylesheet keep `[data-bones-auto="off"]` subtrees visible under the overlay. Without the stylesheet on the page, opted-out subtrees hide with everything else.
 - Re-measurement is driven by size changes and by DOM changes: children added, removed, or replaced, and text edits. An attribute change that reflows content without either — a `class` swap inside a fixed-size boundary — keeps its previous bars until the next resize or DOM change. Content that scrolls inside the boundary (an `overflow: auto` box) also leaves bars at their pre-scroll positions, because scrolling fires neither. A subtree that becomes empty while showing drops the boundary to the CSS path for the rest of that showing window, even if content is added later.
 - Measurement compensates for scale transforms on the boundary or its ancestors, but not for rotation or skew. A rotated boundary draws its bars in the wrong place.
 
@@ -147,4 +147,4 @@ The package augments `JSX.IntrinsicElements` with `"bones-boundary"`. A project 
 
 ## Browser support
 
-Custom elements, `inert` (Chrome 102, Safari 15.5, Firefox 112), and the `:has()` selector that `auto.css` already needs. View Transitions are detected at runtime.
+Custom elements, `inert` (Chrome 102, Safari 15.5, Firefox 112), and the `:has()` selector the stylesheet needs. View Transitions are detected at runtime.
