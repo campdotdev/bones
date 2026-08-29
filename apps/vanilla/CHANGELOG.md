@@ -1,5 +1,12 @@
 # bones-vanilla
 
+## 0.0.3
+
+### Patch Changes
+
+- Updated dependencies [[`81df60d`](https://github.com/campdotdev/bones/commit/81df60d492f32b2a759ff16d5e1bded61e33b9c4)]:
+  - @camp.dev/bones@0.4.1
+
 ## 0.0.2
 
 ### Patch Changes

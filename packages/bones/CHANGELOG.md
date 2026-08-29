@@ -1,5 +1,11 @@
 # bones
 
+## 0.4.1
+
+### Patch Changes
+
+- [#54](https://github.com/campdotdev/bones/pull/54) [`81df60d`](https://github.com/campdotdev/bones/commit/81df60d492f32b2a759ff16d5e1bded61e33b9c4) Thanks [@hunterbecton](https://github.com/hunterbecton)! - Block bones now cover an image that has already loaded. A loaded opaque image paints over its own background, so an `<img>` with a resolved `src` inside a busy region, or one marked `data-bone="block"`, showed the picture instead of a bone. `auto.css` and `bones.css` now set `object-position` on block bones to push the picture out of its content box. The box and its bone background stay in place. Images, canvas, and video without native controls are covered. A loaded `iframe`, `embed`, or `object` still shows its content, because those elements ignore `object-position`.
+
 ## 0.4.0
 
 ### Minor Changes
