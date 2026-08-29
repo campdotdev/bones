@@ -690,6 +690,14 @@
       }
     }
   }
+
+  /* precision="measured" hides a boundary's content with inherited
+     visibility from the shadow side. Visibility, unlike display, can be
+     switched back on by a descendant, so the opt-out contract survives
+     measured mode: exempt subtrees stay visible under the overlay. */
+  bones-boundary[data-bones-measured] [data-bones-auto="off"] {
+    visibility: visible;
+  }
 }
 
 /* ---------------------------------------------------------------------------

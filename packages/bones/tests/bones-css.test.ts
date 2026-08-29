@@ -156,6 +156,12 @@ describe("file shape", () => {
     mount('<p id="host" aria-busy="true"></p>');
     expect(isTextLeaf(el("host"))).toBe(true);
   });
+
+  test("keeps opted-out subtrees visible under a measured overlay", () => {
+    expect(layered).toContain(
+      'bones-boundary[data-bones-measured] [data-bones-auto="off"] { visibility: visible; }',
+    );
+  });
 });
 
 describe("bar geometry is the same in both strengths", () => {
