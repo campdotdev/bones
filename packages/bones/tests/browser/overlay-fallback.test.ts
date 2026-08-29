@@ -19,7 +19,7 @@ test("measured bars without stylesheets derive from the inherited color", () => 
   document.body.insertAdjacentHTML(
     "beforeend",
     `<bones-boundary force precision="measured" transition="none" min-duration="0"
-       data-bone-animate="none"
+       data-bones-animate="none"
        style="width: 20ch; font: 16px/1.5 monospace; color: rgb(238, 238, 238);">
        <p style="margin: 0">aaaa bbbb</p>
      </bones-boundary>`,

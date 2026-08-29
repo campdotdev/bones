@@ -22,20 +22,20 @@ function mount(html: string): HTMLElement {
 
 const DARK_PAGE_TEXT = "color: rgb(238, 238, 238)";
 
-test("text bone bar derives from the inherited text color", () => {
-  // Marked bones shimmer by default (BON-16). The data-bone-animate="none"
+test("explicit text bone bar derives from the inherited text color", () => {
+  // Explicit bones shimmer by default (BON-16). The data-bones-animate="none"
   // wrapper collapses the gradient to a solid background-color; without it
   // the bar's paint lives in background-image.
   const root = mount(
-    `<div data-bone-animate="none" style="${DARK_PAGE_TEXT}"><span data-bone="text">hidden</span></div>`,
+    `<div data-bones-animate="none" style="${DARK_PAGE_TEXT}"><div aria-busy="true"><span data-bones-type="text">hidden</span></div></div>`,
   );
   const bar = getComputedStyle(root.querySelector("span")!, "::after");
   expectColor(bar.backgroundColor, [238, 238, 238, 0.12]);
 });
 
-test("image block bone hides its alt text but keeps the inherited channels", () => {
+test("explicit image block hides its alt text but keeps the inherited channels", () => {
   const root = mount(
-    `<div data-bone-animate="none" style="color: rgb(51, 51, 51)"><img data-bone="block" alt="avatar" width="48" height="48" /></div>`,
+    `<div data-bones-animate="none" style="color: rgb(51, 51, 51)"><div aria-busy="true"><img data-bones-type="block" alt="avatar" width="48" height="48" /></div></div>`,
   );
   const img = getComputedStyle(root.querySelector("img")!);
   // Alt text stays invisible…
@@ -44,17 +44,17 @@ test("image block bone hides its alt text but keeps the inherited channels", () 
   expectColor(img.backgroundColor, [51, 51, 51, 0.12]);
 });
 
-test("auto text leaf bar derives from the inherited text color", () => {
+test("inferred text leaf bar derives from the inherited text color", () => {
   const root = mount(
-    `<div data-bone-animate="none"><section aria-busy="true" style="${DARK_PAGE_TEXT}"><p>some copy</p></section></div>`,
+    `<div data-bones-animate="none"><section aria-busy="true" style="${DARK_PAGE_TEXT}"><p>some copy</p></section></div>`,
   );
   const bar = getComputedStyle(root.querySelector("p")!, "::after");
   expectColor(bar.backgroundColor, [238, 238, 238, 0.12]);
 });
 
-test("auto block bone derives from the inherited text color", () => {
+test("inferred block bone derives from the inherited text color", () => {
   const root = mount(
-    `<div data-bone-animate="none"><section aria-busy="true" style="${DARK_PAGE_TEXT}"><img alt="avatar" width="48" height="48" /></section></div>`,
+    `<div data-bones-animate="none"><section aria-busy="true" style="${DARK_PAGE_TEXT}"><img alt="avatar" width="48" height="48" /></section></div>`,
   );
   const img = getComputedStyle(root.querySelector("img")!);
   expectColor(img.backgroundColor, [238, 238, 238, 0.12]);
@@ -63,7 +63,9 @@ test("auto block bone derives from the inherited text color", () => {
 test("default text color keeps today's black-at-12% bones", () => {
   // Chromium's default color is black, so pages that never set a color get
   // exactly the value the library shipped before the derivation change.
-  const root = mount(`<div data-bone-animate="none"><span data-bone="text">hidden</span></div>`);
+  const root = mount(
+    `<div data-bones-animate="none"><div aria-busy="true"><span data-bones-type="text">hidden</span></div></div>`,
+  );
   const bar = getComputedStyle(root.querySelector("span")!, "::after");
   expectColor(bar.backgroundColor, [0, 0, 0, 0.12]);
 });

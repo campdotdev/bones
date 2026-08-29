@@ -6,7 +6,7 @@
 // ResizeObserver that re-measures. The shadow root gives the bars a home that
 // page CSS, React reconciliation, and author selectors can never reach, while
 // a single <slot> keeps the children in the light DOM where document
-// stylesheets (the auto half of bones.css included) still style them.
+// stylesheets (the inferred rules in bones.css included) still style them.
 // ---------------------------------------------------------------------------
 
 import { measureBones } from "./measure.ts";
@@ -41,8 +41,8 @@ const OVERLAY_CSS = `
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
-[part~="overlay"]:not([data-bone-animate]) [part~="bone"],
-[part~="overlay"][data-bone-animate="shimmer"] [part~="bone"] {
+[part~="overlay"]:not([data-bones-animate]) [part~="bone"],
+[part~="overlay"][data-bones-animate="shimmer"] [part~="bone"] {
   animation: bone-shimmer var(--bone-duration, 1.5s) ease-in-out infinite;
   background: linear-gradient(
     90deg,
@@ -52,19 +52,19 @@ const OVERLAY_CSS = `
   );
   background-size: 200% 100%;
 }
-[part~="overlay"][data-bone-animate="pulse"] [part~="bone"] {
+[part~="overlay"][data-bones-animate="pulse"] [part~="bone"] {
   animation: bone-pulse var(--bone-duration, 1.5s) ease-in-out infinite;
 }
-[part~="overlay"][data-bone-animate="none"] [part~="bone"] {
+[part~="overlay"][data-bones-animate="none"] [part~="bone"] {
   animation: none;
 }
 /* Matches the shimmer/pulse selectors above at equal (0,3,0) specificity so
    this override always wins the cascade instead of losing to source order.
-   data-bone-animate="none" is deliberately excluded: none still means none. */
+   data-bones-animate="none" is deliberately excluded: none still means none. */
 @media (prefers-reduced-motion: reduce) {
-  [part~="overlay"]:not([data-bone-animate]) [part~="bone"],
-  [part~="overlay"][data-bone-animate="shimmer"] [part~="bone"],
-  [part~="overlay"][data-bone-animate="pulse"] [part~="bone"] {
+  [part~="overlay"]:not([data-bones-animate]) [part~="bone"],
+  [part~="overlay"][data-bones-animate="shimmer"] [part~="bone"],
+  [part~="overlay"][data-bones-animate="pulse"] [part~="bone"] {
     animation: bone-pulse 2s ease-in-out infinite;
     background: var(--bone-base, color-mix(in srgb, rgb(from currentcolor r g b / 1) 12%, transparent));
     background-size: auto;
@@ -220,9 +220,9 @@ export class MeasuredOverlay {
     }
     // The overlay cannot see light-DOM ancestors from CSS, so the animation
     // override attribute is mirrored onto the container at render time.
-    const animate = this.#host.closest("[data-bone-animate]")?.getAttribute("data-bone-animate");
-    if (animate) this.#container.setAttribute("data-bone-animate", animate);
-    else this.#container.removeAttribute("data-bone-animate");
+    const animate = this.#host.closest("[data-bones-animate]")?.getAttribute("data-bones-animate");
+    if (animate) this.#container.setAttribute("data-bones-animate", animate);
+    else this.#container.removeAttribute("data-bones-animate");
     // Measured rects are post-transform viewport geometry, but the bars'
     // CSS values are laid out in the host's local space and then transformed
     // again — under a scale(2) ancestor a naive subtraction doubles every

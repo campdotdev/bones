@@ -694,17 +694,17 @@ describe("overlay reduced-motion contract", () => {
   test("the override matches each shimmer/pulse selector at full specificity", () => {
     const block = extractReducedMotionBlock(overlaySource);
     for (const selector of [
-      '[part~="overlay"]:not([data-bone-animate]) [part~="bone"]',
-      '[part~="overlay"][data-bone-animate="shimmer"] [part~="bone"]',
-      '[part~="overlay"][data-bone-animate="pulse"] [part~="bone"]',
+      '[part~="overlay"]:not([data-bones-animate]) [part~="bone"]',
+      '[part~="overlay"][data-bones-animate="shimmer"] [part~="bone"]',
+      '[part~="overlay"][data-bones-animate="pulse"] [part~="bone"]',
     ]) {
       expect(block).toContain(selector);
     }
   });
 
-  test("the override deliberately excludes data-bone-animate=none", () => {
+  test("the override deliberately excludes data-bones-animate=none", () => {
     const block = extractReducedMotionBlock(overlaySource);
-    expect(block).not.toContain('[data-bone-animate="none"]');
+    expect(block).not.toContain('[data-bones-animate="none"]');
   });
 });
 
