@@ -5,14 +5,14 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, expect, test } from "vite-plus/test";
 import { page } from "vite-plus/test/browser";
 import "../../src/element/index.ts";
-import "../../src/css/auto.css";
+import "../../src/css/bones.css";
 import { createBones, forceBones } from "../../src/react/index.ts";
 
 // ---------------------------------------------------------------------------
-// One card, three renderers. auto.css restates the text-bar geometry from
-// bones.css and only a selector-text test pins the copies; these screenshots
-// pin what a user actually sees. data-bone-animate="none" everywhere so the
-// shimmer cannot make an image non-deterministic.
+// One card, three renderers. The auto half of bones.css restates the marked
+// text-bar geometry and only a selector-text test pins the copies; these
+// screenshots pin what a user actually sees. data-bone-animate="none"
+// everywhere so the shimmer cannot make an image non-deterministic.
 // ---------------------------------------------------------------------------
 
 const CARD_STYLE = "width: 320px; padding: 16px; font: 16px/1.5 sans-serif; background: #fff;";
@@ -73,7 +73,7 @@ test("react renderer with forceBones", async () => {
   await expect(page.getByTestId("react-card")).toMatchScreenshot("react-force");
 });
 
-test("element renderer with auto.css", async () => {
+test("element renderer with auto rules", async () => {
   mountHtml(
     `<bones-boundary force data-testid="element-card" data-bone-animate="none" style="${CARD_STYLE} display: block;">${CONTENT}</bones-boundary>`,
   );
@@ -81,7 +81,7 @@ test("element renderer with auto.css", async () => {
   await expect(page.getByTestId("element-card")).toMatchScreenshot("element-force");
 });
 
-test("bare aria-busy region with auto.css", async () => {
+test("bare aria-busy region with auto rules", async () => {
   mountHtml(
     `<div aria-busy="true" data-testid="bare-card" data-bone-animate="none" style="${CARD_STYLE}">${CONTENT}</div>`,
   );

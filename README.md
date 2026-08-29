@@ -32,14 +32,13 @@ import "@camp.dev/bones/css";
 
 ## Entry points
 
-| Import                     | Contents                                                                                                                                                                                                                   |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@camp.dev/bones/react`    | `createBones`, `readPromise`, `forceBones`, `minMax`, `isMinMax`, `BonesBoundary`                                                                                                                                          |
-| `@camp.dev/bones/css`      | The skeleton stylesheet. Import once in your root layout.                                                                                                                                                                  |
-| `@camp.dev/bones/auto.css` | Skeletonizes unmarked leaves under `aria-busy="true"`. Imports the base stylesheet itself, so a separate `/css` import is optional.                                                                                        |
-| `@camp.dev/bones/element`  | `<bones-boundary>`, a custom element that sets `aria-busy` and `inert` on its subtree with `delay`, `min-duration`, and a crossfade. `precision="measured"` draws pixel-accurate per-line bones measured from the content. |
-| `@camp.dev/bones/server`   | `streamBones` and the wire-protocol primitives: stream a shell with busy boundaries, then flush each region's content out of order as it resolves.                                                                         |
-| `@camp.dev/bones`          | The framework-agnostic core (`boneAttributes`, `minMax`). You only need this to build your own renderer or adapter.                                                                                                        |
+| Import                    | Contents                                                                                                                                                                                                                   |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@camp.dev/bones/react`   | `createBones`, `readPromise`, `forceBones`, `minMax`, `isMinMax`, `BonesBoundary`                                                                                                                                          |
+| `@camp.dev/bones/css`     | The stylesheet. Styles `data-bone` markup and, under any `aria-busy="true"` region, unmarked leaves. Import once in your root layout.                                                                                      |
+| `@camp.dev/bones/element` | `<bones-boundary>`, a custom element that sets `aria-busy` and `inert` on its subtree with `delay`, `min-duration`, and a crossfade. `precision="measured"` draws pixel-accurate per-line bones measured from the content. |
+| `@camp.dev/bones/server`  | `streamBones` and the wire-protocol primitives: stream a shell with busy boundaries, then flush each region's content out of order as it resolves.                                                                         |
+| `@camp.dev/bones`         | The framework-agnostic core (`boneAttributes`, `minMax`). You only need this to build your own renderer or adapter.                                                                                                        |
 
 React is an optional peer dependency: installing the package without React is supported and only the `/react` entry requires it.
 
@@ -114,17 +113,11 @@ To force a subtree into skeleton mode at once, pass `forceBones` to each compone
 <PostCard key={item?.id ?? i} post={item ?? forceBones} />
 ```
 
-For content that has no bone markup at all, wrap it in [`<bones-boundary force>`](apps/docs/content/docs/api/bones-boundary.mdx) and let `auto.css` draw leaf bones.
+For content that has no bone markup at all, wrap it in [`<bones-boundary force>`](apps/docs/content/docs/api/bones-boundary.mdx) and the stylesheet draws leaf bones.
 
 ## Automatic skeletons
 
-For markup you haven't wired up with `bone()` — third-party components, server-rendered HTML, anything without explicit attributes — import the auto stylesheet. It imports `/css` itself, so this one file is a complete setup:
-
-```tsx
-import "@camp.dev/bones/auto.css";
-```
-
-Set `aria-busy="true"` on the loading region and every unmarked leaf inside it becomes a skeleton, no `bone()` calls required:
+For markup you haven't wired up with `bone()` — third-party components, server-rendered HTML, anything without explicit attributes — set `aria-busy="true"` on the loading region. Every unmarked leaf inside it becomes a skeleton, no `bone()` calls required:
 
 ```html
 <section aria-busy="true">
@@ -133,7 +126,7 @@ Set `aria-busy="true"` on the loading region and every unmarked leaf inside it b
 </section>
 ```
 
-`[data-bones-auto="off"]` opts a subtree out — useful for a status message you want to stay readable while its container skeletonizes. Images, canvas, and video without native controls get a solid bone even after they have loaded, unless page CSS sets `object-position` on them, which outranks the layered rule the same way `color` does. A loaded `iframe`, `embed`, or `object` still shows its content, because those elements ignore `object-position`. Explicit `data-bone` markup is left alone; `auto.css` only styles elements neither `bone()` nor a manual `data-bone` attribute has already claimed.
+`[data-bones-auto="off"]` opts a subtree out — useful for a status message you want to stay readable while its container skeletonizes. Set it on `<body>` to turn auto bones off for the whole page. Images, canvas, and video without native controls get a solid bone even after they have loaded, unless page CSS sets `object-position` on them, which outranks the layered rule the same way `color` does. A loaded `iframe`, `embed`, or `object` still shows its content, because those elements ignore `object-position`. Explicit `data-bone` markup is left alone. The stylesheet only styles elements neither `bone()` nor a manual `data-bone` attribute has already claimed.
 
 Auto rules live in `@layer bones-auto`, so any page CSS that sets `color` on an element outranks the bone's transparent text, and that text stays visible over its skeleton bar. `data-bone-animate` works on the `aria-busy` element itself or on any ancestor. The `data-bone-animate` overrides rely on `@scope`. In a browser without `@scope`, every bone shimmers, and `data-bone-animate="pulse"` and `"none"` cannot change that. The `prefers-reduced-motion` fallback to pulse still applies.
 
@@ -154,7 +147,7 @@ Auto rules live in `@layer bones-auto`, so any page CSS that sets `color` on an 
 
 `@camp.dev/bones/element` is a bare specifier. A browser cannot resolve it on its own, so this snippet needs a bundler or an import map. To load the element straight from a CDN in a plain HTML file, see the URL form on the [bones-boundary docs page](apps/docs/content/docs/api/bones-boundary.mdx).
 
-Pair it with `auto.css` for zero-markup skeletons, or with `data-bone` markup from `boneAttributes`. The element is also exported for React as `<BonesBoundary>` from `@camp.dev/bones/react`.
+It works with zero-markup content out of the box, or with `data-bone` markup from `boneAttributes`. The element is also exported for React as `<BonesBoundary>` from `@camp.dev/bones/react`.
 
 ## Development
 

@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from "vite-plus/test";
-import "../../src/css/auto.css";
+import "../../src/css/bones.css";
 
 // ---------------------------------------------------------------------------
 // BON-17: data-bone-animate must take effect from the element that carries it,
@@ -18,7 +18,7 @@ function mount(html: string): HTMLElement {
   return document.body.lastElementChild as HTMLElement;
 }
 
-// --- marked bones (bones.css, pulled in via auto.css's @import) -------------
+// --- marked bones (the marked half of bones.css) ----------------------------
 
 test("data-bone-animate on the marked bone itself takes effect", () => {
   const root = mount(`<div><span data-bone="text" data-bone-animate="shimmer">hidden</span></div>`);

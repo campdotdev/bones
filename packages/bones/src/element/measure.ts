@@ -19,8 +19,8 @@ export interface BoneRect extends Rect {
   kind: "text" | "block";
 }
 
-// Mirrors the :is() list in auto.css's block override; the walk treats these
-// as atomic boxes and never descends into them.
+// Mirrors the :is() list in the auto block override in bones.css. The walk
+// treats these as atomic boxes and never descends into them.
 export const BLOCK_TAGS = new Set([
   "img",
   "svg",

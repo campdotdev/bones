@@ -1,3 +1,28 @@
+/* ---------------------------------------------------------------------------
+   @camp.dev/bones/css: the one stylesheet.
+
+   Two halves, one file. The marked half (first) styles [data-bone] markup:
+   text, block, and container bones. The auto half (after it, inside
+   @layer bones-auto) styles unmarked leaves under an aria-busy state so a
+   page with no bone markup still gets skeletons. [data-bones-auto="off"]
+   exempts a subtree. On <body> it turns the auto half off.
+
+   The cascade shape is deliberate. Keep it through cleanups:
+   - Marked rules are unlayered. They hide text by zeroing color alpha and
+     hide container children with visibility: hidden, and an unlayered page
+     rule (h3 { color: #333 }) would beat either of those inside a layer.
+   - Auto rules live in @layer bones-auto. They match arbitrary page
+     elements, so page CSS must outrank them. The cost: a page color rule
+     keeps auto-bone text visible over its bar.
+   - Within each half, the data-bone-animate scopes beat the default because
+     :is(:scope, :scope *) puts them at higher specificity, not because of
+     source order. tests/browser/default-animation.test.ts and
+     animation-scope.test.ts pin this. @layer cannot take that job for the
+     marked half without moving it into a layer.
+   The halves are ordered marked-then-auto for reading. Unlayered beats
+   layered wherever it sits, so the order is not a correctness requirement.
+--------------------------------------------------------------------------- */
+
 :root {
   /* Bones derive their color from the text color in effect at the bone, so
      they inherit the page's own contrast guarantee on any background in any
@@ -76,7 +101,7 @@ canvas[data-bone="block"] {
   /* A loaded picture paints over the bone's background-color; pushing it out
      of the content box keeps the box and background visible (BON-15).
      transition: none keeps a page `transition: all` from sliding the picture
-     out on the way in; see the matching comment in auto.css. */
+     out on the way in; see the matching comment on the auto block rule below. */
   object-position: 9999px 0;
   transition: none;
 }
@@ -200,5 +225,1120 @@ canvas[data-bone="block"] {
     animation: none;
     background: var(--bone-base);
     background-size: auto;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Auto half: skeletonize unmarked markup under [aria-busy="true"].
+
+   data-bone marks shape, aria-busy marks state; these rules key on state so
+   a page with zero data-bone attributes still gets skeletons. Escape hatches:
+   [data-bones-auto="off"] exempts a subtree, and explicit [data-bone] markup
+   is always left to the marked rules above. Every rule lives in
+   @layer bones-auto so page CSS outranks it without !important.
+--------------------------------------------------------------------------- */
+
+@layer bones-auto {
+  /* Text default: any element with no child elements, minus exemptions and
+     the replaced/control elements that get block treatment below. Same bar
+     geometry as [data-bone="text"] in the marked half above — restated because CSS cannot
+     alias an attribute selector; the test suite pins both copies. */
+  [aria-busy="true"]
+    :not(:has(*)):not(
+      [data-bone],
+      [data-bone] *,
+      [data-bones-auto="off"],
+      [data-bones-auto="off"] *
+    ):not(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      iframe,
+      embed,
+      object,
+      audio,
+      button,
+      input,
+      select,
+      textarea,
+      progress,
+      meter,
+      hr,
+      br,
+      svg *,
+      picture *,
+      select *,
+      object *
+    ) {
+    color: rgb(from currentcolor r g b / 0);
+    position: relative;
+    min-width: 4ch;
+    min-height: 1lh;
+  }
+
+  [aria-busy="true"]
+    :not(:has(*)):not(
+      [data-bone],
+      [data-bone] *,
+      [data-bones-auto="off"],
+      [data-bones-auto="off"] *
+    ):not(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      iframe,
+      embed,
+      object,
+      audio,
+      button,
+      input,
+      select,
+      textarea,
+      progress,
+      meter,
+      hr,
+      br,
+      svg *,
+      picture *,
+      select *,
+      object *
+    )::before {
+    content: "\200b";
+  }
+
+  [aria-busy="true"]
+    :not(:has(*)):not(
+      [data-bone],
+      [data-bone] *,
+      [data-bones-auto="off"],
+      [data-bones-auto="off"] *
+    ):not(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      iframe,
+      embed,
+      object,
+      audio,
+      button,
+      input,
+      select,
+      textarea,
+      progress,
+      meter,
+      hr,
+      br,
+      svg *,
+      picture *,
+      select *,
+      object *
+    )::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: calc((1lh + 1cap) / 2 - 1ex);
+    height: 1ex;
+    background-color: var(--bone-base);
+    border-radius: var(--bone-radius);
+    pointer-events: none;
+  }
+}
+
+@layer bones-auto {
+  /* Block override: replaced elements and form controls fill their own box.
+     A text bar across an avatar or a button looks wrong. Leafness is not
+     required — svg and select routinely have element children. */
+  [aria-busy="true"]
+    :is(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      iframe,
+      embed,
+      object,
+      audio,
+      button,
+      input,
+      select,
+      textarea,
+      progress,
+      meter
+    ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
+    color: rgb(from currentcolor r g b / 0);
+    background-color: var(--bone-base);
+    border-radius: var(--bone-radius);
+    border-color: transparent;
+    /* A loaded image paints over its own background, so the bone color alone
+       does not cover it. Pushing the picture out of its content box leaves
+       the box and its background in place (BON-15). Only img, video, and
+       canvas honor this; a loaded iframe, embed, or object still shows, and
+       native video controls paint over the bone. object-position is
+       interpolable, so a page `transition: all` on images would slide the
+       picture out over the transition's duration; transition: none stops
+       that on the way in. On the way out the page's own transition applies,
+       and the picture reappears at the end of it instead of the start. */
+    object-position: 9999px 0;
+    transition: none;
+  }
+
+  /* Width variance: text leaves cycle 85 / 100 / 92 / 60 so runs of lines
+     look organic. Takes effect on block-level leaves; inline leaves keep
+     their content-derived width, which already varies. */
+  [aria-busy="true"]
+    :not(:has(*)):not(
+      [data-bone],
+      [data-bone] *,
+      [data-bones-auto="off"],
+      [data-bones-auto="off"] *
+    ):not(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      iframe,
+      embed,
+      object,
+      audio,
+      button,
+      input,
+      select,
+      textarea,
+      progress,
+      meter,
+      hr,
+      br,
+      svg *,
+      picture *,
+      select *,
+      object *
+    ):nth-child(4n + 1) {
+    width: 85%;
+  }
+
+  [aria-busy="true"]
+    :not(:has(*)):not(
+      [data-bone],
+      [data-bone] *,
+      [data-bones-auto="off"],
+      [data-bones-auto="off"] *
+    ):not(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      iframe,
+      embed,
+      object,
+      audio,
+      button,
+      input,
+      select,
+      textarea,
+      progress,
+      meter,
+      hr,
+      br,
+      svg *,
+      picture *,
+      select *,
+      object *
+    ):nth-child(4n + 2) {
+    width: 100%;
+  }
+
+  [aria-busy="true"]
+    :not(:has(*)):not(
+      [data-bone],
+      [data-bone] *,
+      [data-bones-auto="off"],
+      [data-bones-auto="off"] *
+    ):not(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      iframe,
+      embed,
+      object,
+      audio,
+      button,
+      input,
+      select,
+      textarea,
+      progress,
+      meter,
+      hr,
+      br,
+      svg *,
+      picture *,
+      select *,
+      object *
+    ):nth-child(4n + 3) {
+    width: 92%;
+  }
+
+  [aria-busy="true"]
+    :not(:has(*)):not(
+      [data-bone],
+      [data-bone] *,
+      [data-bones-auto="off"],
+      [data-bones-auto="off"] *
+    ):not(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      iframe,
+      embed,
+      object,
+      audio,
+      button,
+      input,
+      select,
+      textarea,
+      progress,
+      meter,
+      hr,
+      br,
+      svg *,
+      picture *,
+      select *,
+      object *
+    ):nth-child(4n) {
+    width: 60%;
+  }
+}
+
+@layer bones-auto {
+  /* Auto bones default to shimmer. The marked rules above have their own
+     default, but they match [data-bone] elements only and never the unmarked
+     leaves targeted here, so the default is restated for them, and the scopes
+     below mirror the marked scopes for pages that set the attribute (BON-16).
+     In those scopes, :is(:scope, :scope *) lets the attribute sit on the
+     aria-busy element itself: a scoped selector's implicit :scope prefix
+     matches strict descendants only (BON-17). */
+  [aria-busy="true"]
+    :not(:has(*)):not(
+      [data-bone],
+      [data-bone] *,
+      [data-bones-auto="off"],
+      [data-bones-auto="off"] *
+    ):not(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      iframe,
+      embed,
+      object,
+      audio,
+      button,
+      input,
+      select,
+      textarea,
+      progress,
+      meter,
+      hr,
+      br,
+      svg *,
+      picture *,
+      select *,
+      object *
+    )::before,
+  [aria-busy="true"]
+    :not(:has(*)):not(
+      [data-bone],
+      [data-bone] *,
+      [data-bones-auto="off"],
+      [data-bones-auto="off"] *
+    ):not(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      iframe,
+      embed,
+      object,
+      audio,
+      button,
+      input,
+      select,
+      textarea,
+      progress,
+      meter,
+      hr,
+      br,
+      svg *,
+      picture *,
+      select *,
+      object *
+    )::after,
+  [aria-busy="true"]
+    :is(
+      img,
+      svg,
+      video,
+      canvas,
+      picture,
+      iframe,
+      embed,
+      object,
+      audio,
+      button,
+      input,
+      select,
+      textarea,
+      progress,
+      meter
+    ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
+    animation: bone-shimmer var(--bone-duration) ease-in-out infinite;
+    background: linear-gradient(
+      90deg,
+      var(--bone-base) 25%,
+      var(--bone-highlight) 50%,
+      var(--bone-base) 75%
+    );
+    background-size: 200% 100%;
+  }
+
+  @scope ([data-bone-animate="shimmer"]) to ([data-bone-animate]:not([data-bone-animate="shimmer"])) {
+    [aria-busy="true"]:is(:scope, :scope *)
+      :not(:has(*)):not(
+        [data-bone],
+        [data-bone] *,
+        [data-bones-auto="off"],
+        [data-bones-auto="off"] *
+      ):not(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter,
+        hr,
+        br,
+        svg *,
+        picture *,
+        select *,
+        object *
+      )::before,
+    [aria-busy="true"]:is(:scope, :scope *)
+      :not(:has(*)):not(
+        [data-bone],
+        [data-bone] *,
+        [data-bones-auto="off"],
+        [data-bones-auto="off"] *
+      ):not(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter,
+        hr,
+        br,
+        svg *,
+        picture *,
+        select *,
+        object *
+      )::after,
+    [aria-busy="true"]:is(:scope, :scope *)
+      :is(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter
+      ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
+      animation: bone-shimmer var(--bone-duration) ease-in-out infinite;
+      background: linear-gradient(
+        90deg,
+        var(--bone-base) 25%,
+        var(--bone-highlight) 50%,
+        var(--bone-base) 75%
+      );
+      background-size: 200% 100%;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      [aria-busy="true"]:is(:scope, :scope *)
+        :not(:has(*)):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ):not(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          iframe,
+          embed,
+          object,
+          audio,
+          button,
+          input,
+          select,
+          textarea,
+          progress,
+          meter,
+          hr,
+          br,
+          svg *,
+          picture *,
+          select *,
+          object *
+        )::before,
+      [aria-busy="true"]:is(:scope, :scope *)
+        :not(:has(*)):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ):not(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          iframe,
+          embed,
+          object,
+          audio,
+          button,
+          input,
+          select,
+          textarea,
+          progress,
+          meter,
+          hr,
+          br,
+          svg *,
+          picture *,
+          select *,
+          object *
+        )::after,
+      [aria-busy="true"]:is(:scope, :scope *)
+        :is(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          iframe,
+          embed,
+          object,
+          audio,
+          button,
+          input,
+          select,
+          textarea,
+          progress,
+          meter
+        ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
+        animation: bone-pulse 2s ease-in-out infinite;
+        background: var(--bone-base);
+        background-size: auto;
+      }
+    }
+
+    @media (forced-colors: active) {
+      [aria-busy="true"]:is(:scope, :scope *)
+        :not(:has(*)):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ):not(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          iframe,
+          embed,
+          object,
+          audio,
+          button,
+          input,
+          select,
+          textarea,
+          progress,
+          meter,
+          hr,
+          br,
+          svg *,
+          picture *,
+          select *,
+          object *
+        )::after,
+      [aria-busy="true"]:is(:scope, :scope *)
+        :is(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          iframe,
+          embed,
+          object,
+          audio,
+          button,
+          input,
+          select,
+          textarea,
+          progress,
+          meter
+        ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
+        background-color: GrayText;
+        forced-color-adjust: none;
+      }
+    }
+  }
+
+  @scope ([data-bone-animate="pulse"]) to ([data-bone-animate]:not([data-bone-animate="pulse"])) {
+    [aria-busy="true"]:is(:scope, :scope *)
+      :not(:has(*)):not(
+        [data-bone],
+        [data-bone] *,
+        [data-bones-auto="off"],
+        [data-bones-auto="off"] *
+      ):not(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter,
+        hr,
+        br,
+        svg *,
+        picture *,
+        select *,
+        object *
+      )::before,
+    [aria-busy="true"]:is(:scope, :scope *)
+      :not(:has(*)):not(
+        [data-bone],
+        [data-bone] *,
+        [data-bones-auto="off"],
+        [data-bones-auto="off"] *
+      ):not(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter,
+        hr,
+        br,
+        svg *,
+        picture *,
+        select *,
+        object *
+      )::after,
+    [aria-busy="true"]:is(:scope, :scope *)
+      :is(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter
+      ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
+      animation: bone-pulse var(--bone-duration) ease-in-out infinite;
+      background: var(--bone-base);
+      background-size: auto;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      [aria-busy="true"]:is(:scope, :scope *)
+        :not(:has(*)):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ):not(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          iframe,
+          embed,
+          object,
+          audio,
+          button,
+          input,
+          select,
+          textarea,
+          progress,
+          meter,
+          hr,
+          br,
+          svg *,
+          picture *,
+          select *,
+          object *
+        )::before,
+      [aria-busy="true"]:is(:scope, :scope *)
+        :not(:has(*)):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ):not(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          iframe,
+          embed,
+          object,
+          audio,
+          button,
+          input,
+          select,
+          textarea,
+          progress,
+          meter,
+          hr,
+          br,
+          svg *,
+          picture *,
+          select *,
+          object *
+        )::after,
+      [aria-busy="true"]:is(:scope, :scope *)
+        :is(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          iframe,
+          embed,
+          object,
+          audio,
+          button,
+          input,
+          select,
+          textarea,
+          progress,
+          meter
+        ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
+        animation: bone-pulse 2s ease-in-out infinite;
+        background: var(--bone-base);
+        background-size: auto;
+      }
+    }
+
+    @media (forced-colors: active) {
+      [aria-busy="true"]:is(:scope, :scope *)
+        :not(:has(*)):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ):not(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          iframe,
+          embed,
+          object,
+          audio,
+          button,
+          input,
+          select,
+          textarea,
+          progress,
+          meter,
+          hr,
+          br,
+          svg *,
+          picture *,
+          select *,
+          object *
+        )::after,
+      [aria-busy="true"]:is(:scope, :scope *)
+        :is(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          iframe,
+          embed,
+          object,
+          audio,
+          button,
+          input,
+          select,
+          textarea,
+          progress,
+          meter
+        ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
+        background-color: GrayText;
+        forced-color-adjust: none;
+      }
+    }
+  }
+
+  @scope ([data-bone-animate="none"]) to ([data-bone-animate]:not([data-bone-animate="none"])) {
+    [aria-busy="true"]:is(:scope, :scope *)
+      :not(:has(*)):not(
+        [data-bone],
+        [data-bone] *,
+        [data-bones-auto="off"],
+        [data-bones-auto="off"] *
+      ):not(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter,
+        hr,
+        br,
+        svg *,
+        picture *,
+        select *,
+        object *
+      )::before,
+    [aria-busy="true"]:is(:scope, :scope *)
+      :not(:has(*)):not(
+        [data-bone],
+        [data-bone] *,
+        [data-bones-auto="off"],
+        [data-bones-auto="off"] *
+      ):not(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter,
+        hr,
+        br,
+        svg *,
+        picture *,
+        select *,
+        object *
+      )::after,
+    [aria-busy="true"]:is(:scope, :scope *)
+      :is(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter
+      ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
+      animation: none;
+      background: var(--bone-base);
+      background-size: auto;
+    }
+
+    @media (forced-colors: active) {
+      [aria-busy="true"]:is(:scope, :scope *)
+        :not(:has(*)):not(
+          [data-bone],
+          [data-bone] *,
+          [data-bones-auto="off"],
+          [data-bones-auto="off"] *
+        ):not(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          iframe,
+          embed,
+          object,
+          audio,
+          button,
+          input,
+          select,
+          textarea,
+          progress,
+          meter,
+          hr,
+          br,
+          svg *,
+          picture *,
+          select *,
+          object *
+        )::after,
+      [aria-busy="true"]:is(:scope, :scope *)
+        :is(
+          img,
+          svg,
+          video,
+          canvas,
+          picture,
+          iframe,
+          embed,
+          object,
+          audio,
+          button,
+          input,
+          select,
+          textarea,
+          progress,
+          meter
+        ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
+        background-color: GrayText;
+        forced-color-adjust: none;
+      }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [aria-busy="true"]
+      :not(:has(*)):not(
+        [data-bone],
+        [data-bone] *,
+        [data-bones-auto="off"],
+        [data-bones-auto="off"] *
+      ):not(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter,
+        hr,
+        br,
+        svg *,
+        picture *,
+        select *,
+        object *
+      )::before,
+    [aria-busy="true"]
+      :not(:has(*)):not(
+        [data-bone],
+        [data-bone] *,
+        [data-bones-auto="off"],
+        [data-bones-auto="off"] *
+      ):not(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter,
+        hr,
+        br,
+        svg *,
+        picture *,
+        select *,
+        object *
+      )::after,
+    [aria-busy="true"]
+      :is(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter
+      ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
+      animation: bone-pulse 2s ease-in-out infinite;
+      background: var(--bone-base);
+      background-size: auto;
+    }
+  }
+
+  /* High-contrast modes strip author backgrounds; keep bones visible with a
+     system color and opt the surfaces out of forced-color adjustment. */
+  @media (forced-colors: active) {
+    [aria-busy="true"]
+      :not(:has(*)):not(
+        [data-bone],
+        [data-bone] *,
+        [data-bones-auto="off"],
+        [data-bones-auto="off"] *
+      ):not(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter,
+        hr,
+        br,
+        svg *,
+        picture *,
+        select *,
+        object *
+      )::after,
+    [aria-busy="true"]
+      :is(
+        img,
+        svg,
+        video,
+        canvas,
+        picture,
+        iframe,
+        embed,
+        object,
+        audio,
+        button,
+        input,
+        select,
+        textarea,
+        progress,
+        meter
+      ):not([data-bone], [data-bone] *, [data-bones-auto="off"], [data-bones-auto="off"] *) {
+      background-color: GrayText;
+      forced-color-adjust: none;
+    }
+  }
+}
+
+@layer bones-auto {
+  /* precision="measured" hides a boundary's content with inherited
+     visibility from the shadow side. Visibility, unlike display, can be
+     switched back on by a descendant, so the opt-out contract survives
+     measured mode: exempt subtrees stay visible under the overlay. */
+  bones-boundary[data-bones-measured] [data-bones-auto="off"] {
+    visibility: visible;
   }
 }

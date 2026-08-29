@@ -708,14 +708,16 @@ describe("overlay reduced-motion contract", () => {
   });
 });
 
-describe("auto.css contract", () => {
-  test("a leaf inside a showing boundary matches the auto.css text-leaf selector", async () => {
+describe("auto rules contract", () => {
+  test("a leaf inside a showing boundary matches the auto text-leaf selector", async () => {
     const { readFileSync } = await import("node:fs");
     const { join } = await import("node:path");
-    const css = readFileSync(join(import.meta.dirname, "../src/css/auto.css"), "utf8");
-    // Search past the file's header comment: its prose mentions the literal
-    // text `[aria-busy="true"]` before the first real rule does.
-    const layerStart = css.indexOf("@layer bones-auto");
+    const css = readFileSync(join(import.meta.dirname, "../src/css/bones.css"), "utf8");
+    // Search past the file's header comments: their prose mentions the
+    // literal text `[aria-busy="true"]` and `@layer bones-auto` before the
+    // first real rule does. Anchor on the rule's opening brace, since no
+    // comment's prose happens to place one immediately after the phrase.
+    const layerStart = css.indexOf("@layer bones-auto {");
     const start = css.indexOf('[aria-busy="true"]', layerStart);
     const selector = css.slice(start, css.indexOf("{", start)).replace(/\s+/g, " ").trim();
     const el = mount({ delay: "0", "min-duration": "0" });

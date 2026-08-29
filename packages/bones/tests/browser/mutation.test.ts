@@ -1,6 +1,6 @@
 /// <reference types="vite-plus/client" />
 import { afterEach, expect, test } from "vite-plus/test";
-import "../../src/css/auto.css";
+import "../../src/css/bones.css";
 import "../../src/element/index.ts";
 import type { BonesBoundary } from "../../src/element/index.ts";
 
