@@ -10,9 +10,9 @@ import { createBones, forceBones } from "../../src/react/index.ts";
 
 // ---------------------------------------------------------------------------
 // One card, three renderers. The auto half of bones.css restates the marked
-// text-bar geometry and only a selector-text test pins the copies; these screenshots
-// pin what a user actually sees. data-bone-animate="none" everywhere so the
-// shimmer cannot make an image non-deterministic.
+// text-bar geometry and only a selector-text test pins the copies; these
+// screenshots pin what a user actually sees. data-bone-animate="none"
+// everywhere so the shimmer cannot make an image non-deterministic.
 // ---------------------------------------------------------------------------
 
 const CARD_STYLE = "width: 320px; padding: 16px; font: 16px/1.5 sans-serif; background: #fff;";

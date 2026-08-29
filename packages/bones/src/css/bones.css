@@ -241,7 +241,7 @@ canvas[data-bone="block"] {
 @layer bones-auto {
   /* Text default: any element with no child elements, minus exemptions and
      the replaced/control elements that get block treatment below. Same bar
-     geometry as [data-bone="text"] in bones.css — restated because CSS cannot
+     geometry as [data-bone="text"] in the marked half above — restated because CSS cannot
      alias an attribute selector; the test suite pins both copies. */
   [aria-busy="true"]
     :not(:has(*)):not(
