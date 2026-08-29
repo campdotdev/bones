@@ -147,6 +147,8 @@ declare module "react" {
         "min-duration"?: number;
         transition?: "auto" | "none";
         precision?: "css" | "measured";
+        "onbones:show"?: (event: CustomEvent) => void;
+        "onbones:hide"?: (event: CustomEvent) => void;
         ref?: React.Ref<BonesBoundary>;
       };
     }

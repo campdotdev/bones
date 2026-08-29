@@ -67,7 +67,7 @@ Bones shimmer by default. Set `data-bones-animate` on an element to change the a
 ```tsx
 {/* Pulse one section */}
 <div data-bones-animate="pulse">
-  <UserCard user={fetchUser()} />
+  <UserCard aria-busy="true" />
 </div>
 
 {/* Keep every skeleton in the app still */}
