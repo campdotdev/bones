@@ -18,6 +18,12 @@ interface MovesInteractiveProps extends ComponentProps<"div"> {
   moveDetails?: Record<string, MoveDetail>;
 }
 
+interface FilteredMove {
+  name: string;
+  level: number;
+  detail: MoveDetail | undefined;
+}
+
 export function MovesInteractive({ moves = [], moveDetails, ...rest }: MovesInteractiveProps) {
   const versionGroups = useMemo(() => {
     const set = new Set<string>();
@@ -33,11 +39,7 @@ export function MovesInteractive({ moves = [], moveDetails, ...rest }: MovesInte
   const [activeMethod, setActiveMethod] = useState<string>("level-up");
 
   const filteredMoves = useMemo(() => {
-    const result: {
-      name: string;
-      level: number;
-      detail: MoveDetail | undefined;
-    }[] = [];
+    const result: FilteredMove[] = [];
 
     for (const move of moves) {
       for (const vd of move.versionDetails) {
@@ -75,7 +77,10 @@ export function MovesInteractive({ moves = [], moveDetails, ...rest }: MovesInte
   return (
     <div className={styles.panel} aria-busy={moveDetails ? undefined : "true"} {...rest}>
       <div className={styles.gamePills}>
-        {(versionGroups.length ? versionGroups : Array.from({ length: 25 })).map((item, i) => (
+        {(versionGroups.length
+          ? versionGroups
+          : Array.from<string | undefined>({ length: 25 })
+        ).map((item, i) => (
           <button
             key={item ?? i}
             className={`${styles.pill} ${item === activeGame ? styles.pillActive : ""}`}
@@ -91,7 +96,10 @@ export function MovesInteractive({ moves = [], moveDetails, ...rest }: MovesInte
       </div>
 
       <div className={styles.methodTabs}>
-        {(availableMethods.length ? availableMethods : Array.from({ length: 4 })).map((item, i) => (
+        {(availableMethods.length
+          ? availableMethods
+          : Array.from<(typeof LEARN_METHODS)[number] | undefined>({ length: 4 })
+        ).map((item, i) => (
           <button
             key={item ?? i}
             className={`${styles.methodTab} ${item === activeMethod ? styles.methodTabActive : ""}`}
@@ -118,7 +126,10 @@ export function MovesInteractive({ moves = [], moveDetails, ...rest }: MovesInte
             </tr>
           </thead>
           <tbody>
-            {(filteredMoves.length ? filteredMoves : Array.from({ length: 10 })).map((item, i) => (
+            {(filteredMoves.length
+              ? filteredMoves
+              : Array.from<FilteredMove | undefined>({ length: 10 })
+            ).map((item, i) => (
               <tr key={item ? `${item.name}-${i}` : i}>
                 <td className={styles.tdMuted}>
                   <span>

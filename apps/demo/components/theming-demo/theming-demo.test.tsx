@@ -22,7 +22,6 @@ describe("ThemingDemo", () => {
 
   test("renders three PokemonCard skeletons", () => {
     const { container } = render(<ThemingDemo />);
-    const skeletons = container.querySelectorAll('img[alt="Pokemon"][data-bone]');
-    expect(skeletons.length).toBe(3);
+    expect(container.querySelectorAll('[aria-busy="true"] img[alt="Pokemon"]').length).toBe(3);
   });
 });

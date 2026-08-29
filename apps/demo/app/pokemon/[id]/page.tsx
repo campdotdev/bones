@@ -1,9 +1,9 @@
 import { Suspense } from "react";
-import { forceBones } from "@camp.dev/bones/react";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { delay } from "@/lib/delay";
+import { Await } from "@/lib/await";
 import { getDelays } from "@/lib/demo-delays";
 import {
   hasPokemon,
@@ -119,17 +119,23 @@ export default async function PokemonPage({ params }: { params: Promise<{ id: st
         </Link>
       </div>
 
-      <Suspense fallback={<PokemonHero pokemon={forceBones} species={forceBones} />}>
-        <PokemonHero pokemon={pokemonPromise} species={speciesPromise} />
+      <Suspense fallback={<PokemonHero aria-busy="true" />}>
+        <Await promise={Promise.all([pokemonPromise, speciesPromise])}>
+          {([pokemon, species]) => <PokemonHero pokemon={pokemon} species={species} />}
+        </Await>
       </Suspense>
 
       <div className={styles.bentoGrid}>
         <div className={styles.bentoRow1}>
-          <Suspense fallback={<BaseStatsCard pokemon={forceBones} />}>
-            <BaseStatsCard pokemon={pokemonPromise} />
+          <Suspense fallback={<BaseStatsCard aria-busy="true" />}>
+            <Await promise={pokemonPromise}>
+              {(pokemon) => <BaseStatsCard pokemon={pokemon} />}
+            </Await>
           </Suspense>
-          <Suspense fallback={<TypeDefenseCard typeDefense={forceBones} />}>
-            <TypeDefenseCard typeDefense={typeDefensePromise} />
+          <Suspense fallback={<TypeDefenseCard aria-busy="true" />}>
+            <Await promise={typeDefensePromise}>
+              {(typeDefense) => <TypeDefenseCard typeDefense={typeDefense} />}
+            </Await>
           </Suspense>
         </div>
 
@@ -139,50 +145,64 @@ export default async function PokemonPage({ params }: { params: Promise<{ id: st
               <InfoCard
                 title="Training"
                 labels={["EV Yield", "Catch Rate", "Base Exp", "Growth"]}
-                rows={forceBones}
+                aria-busy="true"
               />
             }
           >
-            <InfoCard
-              title="Training"
-              labels={["EV Yield", "Catch Rate", "Base Exp", "Growth"]}
-              rows={trainingPromise}
-            />
+            <Await promise={trainingPromise}>
+              {(rows) => (
+                <InfoCard
+                  title="Training"
+                  labels={["EV Yield", "Catch Rate", "Base Exp", "Growth"]}
+                  rows={rows}
+                />
+              )}
+            </Await>
           </Suspense>
           <Suspense
             fallback={
               <InfoCard
                 title="Breeding"
                 labels={["Egg Groups", "Gender", "Egg Cycles", "Friendship"]}
-                rows={forceBones}
+                aria-busy="true"
               />
             }
           >
-            <InfoCard
-              title="Breeding"
-              labels={["Egg Groups", "Gender", "Egg Cycles", "Friendship"]}
-              rows={breedingPromise}
-            />
+            <Await promise={breedingPromise}>
+              {(rows) => (
+                <InfoCard
+                  title="Breeding"
+                  labels={["Egg Groups", "Gender", "Egg Cycles", "Friendship"]}
+                  rows={rows}
+                />
+              )}
+            </Await>
           </Suspense>
           <Suspense
             fallback={
               <InfoCard
                 title="Pokedex Data"
                 labels={["Species", "Generation", "Habitat", "Shape"]}
-                rows={forceBones}
+                aria-busy="true"
               />
             }
           >
-            <InfoCard
-              title="Pokedex Data"
-              labels={["Species", "Generation", "Habitat", "Shape"]}
-              rows={pokedexPromise}
-            />
+            <Await promise={pokedexPromise}>
+              {(rows) => (
+                <InfoCard
+                  title="Pokedex Data"
+                  labels={["Species", "Generation", "Habitat", "Shape"]}
+                  rows={rows}
+                />
+              )}
+            </Await>
           </Suspense>
         </div>
 
-        <Suspense fallback={<EvolutionChainCard chain={forceBones} currentName={id} />}>
-          <EvolutionChainCard chain={evolutionPromise} currentName={id} />
+        <Suspense fallback={<EvolutionChainCard currentName={id} aria-busy="true" />}>
+          <Await promise={evolutionPromise}>
+            {(chain) => <EvolutionChainCard chain={chain} currentName={id} />}
+          </Await>
         </Suspense>
       </div>
 

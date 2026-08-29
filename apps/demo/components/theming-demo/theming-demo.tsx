@@ -1,4 +1,3 @@
-import { forceBones } from "@camp.dev/bones/react";
 import { DemoSection } from "@/components/demo-section/demo-section";
 import { PokemonCard } from "@/components/pokemon-card/pokemon-card";
 import styles from "./styles.module.css";
@@ -26,7 +25,7 @@ export function ThemingDemo() {
           }}
         >
           <h3>Warm</h3>
-          <PokemonCard pokemon={forceBones} />
+          <PokemonCard aria-busy="true" />
         </div>
         <div
           className={styles.themeDemo}
@@ -39,7 +38,7 @@ export function ThemingDemo() {
           }}
         >
           <h3>Cool</h3>
-          <PokemonCard pokemon={forceBones} />
+          <PokemonCard aria-busy="true" />
         </div>
         <div
           className={styles.themeDemo}
@@ -52,7 +51,7 @@ export function ThemingDemo() {
           }}
         >
           <h3>Dark</h3>
-          <PokemonCard pokemon={forceBones} />
+          <PokemonCard aria-busy="true" />
         </div>
       </div>
     </DemoSection>

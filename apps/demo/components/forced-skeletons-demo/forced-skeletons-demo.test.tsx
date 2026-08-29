@@ -36,6 +36,6 @@ describe("ForcedSkeletonsDemo", () => {
     const { container } = render(Component);
     fireEvent.click(screen.getByRole("button", { name: "Force Skeletons" }));
     expect(screen.queryByText("bulbasaur")).toBeNull();
-    expect(container.querySelectorAll('img[alt="Pokemon"][data-bone]').length).toBe(12);
+    expect(container.querySelectorAll('[aria-busy="true"] img[alt="Pokemon"]').length).toBe(12);
   });
 });

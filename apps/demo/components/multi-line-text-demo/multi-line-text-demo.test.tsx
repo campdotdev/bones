@@ -21,8 +21,8 @@ describe("MultiLineTextDemo", () => {
     expect(headings.length).toBe(2);
   });
 
-  test("renders the forced preview as four skeleton lines", () => {
+  test("renders the busy preview with a four-line excerpt", () => {
     const { container } = render(<MultiLineTextDemo />);
-    expect(container.querySelectorAll("[data-bone-line]").length).toBe(4);
+    expect(container.querySelector('[aria-busy="true"] [data-bones-lines="4"]')).not.toBeNull();
   });
 });

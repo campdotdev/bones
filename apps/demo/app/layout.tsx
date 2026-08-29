@@ -17,7 +17,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en">
-      <body data-bone-animate={animate}>
+      <body data-bones-animate={animate}>
         {children}
         {!isCompareFrame && <BonesDevTool />}
       </body>

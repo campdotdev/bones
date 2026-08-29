@@ -1,4 +1,3 @@
-import { forceBones } from "@camp.dev/bones/react";
 import { ArticlePreview } from "@/components/article-preview/article-preview";
 import { DemoSection } from "@/components/demo-section/demo-section";
 import styles from "./styles.module.css";
@@ -9,13 +8,13 @@ export function MultiLineTextDemo() {
       title="Multi-Line Text"
       description={
         <>
-          Use the <code>lines()</code> helper to create paragraph-sized placeholders. Each skeleton
-          line is a real element with its own animation.
+          Put <code>data-bones-lines</code> on a paragraph and the stylesheet paints that many bars
+          in the one element, with a shorter last line.
         </>
       }
     >
       <div className={styles.articleDemos}>
-        <ArticlePreview article={forceBones} />
+        <ArticlePreview aria-busy="true" />
         <ArticlePreview
           article={{
             title: "Understanding React Server Components",

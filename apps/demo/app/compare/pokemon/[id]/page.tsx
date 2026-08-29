@@ -1,4 +1,3 @@
-import { forceBones } from "@camp.dev/bones/react";
 import Link from "next/link";
 import { PokemonHero } from "@/components/pokemon-hero/pokemon-hero";
 import { BaseStatsCard } from "@/components/base-stats-card/base-stats-card";
@@ -13,7 +12,7 @@ import styles from "@/app/pokemon/[id]/page.module.css";
 /**
  * Skeleton-only mirror of the Pokemon detail page.
  * Used by the Compare Bones devtool overlay—renders the same component
- * tree with forceBones so every createBones call shows skeletons.
+ * tree with aria-busy and no data so every component shows its skeleton.
  * No data fetching, no API calls, instant render.
  */
 export default function ComparePokemonPage() {
@@ -25,33 +24,33 @@ export default function ComparePokemonPage() {
         </Link>
       </div>
 
-      <PokemonHero pokemon={forceBones} species={forceBones} />
+      <PokemonHero aria-busy="true" />
 
       <div className={styles.bentoGrid}>
         <div className={styles.bentoRow1}>
-          <BaseStatsCard pokemon={forceBones} />
-          <TypeDefenseCard typeDefense={forceBones} />
+          <BaseStatsCard aria-busy="true" />
+          <TypeDefenseCard aria-busy="true" />
         </div>
 
         <div className={styles.bentoRow2}>
           <InfoCard
             title="Training"
             labels={["EV Yield", "Catch Rate", "Base Exp", "Growth"]}
-            rows={forceBones}
+            aria-busy="true"
           />
           <InfoCard
             title="Breeding"
             labels={["Egg Groups", "Gender", "Egg Cycles", "Friendship"]}
-            rows={forceBones}
+            aria-busy="true"
           />
           <InfoCard
             title="Pokedex Data"
             labels={["Species", "Generation", "Habitat", "Shape"]}
-            rows={forceBones}
+            aria-busy="true"
           />
         </div>
 
-        <EvolutionChainCard chain={forceBones} currentName="" />
+        <EvolutionChainCard currentName="" aria-busy="true" />
       </div>
 
       <DetailTabs
@@ -59,12 +58,12 @@ export default function ComparePokemonPage() {
           {
             id: "moves",
             label: "Moves",
-            content: <MovesPanel moves={forceBones} moveDetails={forceBones} />,
+            content: <MovesPanel aria-busy="true" />,
           },
           {
             id: "dex-entries",
             label: "Dex Entries",
-            content: <DexEntriesPanel entries={forceBones} />,
+            content: <DexEntriesPanel aria-busy="true" />,
           },
           {
             id: "locations",
