@@ -1,19 +1,16 @@
-import { createBones, forceBones } from "@camp.dev/bones/react";
+import type { ComponentProps } from "react";
 import { PokemonCard } from "@/components/pokemon-card/pokemon-card";
 import type { PokemonListItem } from "@/lib/pokeapi";
 import styles from "./styles.module.css";
 
 export function PokemonGrid({
   pokemon,
-}: {
-  pokemon?: PokemonListItem[] | Promise<PokemonListItem[]>;
-}) {
-  const { repeat, data } = createBones(pokemon);
-
+  ...rest
+}: { pokemon?: PokemonListItem[] } & ComponentProps<"div">) {
   return (
-    <div className={styles.grid}>
-      {repeat(data, 12, (item, i) => (
-        <PokemonCard key={item?.id ?? i} pokemon={item ?? forceBones} />
+    <div className={styles.grid} {...rest}>
+      {(pokemon ?? Array.from({ length: 12 })).map((item, i) => (
+        <PokemonCard key={item?.id ?? i} pokemon={item} />
       ))}
     </div>
   );
