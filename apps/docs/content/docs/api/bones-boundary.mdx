@@ -7,7 +7,7 @@ description: A custom element that manages the loading state of its subtree.
 import "@camp.dev/bones/element";
 ```
 
-`<bones-boundary>` sets `aria-busy="true"` and `inert` on itself while its subtree is loading, and removes them when it is not. It draws nothing. `@camp.dev/bones/css` styles `data-bone` markup and unmarked leaves, both keyed on `aria-busy="true"`.
+`<bones-boundary>` sets `aria-busy="true"` and `inert` on itself while its subtree is loading, and removes them when it is not. It draws nothing. `@camp.dev/bones/css` styles `data-bone` markup wherever it appears, and unmarked leaves only inside an `aria-busy="true"` region.
 
 Set `busy` when loading starts and remove it when loading ends. The element waits `delay` before it shows bones, so a fast response never flashes a skeleton, and it keeps bones for at least `min-duration`, so a slow one never strobes.
 
