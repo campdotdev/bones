@@ -9,7 +9,7 @@ import "../../src/css/bones.css";
 import { createBones, forceBones } from "../../src/react/index.ts";
 
 // ---------------------------------------------------------------------------
-// One card, three renderers. the auto half of bones.css restates the marked
+// One card, three renderers. The auto half of bones.css restates the marked
 // text-bar geometry and only a selector-text test pins the copies; these screenshots
 // pin what a user actually sees. data-bone-animate="none" everywhere so the
 // shimmer cannot make an image non-deterministic.

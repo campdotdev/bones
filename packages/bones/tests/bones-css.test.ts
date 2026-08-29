@@ -47,7 +47,7 @@ function scopeFor(value: string): string {
 }
 
 // `css.split("@scope")[0]` and `scopeFor()` find the first match in the file.
-// The marked half comes first, so these pin the marked rules; the auto
+// The marked half comes first, so these pin the marked rules. The auto
 // half's scopes sit after it and are pinned by auto-css.test.ts.
 describe("bones.css reduced-motion contract", () => {
   test("the default shimmer downgrades to pulse for every bone kind", () => {

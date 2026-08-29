@@ -5,7 +5,7 @@
    text, block, and container bones. The auto half (after it, inside
    @layer bones-auto) styles unmarked leaves under an aria-busy state so a
    page with no bone markup still gets skeletons. [data-bones-auto="off"]
-   exempts a subtree; on <body> it turns the auto half off.
+   exempts a subtree. On <body> it turns the auto half off.
 
    The cascade shape is deliberate. Keep it through cleanups:
    - Marked rules are unlayered. They hide text by zeroing color alpha and
@@ -525,10 +525,10 @@ canvas[data-bone="block"] {
   /* Auto bones default to shimmer. The marked rules above have their own
      default, but they match [data-bone] elements only and never the unmarked
      leaves targeted here, so the default is restated for them, and the scopes
-     below mirror the marked scopes for pages that set the attribute (BON-16). In those
-     scopes, :is(:scope, :scope *) lets the attribute
-     sit on the aria-busy element itself: a scoped selector's implicit :scope
-     prefix matches strict descendants only (BON-17). */
+     below mirror the marked scopes for pages that set the attribute (BON-16).
+     In those scopes, :is(:scope, :scope *) lets the attribute sit on the
+     aria-busy element itself: a scoped selector's implicit :scope prefix
+     matches strict descendants only (BON-17). */
   [aria-busy="true"]
     :not(:has(*)):not(
       [data-bone],
