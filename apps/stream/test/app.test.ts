@@ -33,9 +33,9 @@ test("serves the element module from the workspace build", async () => {
   expect(res.headers.get("content-type")).toContain("text/javascript");
 });
 
-test("serves the stylesheets", async () => {
-  expect((await app.request("/assets/src/css/auto.css")).status).toBe(200);
+test("serves the stylesheet and nothing at the old auto.css path", async () => {
   expect((await app.request("/assets/src/css/bones.css")).status).toBe(200);
+  expect((await app.request("/assets/src/css/auto.css")).status).not.toBe(200);
 });
 
 test("refuses paths outside the two published subtrees", async () => {

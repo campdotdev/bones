@@ -6,7 +6,7 @@
 // ResizeObserver that re-measures. The shadow root gives the bars a home that
 // page CSS, React reconciliation, and author selectors can never reach, while
 // a single <slot> keeps the children in the light DOM where document
-// stylesheets (auto.css included) still style them.
+// stylesheets (the auto half of bones.css included) still style them.
 // ---------------------------------------------------------------------------
 
 import { measureBones } from "./measure.ts";
@@ -18,7 +18,7 @@ const OVERLAY_CSS = `
 }
 /* Hidden content still lays out, so re-measurement stays valid. Deliberately
    not !important: outer-tree rules beat ::slotted, which is what lets the
-   auto.css opt-out rule re-show exempt subtrees (and lets an author
+   auto opt-out rule in bones.css re-show exempt subtrees (and lets an author
    visibility rule on a direct child win — a documented edge). */
 :host([data-bones-measured]) ::slotted(*) {
   visibility: hidden;
@@ -126,7 +126,7 @@ export class MeasuredOverlay {
 
   activate(): void {
     this.prepare();
-    // The markers land before measuring: auto.css's leaf rules (min-width,
+    // The markers land before measuring: the auto leaf rules (min-width,
     // min-height) key on their absence, and measuring while they are still
     // active would inflate the geometry against a layout that snaps back a
     // frame later. The ::slotted visibility rule this turns on does not

@@ -41,7 +41,7 @@ export function shell(): string {
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Bones streaming demo</title>
-<link rel="stylesheet" href="/assets/src/css/auto.css" />
+<link rel="stylesheet" href="/assets/src/css/bones.css" />
 <script type="module" async src="/assets/dist/element/index.mjs"></script>
 <style>
   body { font: 16px/1.5 system-ui, sans-serif; margin: 2rem auto; max-width: 40rem; padding: 0 1rem; }

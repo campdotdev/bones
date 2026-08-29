@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------
 // <bones-boundary> — owns the loading state of its subtree
 //
-// The element draws nothing. bones.css and auto.css key on aria-busy="true",
+// The element draws nothing. Both halves of bones.css key on aria-busy="true",
 // so the element's whole job is to set aria-busy and inert at the right time:
 // after `delay` so fast loads never flash a skeleton, and for at least
 // `min-duration` so slow ones never strobe. `busy` and `force` are the inputs
