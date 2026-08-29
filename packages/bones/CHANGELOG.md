@@ -1,5 +1,31 @@
 # bones
 
+## 0.4.0
+
+### Minor Changes
+
+- [#42](https://github.com/campdotdev/bones/pull/42) [`f4d1362`](https://github.com/campdotdev/bones/commit/f4d1362e1c638ed0bc7145fbd20a46e2d1508c1a) Thanks [@hunterbecton](https://github.com/hunterbecton)! - Bone colors derive from the inherited text color instead of the OS color scheme. `--bone-base` defaults to the text color at 12% opacity and `--bone-highlight` at 6%, and the `prefers-color-scheme` media query is gone. Bones are now visible on any background the surrounding text is readable on. Before this, a dark-mode OS over a page that kept a light canvas painted white bones on white (BON-13). Overriding the custom properties works unchanged. Internally, bones hide their content by zeroing the alpha of `color` so the channels survive into the derivation, and the measured overlay's no-stylesheet fallbacks derive the same way. The stylesheets now use relative color syntax, which is Baseline 2024 (Chrome 119, Safari 18, Firefox 128).
+
+- [#51](https://github.com/campdotdev/bones/pull/51) [`dc790c3`](https://github.com/campdotdev/bones/commit/dc790c32ea61c614085d2c7d9115b6b384637a4e) Thanks [@hunterbecton](https://github.com/hunterbecton)! - Marked bones (`data-bone`) now shimmer by default, matching auto bones and the measured overlay. Before this, `bones.css` only animated inside a `data-bone-animate` scope, so a page that mixed an `aria-busy` region with explicit `data-bone` markup showed shimmering auto bones beside frozen marked ones. Set `data-bone-animate="none"` on a bone, a wrapper, or `<body>` to keep skeletons still. `"pulse"` still switches the animation. Under `prefers-reduced-motion: reduce`, the default and the `shimmer` and `pulse` scopes all downgrade to a slow pulse, and `none` stays still. This replaces the old reduced-motion rule, which pulsed the whole `aria-busy` element on top of the bar's own animation.
+
+- [#47](https://github.com/campdotdev/bones/pull/47) [`3a690bb`](https://github.com/campdotdev/bones/commit/3a690bb50b3f2bcf898f2218457d519a85223103) Thanks [@hunterbecton](https://github.com/hunterbecton)! - `<bones-boundary>` is now the sole skeleton component. The React entry removes `<Bones>` and `<BonesForce>` and keeps `createBones`, `forceBones`, `readPromise`, `minMax`, `isMinMax`, and the `BonesBoundary` wrapper for `<bones-boundary>`.
+
+  `<Bones>` is gone. Write the Suspense boundary yourself. Pass `forceBones` where the fallback needs a pending prop:
+
+  ```tsx
+  <Suspense fallback={<ProfileCard user={forceBones} />}>
+    <ProfileCard user={fetchUser()} />
+  </Suspense>
+  ```
+
+  `<BonesForce>` is gone. Pass `forceBones` as the data prop of each component you want forced, or wrap unmarked content in `<bones-boundary force>`.
+
+  The ambient loading flag went with them. `createBones` no longer reads any context. It shows bones only for the `loading` option, the `forceBones` sentinel, or a pending promise.
+
+### Patch Changes
+
+- [#45](https://github.com/campdotdev/bones/pull/45) [`14ff496`](https://github.com/campdotdev/bones/commit/14ff49692bfbb5de6c3949b6569ca0662bcd6bbb) Thanks [@hunterbecton](https://github.com/hunterbecton)! - `data-bone-animate` now takes effect from the element that carries it: a marked bone can animate itself, and an `aria-busy` region can be stilled or switched from its own tag instead of a wrapper. The animation variants live in `@scope` blocks, and a scoped selector's implicit `:scope` prefix matches strict descendants only, so the attribute was a silent no-op on the scope root itself. The scoped selectors now include the root via `:is(:scope, :scope *)`.
+
 ## 0.3.0
 
 ### Minor Changes
