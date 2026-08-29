@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "jsx": "react-jsx",
     "lib": ["es2023", "DOM"],
     "moduleDetection": "force",
     "module": "nodenext",

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test";
-import { BonesBoundary } from "../src/element/index.ts";
+import { BonesBoundary } from "../src/index.ts";
 
 // ---------------------------------------------------------------------------
 // <bones-boundary> state machine

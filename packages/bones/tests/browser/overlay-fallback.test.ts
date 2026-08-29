@@ -1,6 +1,6 @@
 import { afterEach, test } from "vite-plus/test";
-import "../../src/element/index.ts";
-import type { BonesBoundary } from "../../src/element/index.ts";
+import "../../src/index.ts";
+import type { BonesBoundary } from "../../src/index.ts";
 import { expectColor } from "./expect-color.ts";
 
 // ---------------------------------------------------------------------------

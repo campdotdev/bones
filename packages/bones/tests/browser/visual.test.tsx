@@ -1,7 +1,7 @@
 /// <reference types="vite-plus/client" />
 import { afterEach, expect, test } from "vite-plus/test";
 import { page } from "vite-plus/test/browser";
-import "../../src/element/index.ts";
+import "../../src/index.ts";
 import "../../src/css/bones.css";
 
 // ---------------------------------------------------------------------------
