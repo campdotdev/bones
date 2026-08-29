@@ -3,15 +3,16 @@ import { join } from "node:path";
 import { afterEach, describe, expect, test } from "vite-plus/test";
 
 // ---------------------------------------------------------------------------
-// auto.css selector contract
+// Auto-rules selector contract
 //
-// auto.css skeletonizes unmarked leaves under [aria-busy="true"]. These tests
-// read the shipped file, pin its selectors verbatim, and assert which fixture
-// elements match. jsdom evaluates :has(), :is(), and complex :not() args, so
-// the contract is testable without a browser.
+// The auto half of bones.css skeletonizes unmarked leaves under
+// [aria-busy="true"]. These tests read the shipped file, pin its selectors
+// verbatim, and assert which fixture elements match. jsdom evaluates :has(),
+// :is(), and complex :not() args, so the contract is testable without a
+// browser.
 // ---------------------------------------------------------------------------
 
-const css = readFileSync(join(import.meta.dirname, "../src/css/auto.css"), "utf8");
+const css = readFileSync(join(import.meta.dirname, "../src/css/bones.css"), "utf8");
 const flat = css.replace(/\s+/g, " ");
 
 const EXEMPT =
@@ -59,8 +60,8 @@ afterEach(() => {
 });
 
 describe("file contract", () => {
-  test("begins with the bones.css import", () => {
-    expect(css.trimStart().startsWith('@import "./bones.css";')).toBe(true);
+  test("has no @import: the auto rules live in the one stylesheet", () => {
+    expect(css).not.toContain("@import");
   });
 
   test("wraps auto rules in the bones-auto layer", () => {

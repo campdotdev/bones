@@ -1,6 +1,6 @@
 /// <reference types="vite-plus/client" />
 import { afterEach, expect, test } from "vite-plus/test";
-import "../../src/css/auto.css";
+import "../../src/css/bones.css";
 import "../../src/element/index.ts";
 import type { BonesBoundary } from "../../src/element/index.ts";
 import { TEXT_BAR_SCALE } from "../../src/element/measure.ts";
@@ -110,7 +110,7 @@ test("an opted-out subtree gets no bars and stays visible", () => {
   // `[data-bones-auto="off"] p` would match the TWO_LINES paragraph (a
   // direct child of the host) before it reaches this subtree's own p.
   const live = el.querySelector('div[data-bones-auto="off"] p')!;
-  // The auto.css rule flips inherited visibility back on for the subtree.
+  // The auto opt-out rule flips inherited visibility back on for the subtree.
   expect(getComputedStyle(live).visibility).toBe("visible");
 });
 
@@ -177,7 +177,7 @@ test("a precision flip while disconnected is honored on reconnect", () => {
   expect(el.hasAttribute("data-bones-measured")).toBe(false);
   expect(bars(el)).toHaveLength(0);
   // data-bones-measured is gone, so the ::slotted hide rule no longer
-  // matches: content is visible either way, with or without the auto.css
+  // matches: content is visible either way, with or without the auto
   // opt-out rule.
   const p = el.querySelector("p")!;
   expect(getComputedStyle(p).visibility).toBe("visible");

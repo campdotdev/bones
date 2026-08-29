@@ -18,6 +18,9 @@ const css = readFileSync(join(import.meta.dirname, "../src/css/bones.css"), "utf
   "",
 );
 
+/** The marked half: everything before the auto rules' first layer block. */
+const marked = css.split("@layer bones-auto")[0];
+
 const REDUCED = "@media (prefers-reduced-motion: reduce)";
 
 /** The brace-balanced block that starts at the first `marker` in `source`. */
@@ -43,6 +46,9 @@ function scopeFor(value: string): string {
   return blockAt(css, `@scope ([data-bone-animate="${value}"])`);
 }
 
+// `css.split("@scope")[0]` and `scopeFor()` find the first match in the file.
+// The marked half comes first, so these pin the marked rules; the auto
+// half's scopes sit after it and are pinned by auto-css.test.ts.
 describe("bones.css reduced-motion contract", () => {
   test("the default shimmer downgrades to pulse for every bone kind", () => {
     const outside = css.split("@scope")[0];
@@ -73,7 +79,9 @@ describe("bones.css reduced-motion contract", () => {
   test("nothing animates the aria-busy element itself", () => {
     // The old reduced-motion override animated whatever carried aria-busy,
     // which stacked an opacity pulse on top of the bar's own animation
-    // instead of replacing it. Bones target their bars, never the carrier.
-    expect(css).not.toContain('[aria-busy="true"]');
+    // instead of replacing it. Marked bones target their bars, never the
+    // carrier. The auto half matches [aria-busy="true"] by design, so this
+    // guard reads the marked half only.
+    expect(marked).not.toContain('[aria-busy="true"]');
   });
 });

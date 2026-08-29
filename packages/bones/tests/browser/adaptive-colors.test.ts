@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from "vite-plus/test";
-import "../../src/css/auto.css";
+import "../../src/css/bones.css";
 import { expectColor, parseColor } from "./expect-color.ts";
 
 // ---------------------------------------------------------------------------
@@ -44,7 +44,7 @@ test("image block bone hides its alt text but keeps the inherited channels", () 
   expectColor(img.backgroundColor, [51, 51, 51, 0.12]);
 });
 
-test("auto.css text leaf bar derives from the inherited text color", () => {
+test("auto text leaf bar derives from the inherited text color", () => {
   const root = mount(
     `<div data-bone-animate="none"><section aria-busy="true" style="${DARK_PAGE_TEXT}"><p>some copy</p></section></div>`,
   );
@@ -52,7 +52,7 @@ test("auto.css text leaf bar derives from the inherited text color", () => {
   expectColor(bar.backgroundColor, [238, 238, 238, 0.12]);
 });
 
-test("auto.css block bone derives from the inherited text color", () => {
+test("auto block bone derives from the inherited text color", () => {
   const root = mount(
     `<div data-bone-animate="none"><section aria-busy="true" style="${DARK_PAGE_TEXT}"><img alt="avatar" width="48" height="48" /></section></div>`,
   );

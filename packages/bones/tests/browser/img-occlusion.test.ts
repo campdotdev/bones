@@ -1,6 +1,6 @@
 import { afterEach, expect, test } from "vite-plus/test";
 import { page } from "vite-plus/test/browser";
-import "../../src/css/auto.css";
+import "../../src/css/bones.css";
 import { parseColor } from "./expect-color.ts";
 
 // ---------------------------------------------------------------------------
@@ -78,7 +78,7 @@ test("control: outside a busy region a loaded image paints its own pixels", asyn
   expect(await centerPixel(img)).toEqual([255, 0, 0]);
 });
 
-test("auto.css: a loaded image inside a busy region paints its bone color", async () => {
+test("auto rules: a loaded image inside a busy region paints its bone color", async () => {
   const img = await mountImage(
     `<section aria-busy="true" data-bone-animate="none" style="${PAGE}"><img src="${RED_PNG}" width="48" height="48" alt="" /></section>`,
   );
