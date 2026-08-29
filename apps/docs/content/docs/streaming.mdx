@@ -3,7 +3,7 @@ title: Streaming
 description: Stream the shell immediately, then fill each boundary as its data resolves.
 ---
 
-`@camp.dev/bones/server` streams an HTML page in two stages. The shell goes out immediately, with each slow region rendered as a busy `<bones-boundary>`, so the first paint shows skeletons. As each region's data resolves — in any order — the server flushes a chunk that swaps the real content in. The client needs no library: a small inline script sent with the shell performs the swaps. When `@camp.dev/bones/element` is on the page, each reveal also gets the element's `min-duration` timing and view-transition crossfade.
+`@camp.dev/bones/server` streams an HTML page in two stages. The shell goes out immediately, with each slow region rendered as a busy `<bones-boundary>`, so the first paint shows skeletons. As each region's data resolves — in any order — the server flushes a chunk that swaps the real content in. The client needs no library: a small inline script sent with the shell performs the swaps. When `@camp.dev/bones` is on the page, each reveal also gets the element's `min-duration` timing and view-transition crossfade.
 
 ```ts
 import { renderBoundary, streamBones } from "@camp.dev/bones/server";
@@ -12,7 +12,7 @@ const shell = `<!doctype html>
 <html lang="en">
 <head>
   <link rel="stylesheet" href="https://unpkg.com/@camp.dev/bones/src/css/bones.css" />
-  <script type="module" async src="https://unpkg.com/@camp.dev/bones/dist/element/index.mjs"></script>
+  <script type="module" async src="https://unpkg.com/@camp.dev/bones/dist/index.mjs"></script>
 </head>
 <body>
   <h1>Dashboard</h1>

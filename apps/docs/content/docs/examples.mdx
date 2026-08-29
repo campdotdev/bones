@@ -5,56 +5,51 @@ description: Common patterns for using bones.
 
 ## Suspense streaming
 
-Pass a promise to the component and reuse it, fed `forceBones`, as the fallback.
+Pass the resolved data to the component and reuse it, busy and empty, as the fallback.
 
 ```tsx
-import { createBones, forceBones } from "@camp.dev/bones/react";
 import { Suspense } from "react";
+import type { ComponentProps } from "react";
 
 async function fetchUser(): Promise<User> {
   const res = await fetch("/api/user");
   return res.json();
 }
 
+async function User() {
+  const user = await fetchUser();
+  return <UserCard user={user} />;
+}
+
 export default function Page() {
-  const user = fetchUser();
   return (
-    <Suspense fallback={<UserCard user={forceBones} />}>
-      <UserCard user={user} />
+    <Suspense fallback={<UserCard aria-busy="true" />}>
+      <User />
     </Suspense>
   );
 }
 
-function UserCard({ user }: { user: Promise<User> }) {
-  const { bone, data, lines } = createBones(user);
-
+function UserCard({ user, ...rest }: { user?: User } & ComponentProps<"div">) {
   return (
-    <div>
-      <img src={data?.avatar} width={64} height={64} {...bone("block")} />
-      <h2 {...bone("text", { length: 12 })}>{data?.name}</h2>
-      {lines(data?.bio, 2, (item) => (
-        <p>{item}</p>
-      ))}
+    <div {...rest}>
+      <img src={user?.avatar} width={64} height={64} alt="" />
+      <h2>{user?.name}</h2>
+      <p data-bones-lines="2">{user?.bio}</p>
     </div>
   );
 }
 ```
 
-## Forced skeletons
+## Preview a skeleton
 
-`forceBones` shows skeleton states without real data:
+Render the component busy with no data. No promise, no boundary:
 
 ```tsx
-import { forceBones } from "@camp.dev/bones/react";
-
 function SkeletonDemo() {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-      {/* Loaded state */}
-      <UserCard user={Promise.resolve(mockUser)} />
-
-      {/* Skeleton state */}
-      <UserCard user={forceBones} />
+      <UserCard user={mockUser} />
+      <UserCard aria-busy="true" />
     </div>
   );
 }
@@ -62,78 +57,44 @@ function SkeletonDemo() {
 
 ## Client-side data fetching
 
-With hooks like React Query or SWR, pass the `loading` option to control skeleton state:
+With React Query or SWR, set `aria-busy` from the loading flag:
 
 ```tsx
-import { createBones } from "@camp.dev/bones/react";
 import useSWR from "swr";
 
 function UserCard() {
-  const { data, isLoading } = useSWR("/api/user", fetcher);
-  const { bone, data: user, lines } = createBones(data, { loading: isLoading });
+  const { data: user, isLoading } = useSWR("/api/user", fetcher);
 
   return (
-    <div>
-      <img src={user?.avatar} width={64} height={64} {...bone("block")} />
-      <h2 {...bone("text", { length: 12 })}>{user?.name}</h2>
-      {lines(user?.bio, 2, (item) => (
-        <p>{item}</p>
-      ))}
+    <div aria-busy={isLoading ? "true" : undefined}>
+      <img src={user?.avatar} width={64} height={64} alt="" />
+      <h2>{user?.name}</h2>
+      <p data-bones-lines="2">{user?.bio}</p>
     </div>
   );
 }
 ```
 
-Skeletons show while `isLoading` is `true`, then content appears once data arrives. No Suspense boundary needed.
+## Multi-line text
 
-When you only need `bone` and `repeat` (no data to resolve), use the options-only signature:
+`data-bones-lines` paints that many bars in one element, with a shorter last line:
 
 ```tsx
-const { bone, repeat } = createBones({ loading: !moveDetails });
+<p data-bones-lines="3">{article?.excerpt}</p>
 ```
 
-## Multi-line text with `lines()`
+## List placeholders
 
-`lines` generates skeleton `<span>` elements inside your wrapper. Full-width lines with a shorter last line, each with its own animation:
-
-```tsx
-import { createBones } from "@camp.dev/bones/react";
-
-function ArticleCard({ article }: { article: Promise<Article> }) {
-  const { bone, data, lines } = createBones(article);
-
-  return (
-    <article>
-      <h3 {...bone("text", { length: 20 })}>{data?.title}</h3>
-      {lines(data?.excerpt, 3, (item) => (
-        <p>{item}</p>
-      ))}
-      <span {...bone("text", { length: 8, contained: true })}>{data?.readTime}</span>
-    </article>
-  );
-}
-```
-
-During loading, `item` is an array of skeleton spans that render inside the `<p>`. When data resolves, `item` is the real string. No `bone()` call needed in the callback.
-
-## List placeholders with `repeat()`
-
-`repeat` renders a fixed number of placeholder items while data loads. The callback receives each item (or `undefined` during loading) and its index:
+CSS cannot add elements, so a list with no data needs a count:
 
 ```tsx
-import { createBones, minMax } from "@camp.dev/bones/react";
-
-function TagList({ pokemon }: { pokemon: Promise<Pokemon> }) {
-  const { bone, data, repeat } = createBones(pokemon);
-
+function TagList({ pokemon, ...rest }: { pokemon?: Pokemon } & ComponentProps<"div">) {
   return (
-    <div>
-      <h3 {...bone("text", { length: 9 })}>{data?.name}</h3>
+    <div {...rest}>
+      <h3>{pokemon?.name}</h3>
       <div style={{ display: "flex", gap: 4 }}>
-        {repeat(data?.types, 2, (item, i) => (
-          <span key={item ?? i} {...bone("text", { contained: true, length: 7 })}>
-            {item}
-          </span>
+        {(pokemon?.types ?? Array.from({ length: 2 })).map((type, i) => (
+          <span key={type ?? i}>{type}</span>
         ))}
       </div>
     </div>
@@ -141,64 +102,36 @@ function TagList({ pokemon }: { pokemon: Promise<Pokemon> }) {
 }
 ```
 
-`repeat(data?.types, 2, render)` calls the callback twice with `(undefined, index)` while loading, giving you two skeleton pills. Once data arrives it maps over the real array and ignores the count.
+Each empty `span` paints as a bar four characters wide. Block-level bars vary their width by position on their own.
 
-`minMax` gives you varied widths so skeleton lists look more natural:
+## Keep a label readable
 
 ```tsx
-{
-  repeat(data?.moves, 10, (item, i) => (
-    <span key={item ?? i} {...bone("text", { length: minMax(5, 12), contained: true })}>
-      {item}
-    </span>
-  ));
-}
+<div className="row">
+  <span data-bones-auto="off">Catch rate</span>
+  <span>{species?.captureRate}</span>
+</div>
 ```
 
 ## Skeleton animations
 
-Skeletons shimmer by default. Set `data-bone-animate` on an element to change the animation for the bones inside it, or to `none` to keep them still. The attribute also works on a bone itself and on the `aria-busy` element of an automatic region.
-
-### Shimmer
-
-A horizontal highlight sweep:
+Bones shimmer by default. Set `data-bones-animate` on an element to change the animation for the bones inside it, or to `none` to keep them still. The attribute also works on a bone itself and on the busy element.
 
 ```tsx
-<div data-bone-animate="shimmer">
-  <UserCard user={forceBones} />
-</div>
-```
-
-### Pulse
-
-A gentle opacity fade:
-
-```tsx
-<div data-bone-animate="pulse">
-  <UserCard user={forceBones} />
+<div data-bones-animate="pulse">
+  <UserCard aria-busy="true" />
 </div>
 ```
 
 When `prefers-reduced-motion: reduce` is active, the default and `shimmer` both become `pulse`. `none` stays still.
 
-### Global animation
-
-Set it on `<body>` to change every skeleton in your app:
+Set it on `<body>` to change every skeleton in your app, and on a section to override that:
 
 ```tsx
-<body data-bone-animate="pulse">
-```
-
-Individual sections can override the global animation:
-
-```tsx
-<body data-bone-animate="shimmer">
-  {/* These skeletons shimmer */}
-  <UserCard user={fetchUser()} />
-
-  {/* These skeletons pulse instead */}
-  <div data-bone-animate="pulse">
-    <Sidebar items={fetchItems()} />
+<body data-bones-animate="shimmer">
+  <UserCard user={user} />
+  <div data-bones-animate="pulse">
+    <Sidebar items={items} />
   </div>
 </body>
 ```

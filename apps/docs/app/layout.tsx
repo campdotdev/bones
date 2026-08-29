@@ -9,9 +9,10 @@ import "./global.css";
 export const metadata: Metadata = {
   title: {
     template: "%s | bones",
-    default: "Bones: Skeleton loaders designed for React Server Components and streaming.",
+    default: "Bones: automatic skeleton loaders for any stack.",
   },
-  description: "Primitives for inline skeleton loaders in React. One component, both states.",
+  description:
+    "One stylesheet, one custom element. Set aria-busy and the content becomes its own skeleton.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

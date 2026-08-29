@@ -1,0 +1,74 @@
+---
+title: Attributes
+description: The stylesheet's contract, one attribute at a time.
+---
+
+```ts
+import "@camp.dev/bones/css";
+```
+
+The stylesheet keys on one thing: an element with `aria-busy="true"`. On that element and under it, every leaf with no element children becomes a text bar and every image or form control becomes a block. Four attributes adjust that. Outside a busy region every attribute is inert, so the markup you ship is the markup you style.
+
+## `aria-busy="true"`
+
+Set it on the region that is loading, or on the component root. `<bones-boundary busy>` sets it for you with timing and a crossfade. `renderBoundary` in the streaming kit renders it. An adapter for htmx or Turbo toggles it. In React, pass it to the component as a prop and forward it to the root element.
+
+## `data-bones-type`
+
+| Value     | Effect                                                                                         |
+| --------- | ---------------------------------------------------------------------------------------------- |
+| `"text"`  | Paint a text bar even where inference would not, or would paint a block.                       |
+| `"block"` | Paint one filled box the size of the element and hide its descendants. A `div` avatar, a card. |
+
+Explicit rules are unlayered, so page CSS does not outrank them. A page rule that sets `color` on an inferred leaf keeps that text visible over its bar; on a `data-bones-type="text"` element the text hides.
+
+## `data-bones-lines`
+
+An integer. Paints that many stacked bars in one element, one per line height, with the last bar at 60% width. The element becomes `display: block`.
+
+```html
+<p data-bones-lines="3"></p>
+```
+
+Values 2 through 8 work in every supported browser. Any other integer works where the browser supports `attr()` with a type: Chrome 133, Firefox 155, and Safari after it ships its Interop 2026 work. Elsewhere an out-of-range value paints one line.
+
+## `data-bones-auto="off"`
+
+Exempts the element and its subtree from inference. Use it on a label, a status line, or a control that should stay readable while the data around it loads. Explicit `data-bones-type` inside the subtree still paints. Set it on `<body>` and only explicit markup paints anywhere.
+
+## `data-bones-animate`
+
+| Value       | Effect                                                        |
+| ----------- | ------------------------------------------------------------- |
+| `"shimmer"` | A highlight sweeps across each bone. The default.             |
+| `"pulse"`   | Each bone fades in and out. Also the reduced-motion fallback. |
+| `"none"`    | Bones stay still.                                             |
+
+Works on the bone itself, on the busy element, or on any ancestor. The nearest value wins.
+
+## Inference
+
+| Element                                                                                                                                        | Treatment |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| Any element with no element children                                                                                                           | Text bar  |
+| `img`, `svg`, `video`, `canvas`, `picture`, `iframe`, `embed`, `object`, `audio`, `button`, `input`, `select`, `textarea`, `progress`, `meter` | Block     |
+| `hr`, `br`, and anything inside `svg`, `picture`, `select`, or `object`                                                                        | Nothing   |
+
+Block-level text bars cycle through 85%, 100%, 92%, and 60% of their width by position, so a run of lines looks organic. An empty inline leaf gets 4 characters of width.
+
+An `img` with no `src`, or `src=""`, gets a box sized by its `width` and `height` and a transparent pixel in place of the browser's broken-image glyph. A Content Security Policy that blocks `data:` images shows the glyph again.
+
+## Custom properties
+
+| Property           | Default                       | Used for                         |
+| ------------------ | ----------------------------- | -------------------------------- |
+| `--bone-base`      | the text color at 12% opacity | Bone color                       |
+| `--bone-highlight` | the text color at 6% opacity  | Shimmer highlight                |
+| `--bone-radius`    | `4px`                         | Corner radius. Must have a unit. |
+| `--bone-duration`  | `1.5s`                        | Animation duration               |
+
+`--bone-radius: 0` is invalid inside the multi-line mask; write `0px`.
+
+## Browser support
+
+CSS nesting, `@scope`, `:has()`, relative color syntax, `lh` units, and `mask`. Baseline 2024.

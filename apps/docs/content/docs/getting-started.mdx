@@ -3,79 +3,96 @@ title: Getting started
 description: Install bones and render your first skeleton.
 ---
 
-## Installation
+## Install
 
 ```bash
 npm install @camp.dev/bones
 ```
 
-## Import the CSS
+## Import the stylesheet
 
-Bones needs a small CSS file for skeleton visuals. Import it once in your root layout or entry point:
+Import it once in your root layout or entry point:
 
 ```tsx
 import "@camp.dev/bones/css";
 ```
 
-## Basic usage
+## Mark a region busy
 
-Pass data (or a promise of data) to `createBones`. Spread the `bone` function's return value onto elements that should show skeletons while loading.
+Set `aria-busy="true"` on the element that is loading. Every leaf under it becomes a bar and every image becomes a box. Remove the attribute when the data lands.
+
+```html
+<section aria-busy="true">
+  <img src="/avatar.png" width="64" height="64" alt="" />
+  <h2>Sasha Greenfield</h2>
+  <p>Collects tape loops, birdsong, and the hum of old refrigerators.</p>
+</section>
+```
+
+## Render a component with no data
+
+In a framework, write the component so it renders its shell when the data is missing, and forward the rest of its props to the root element. Then the skeleton is the component with `aria-busy` and nothing else.
 
 ```tsx
-import { createBones } from "@camp.dev/bones/react";
+import type { ComponentProps } from "react";
 
-function ProfileCard({ user }: { user: Promise<User> | User }) {
-  const { bone, data, lines } = createBones(user);
-
+function ProfileCard({ user, ...rest }: { user?: User } & ComponentProps<"div">) {
   return (
-    <div>
-      <img src={data?.avatar} width={80} height={80} {...bone("block")} />
-      <h3 {...bone("text", { length: 10 })}>{data?.name}</h3>
-      {lines(data?.bio, 3, (item) => (
-        <p>{item}</p>
-      ))}
+    <div {...rest}>
+      <img src={user?.avatar} width={80} height={80} alt="" />
+      <h3>{user?.name}</h3>
+      <p data-bones-lines="3">{user?.bio}</p>
     </div>
   );
 }
 ```
 
+`data-bones-lines="3"` tells the stylesheet the bio is three lines tall while it is empty.
+
 ## Add a Suspense boundary
 
-Pass the promise to the component, and reuse the same component with `forceBones` as the fallback:
+The fallback is the same component with `aria-busy="true"` and no data:
 
 ```tsx
-import { forceBones } from "@camp.dev/bones/react";
 import { Suspense } from "react";
 
+async function Profile() {
+  const user = await fetchUser();
+  return <ProfileCard user={user} />;
+}
+
 export default function Page() {
-  const user = fetchUser();
   return (
-    <Suspense fallback={<ProfileCard user={forceBones} />}>
-      <ProfileCard user={user} />
+    <Suspense fallback={<ProfileCard aria-busy="true" />}>
+      <Profile />
     </Suspense>
   );
 }
 ```
 
-While the promise is pending, the fallback renders `<ProfileCard>` with skeletons visible. Once it resolves, the real content swaps in. There is no separate skeleton component to keep in sync — the fallback is the component.
+There is no separate skeleton component to keep in sync. The fallback is the component. The async child is what suspends; the page itself returns at once so the fallback paints.
 
-## Bone types
+## Lists
 
-| Type          | Use for                        | Example                              |
-| ------------- | ------------------------------ | ------------------------------------ |
-| `"text"`      | Headings, paragraphs, labels   | `<h2 {...bone("text")}>`             |
-| `"block"`     | Images, avatars, thumbnails    | `<img src={…} {...bone("block")} />` |
-| `"container"` | Wrappers with complex children | `<div {...bone("container")}>`       |
-
-## Previewing skeletons
-
-Use `forceBones` to see a component's skeleton state without setting up real data:
+A list with no data renders no rows. Give it a placeholder count:
 
 ```tsx
-import { createBones, forceBones } from "@camp.dev/bones/react";
-
-// Pass forceBones in place of any promise prop:
-<ProfileCard user={forceBones} />;
+{
+  (user?.posts ?? Array.from({ length: 5 })).map((post, i) => (
+    <li key={post?.id ?? i}>{post?.title}</li>
+  ));
+}
 ```
 
-For content that has no bone markup at all, wrap it in [`<bones-boundary force>`](/api/bones-boundary) and the stylesheet draws leaf bones. No Suspense boundary or async data required either way — render and you'll see skeletons immediately, which is what you want in Storybook or a visual test.
+## Adjust a bone
+
+Inference gets most markup right. When it does not, say what you want:
+
+- `data-bones-type="block"` on a `div` that should paint as one box, such as an avatar with a background image.
+- `data-bones-auto="off"` on a label that should stay readable while the value next to it loads.
+
+See [Attributes](/api/attributes) for the full list.
+
+## Time the swap
+
+`<bones-boundary>` sets `aria-busy` for you, waits before showing bones so fast loads never flash, keeps them long enough that slow loads never strobe, and crossfades to content. See [bones-boundary](/api/bones-boundary).
