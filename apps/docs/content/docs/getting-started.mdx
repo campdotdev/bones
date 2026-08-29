@@ -77,10 +77,14 @@ There is no separate skeleton component to keep in sync. The fallback is the com
 A list with no data renders no rows. Give it a placeholder count:
 
 ```tsx
-{
-  (user?.posts ?? Array.from({ length: 5 })).map((post, i) => (
-    <li key={post?.id ?? i}>{post?.title}</li>
-  ));
+function PostList({ user }: { user?: User }) {
+  return (
+    <ul>
+      {(user?.posts ?? Array.from({ length: 5 })).map((post, i) => (
+        <li key={post?.id ?? i}>{post?.title}</li>
+      ))}
+    </ul>
+  );
 }
 ```
 
