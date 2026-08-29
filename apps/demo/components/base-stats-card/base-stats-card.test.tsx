@@ -49,6 +49,7 @@ describe("BaseStatsCard", () => {
 
   test("with no data: six block fills, empty values, readable labels", () => {
     const { container } = render(<BaseStatsCard aria-busy="true" />);
+    expect(container.firstElementChild?.getAttribute("aria-busy")).toBe("true");
     expect(container.querySelectorAll("[data-bones-type='block']").length).toBe(6);
     expect(container.querySelectorAll("[data-bones-auto='off']").length).toBe(8);
     expect(screen.getByText("HP")).toBeDefined();

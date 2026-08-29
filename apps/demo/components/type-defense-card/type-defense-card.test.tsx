@@ -47,6 +47,7 @@ describe("TypeDefenseCard", () => {
 
   test("renders three placeholder groups with twelve empty pills and readable labels", () => {
     const { container } = render(<TypeDefenseCard aria-busy="true" />);
+    expect(container.firstElementChild?.getAttribute("aria-busy")).toBe("true");
     expect(screen.getByText("Weak to")).toBeDefined();
     expect(screen.getByText("Resistant to")).toBeDefined();
     expect(screen.getByText("Neutral")).toBeDefined();

@@ -48,6 +48,7 @@ describe("EvolutionChainCard", () => {
 
   test("renders a three-stage shell with no data", () => {
     const { container } = render(<EvolutionChainCard aria-busy="true" />);
+    expect(container.firstElementChild?.getAttribute("aria-busy")).toBe("true");
     expect(screen.getAllByText("→").length).toBe(2);
     expect(container.querySelectorAll("[data-bones-type='block']").length).toBe(3);
     expect(container.querySelectorAll("img").length).toBe(0);

@@ -21,6 +21,7 @@ describe("DexEntriesPanel", () => {
 
   test("renders three placeholder generations with three empty entries each", () => {
     const { container } = render(<DexEntriesPanel aria-busy="true" />);
+    expect(container.firstElementChild?.getAttribute("aria-busy")).toBe("true");
     expect(container.querySelectorAll("span").length).toBe(3 + 9 * 2);
     expect(container.textContent).toBe("");
   });
