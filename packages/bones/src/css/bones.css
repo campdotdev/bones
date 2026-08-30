@@ -85,159 +85,163 @@
 
 /* Line count. Enumerated for every Baseline 2024 browser; advanced attr()
    reads any value where it exists (Chrome 133, Firefox 155, Safari after
-   Interop 2026). The value is only a custom property, so these rules need no
-   busy scope. The defaults live in var() fallbacks at the point of use, never
+   Interop 2026). Both tables set an inherited custom property, so they carry
+   the busy scope like every other rule here: an attribute on an element
+   outside a busy region must not reach the leaves of a busy region nested
+   below it. The defaults live in var() fallbacks at the point of use, never
    as declarations in a higher-specificity rule that would beat these. */
-[data-bones-lines="2"] {
-  --bones-lines: 2;
-}
-[data-bones-lines="3"] {
-  --bones-lines: 3;
-}
-[data-bones-lines="4"] {
-  --bones-lines: 4;
-}
-[data-bones-lines="5"] {
-  --bones-lines: 5;
-}
-[data-bones-lines="6"] {
-  --bones-lines: 6;
-}
-[data-bones-lines="7"] {
-  --bones-lines: 7;
-}
-[data-bones-lines="8"] {
-  --bones-lines: 8;
-}
-
-/* Width in characters. Enumerated 1 through 40 for the same reason. */
-[data-bones-length="1"] {
-  --bones-length: 1;
-}
-[data-bones-length="2"] {
-  --bones-length: 2;
-}
-[data-bones-length="3"] {
-  --bones-length: 3;
-}
-[data-bones-length="4"] {
-  --bones-length: 4;
-}
-[data-bones-length="5"] {
-  --bones-length: 5;
-}
-[data-bones-length="6"] {
-  --bones-length: 6;
-}
-[data-bones-length="7"] {
-  --bones-length: 7;
-}
-[data-bones-length="8"] {
-  --bones-length: 8;
-}
-[data-bones-length="9"] {
-  --bones-length: 9;
-}
-[data-bones-length="10"] {
-  --bones-length: 10;
-}
-[data-bones-length="11"] {
-  --bones-length: 11;
-}
-[data-bones-length="12"] {
-  --bones-length: 12;
-}
-[data-bones-length="13"] {
-  --bones-length: 13;
-}
-[data-bones-length="14"] {
-  --bones-length: 14;
-}
-[data-bones-length="15"] {
-  --bones-length: 15;
-}
-[data-bones-length="16"] {
-  --bones-length: 16;
-}
-[data-bones-length="17"] {
-  --bones-length: 17;
-}
-[data-bones-length="18"] {
-  --bones-length: 18;
-}
-[data-bones-length="19"] {
-  --bones-length: 19;
-}
-[data-bones-length="20"] {
-  --bones-length: 20;
-}
-[data-bones-length="21"] {
-  --bones-length: 21;
-}
-[data-bones-length="22"] {
-  --bones-length: 22;
-}
-[data-bones-length="23"] {
-  --bones-length: 23;
-}
-[data-bones-length="24"] {
-  --bones-length: 24;
-}
-[data-bones-length="25"] {
-  --bones-length: 25;
-}
-[data-bones-length="26"] {
-  --bones-length: 26;
-}
-[data-bones-length="27"] {
-  --bones-length: 27;
-}
-[data-bones-length="28"] {
-  --bones-length: 28;
-}
-[data-bones-length="29"] {
-  --bones-length: 29;
-}
-[data-bones-length="30"] {
-  --bones-length: 30;
-}
-[data-bones-length="31"] {
-  --bones-length: 31;
-}
-[data-bones-length="32"] {
-  --bones-length: 32;
-}
-[data-bones-length="33"] {
-  --bones-length: 33;
-}
-[data-bones-length="34"] {
-  --bones-length: 34;
-}
-[data-bones-length="35"] {
-  --bones-length: 35;
-}
-[data-bones-length="36"] {
-  --bones-length: 36;
-}
-[data-bones-length="37"] {
-  --bones-length: 37;
-}
-[data-bones-length="38"] {
-  --bones-length: 38;
-}
-[data-bones-length="39"] {
-  --bones-length: 39;
-}
-[data-bones-length="40"] {
-  --bones-length: 40;
-}
-
-@supports (x: attr(x type(*))) {
-  [data-bones-lines] {
-    --bones-lines: attr(data-bones-lines type(<number>), 1);
+:is([aria-busy="true"], [aria-busy="true"] *) {
+  &[data-bones-lines="2"] {
+    --bones-lines: 2;
   }
-  [data-bones-length] {
-    --bones-length: attr(data-bones-length type(<number>), 4);
+  &[data-bones-lines="3"] {
+    --bones-lines: 3;
+  }
+  &[data-bones-lines="4"] {
+    --bones-lines: 4;
+  }
+  &[data-bones-lines="5"] {
+    --bones-lines: 5;
+  }
+  &[data-bones-lines="6"] {
+    --bones-lines: 6;
+  }
+  &[data-bones-lines="7"] {
+    --bones-lines: 7;
+  }
+  &[data-bones-lines="8"] {
+    --bones-lines: 8;
+  }
+
+  /* Width in characters. Enumerated 1 through 40 for the same reason. */
+  &[data-bones-length="1"] {
+    --bones-length: 1;
+  }
+  &[data-bones-length="2"] {
+    --bones-length: 2;
+  }
+  &[data-bones-length="3"] {
+    --bones-length: 3;
+  }
+  &[data-bones-length="4"] {
+    --bones-length: 4;
+  }
+  &[data-bones-length="5"] {
+    --bones-length: 5;
+  }
+  &[data-bones-length="6"] {
+    --bones-length: 6;
+  }
+  &[data-bones-length="7"] {
+    --bones-length: 7;
+  }
+  &[data-bones-length="8"] {
+    --bones-length: 8;
+  }
+  &[data-bones-length="9"] {
+    --bones-length: 9;
+  }
+  &[data-bones-length="10"] {
+    --bones-length: 10;
+  }
+  &[data-bones-length="11"] {
+    --bones-length: 11;
+  }
+  &[data-bones-length="12"] {
+    --bones-length: 12;
+  }
+  &[data-bones-length="13"] {
+    --bones-length: 13;
+  }
+  &[data-bones-length="14"] {
+    --bones-length: 14;
+  }
+  &[data-bones-length="15"] {
+    --bones-length: 15;
+  }
+  &[data-bones-length="16"] {
+    --bones-length: 16;
+  }
+  &[data-bones-length="17"] {
+    --bones-length: 17;
+  }
+  &[data-bones-length="18"] {
+    --bones-length: 18;
+  }
+  &[data-bones-length="19"] {
+    --bones-length: 19;
+  }
+  &[data-bones-length="20"] {
+    --bones-length: 20;
+  }
+  &[data-bones-length="21"] {
+    --bones-length: 21;
+  }
+  &[data-bones-length="22"] {
+    --bones-length: 22;
+  }
+  &[data-bones-length="23"] {
+    --bones-length: 23;
+  }
+  &[data-bones-length="24"] {
+    --bones-length: 24;
+  }
+  &[data-bones-length="25"] {
+    --bones-length: 25;
+  }
+  &[data-bones-length="26"] {
+    --bones-length: 26;
+  }
+  &[data-bones-length="27"] {
+    --bones-length: 27;
+  }
+  &[data-bones-length="28"] {
+    --bones-length: 28;
+  }
+  &[data-bones-length="29"] {
+    --bones-length: 29;
+  }
+  &[data-bones-length="30"] {
+    --bones-length: 30;
+  }
+  &[data-bones-length="31"] {
+    --bones-length: 31;
+  }
+  &[data-bones-length="32"] {
+    --bones-length: 32;
+  }
+  &[data-bones-length="33"] {
+    --bones-length: 33;
+  }
+  &[data-bones-length="34"] {
+    --bones-length: 34;
+  }
+  &[data-bones-length="35"] {
+    --bones-length: 35;
+  }
+  &[data-bones-length="36"] {
+    --bones-length: 36;
+  }
+  &[data-bones-length="37"] {
+    --bones-length: 37;
+  }
+  &[data-bones-length="38"] {
+    --bones-length: 38;
+  }
+  &[data-bones-length="39"] {
+    --bones-length: 39;
+  }
+  &[data-bones-length="40"] {
+    --bones-length: 40;
+  }
+
+  @supports (x: attr(x type(*))) {
+    &[data-bones-lines] {
+      --bones-lines: attr(data-bones-lines type(<number>), 1);
+    }
+    &[data-bones-length] {
+      --bones-length: attr(data-bones-length type(<number>), 4);
+    }
   }
 }
 

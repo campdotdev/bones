@@ -132,3 +132,30 @@ test("a page reset that zeroes padding on ::after does not pull the bar out of t
     reset.remove();
   }
 });
+
+test("a length on an element outside a busy region does not reach a busy region nested below it", () => {
+  const root = mount(
+    `<div data-bones-length="30" style="width: 320px; font: 16px/1.5 sans-serif">
+       <div aria-busy="true"><h3 style="margin: 0" data-bones-lines="2"></h3><span></span></div>
+     </div>`,
+  );
+  const probe = mount(
+    `<span style="display: inline-block; width: 4ch; font: 16px/1.5 sans-serif"></span>`,
+  );
+  expect(root.querySelector("span")!.getBoundingClientRect().width).toBeCloseTo(
+    probe.getBoundingClientRect().width,
+    0,
+  );
+});
+
+test("a line count outside a busy region does not reach a busy region nested below it", () => {
+  // The bone inside is explicit: an ancestor with data-bones-lines exempts
+  // its descendants from inference, so an inferred leaf would paint nothing
+  // here and the inherited count would not show.
+  const root = mount(
+    `<div data-bones-lines="5" style="width: 320px; font: 16px/1.5 sans-serif">
+       <div aria-busy="true"><p data-bones-type="text" style="margin: 0"></p></div>
+     </div>`,
+  );
+  expect(root.querySelector("p")!.getBoundingClientRect().height).toBeCloseTo(24, 0);
+});

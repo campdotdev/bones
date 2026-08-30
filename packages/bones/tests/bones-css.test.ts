@@ -98,6 +98,13 @@ const layerBlocks = blocksAt(css, "@layer bones-auto {");
 const layered = layerBlocks.join(" ");
 const unlayered = layerBlocks.reduce((rest, block) => rest.replace(block, ""), css);
 
+/**
+ * The data-bones-lines and data-bones-length lookup tables, and the advanced
+ * attr() rules beside them. They set inherited custom properties, so they
+ * carry the busy scope like every painting rule; the marker pins that scope.
+ */
+const table = blockAt(unlayered, `${BUSY} { &[data-bones-lines="2"] {`);
+
 function mount(html: string): void {
   document.body.innerHTML = html;
 }
@@ -228,18 +235,21 @@ describe("bar geometry is the same in both strengths", () => {
 describe("data-bones-lines", () => {
   test("enumerates 2 through 8 and reads any value with advanced attr()", () => {
     for (let n = 2; n <= 8; n++) {
-      expect(unlayered).toContain(`[data-bones-lines="${n}"] { --bones-lines: ${n}; }`);
+      expect(table).toContain(`&[data-bones-lines="${n}"] { --bones-lines: ${n}; }`);
     }
-    const supports = blockAt(unlayered, "@supports (x: attr(x type(*))) {");
+    const supports = blockAt(table, "@supports (x: attr(x type(*))) {");
     expect(supports).toContain(
-      "[data-bones-lines] { --bones-lines: attr(data-bones-lines type(<number>), 1); }",
+      "&[data-bones-lines] { --bones-lines: attr(data-bones-lines type(<number>), 1); }",
     );
   });
 
   test("sizes the box from the line count and paints the rows above the last", () => {
     const text = blockAt(unlayered, `&${EXPLICIT_TEXT_TAIL} {`);
     expect(ownDeclarations(text)).toContain("min-height: calc(var(--bones-lines, 1) * 1lh)");
-    const lines = blockAt(unlayered, "&[data-bones-lines] {");
+    const lines = blockAt(
+      blockAt(unlayered, `${BUSY} { &${EXPLICIT_TEXT_TAIL} {`),
+      "&[data-bones-lines] {",
+    );
     const own = ownDeclarations(lines);
     expect(own).toContain("display: block");
     expect(own).toContain("--bones-last: 60%");
@@ -439,18 +449,18 @@ describe("width variance", () => {
 describe("data-bones-length", () => {
   test("enumerates 1 through 40 and reads any value with advanced attr()", () => {
     for (let n = 1; n <= 40; n++) {
-      expect(unlayered).toContain(`[data-bones-length="${n}"] { --bones-length: ${n}; }`);
+      expect(table).toContain(`&[data-bones-length="${n}"] { --bones-length: ${n}; }`);
     }
-    const supports = blockAt(unlayered, "@supports (x: attr(x type(*))) {");
+    const supports = blockAt(table, "@supports (x: attr(x type(*))) {");
     expect(supports).toContain(
-      "[data-bones-length] { --bones-length: attr(data-bones-length type(<number>), 4); }",
+      "&[data-bones-length] { --bones-length: attr(data-bones-length type(<number>), 4); }",
     );
   });
 
   test("sets the width in characters, unlayered, inside the busy scope only", () => {
     const rule =
       "&[data-bones-length] { width: calc(var(--bones-length, 4) * 1ch); max-width: 100%; }";
-    expect(blockAt(unlayered, `${BUSY} {`)).toContain(rule);
+    expect(blockAt(unlayered, `${BUSY} { &${EXPLICIT_TEXT_TAIL} {`)).toContain(rule);
     expect(layered).not.toContain("data-bones-length");
   });
 
