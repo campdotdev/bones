@@ -5,27 +5,7 @@ export default defineConfig({
   staged: {
     "*": "vp check --fix",
   },
-  pack: {
-    entry: ["src/index.ts", "src/server/index.ts"],
-    unbundle: true,
-    copy: "src/css",
-    dts: {
-      tsgo: true,
-    },
-    exports: {
-      customExports: {
-        "./css": {
-          style: "./src/css/bones.css",
-          default: "./src/css/bones.css",
-        },
-      },
-    },
-  },
   test: {
-    coverage: {
-      provider: "v8",
-      include: ["src/**"],
-    },
     projects: [
       {
         extends: true,
@@ -55,7 +35,7 @@ export default defineConfig({
                 comparatorName: "pixelmatch",
                 comparatorOptions: { allowedMismatchedPixelRatio: 0.01 },
                 // Platform-suffixed baselines: CI (linux) baselines are
-                // committed; local darwin ones are gitignored (Task 3).
+                // committed; local darwin ones are gitignored.
                 resolveScreenshotPath: ({
                   testFileDirectory,
                   screenshotDirectory,

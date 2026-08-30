@@ -6,30 +6,29 @@ import { describe, expect, test } from "vite-plus/test";
 const pkg = JSON.parse(readFileSync(join(import.meta.dirname, "../package.json"), "utf8"));
 
 describe("package.json", () => {
-  test("exports exactly the root, the server entry, the stylesheet, and package.json", () => {
-    expect(Object.keys(pkg.exports).sort()).toEqual([".", "./css", "./package.json", "./server"]);
-    expect(pkg.exports["."]).toBe("./dist/index.mjs");
-    expect(pkg.exports["./server"]).toBe("./dist/server/index.mjs");
+  test("exports exactly the stylesheet and package.json", () => {
+    expect(Object.keys(pkg.exports).sort()).toEqual(["./css", "./package.json"]);
+    expect(pkg.exports["./css"]).toEqual({
+      style: "./src/css/bones.css",
+      default: "./src/css/bones.css",
+    });
   });
 
-  test("registers the element on import, so the root is a side effect", () => {
-    expect(pkg.sideEffects).toEqual(["*.css", "./dist/index.mjs"]);
+  test("ships the stylesheet source and nothing built", () => {
+    expect(pkg.files).toEqual(["src/css"]);
+    expect(pkg.sideEffects).toEqual(["*.css"]);
+    expect(pkg.scripts.build).toBeUndefined();
+    expect(pkg.scripts.prepublishOnly).toBeUndefined();
   });
 
-  test("has no React dependency of any kind", () => {
-    const all = {
-      ...pkg.dependencies,
-      ...pkg.devDependencies,
-      ...pkg.peerDependencies,
-    };
-    expect(Object.keys(all).filter((name) => /react/.test(name))).toEqual([]);
+  test("has no runtime or peer dependency", () => {
+    expect(pkg.dependencies).toBeUndefined();
     expect(pkg.peerDependencies).toBeUndefined();
     expect(pkg.peerDependenciesMeta).toBeUndefined();
+    expect(Object.keys(pkg.devDependencies).filter((name) => /react/.test(name))).toEqual([]);
   });
 
-  test("describes itself without a framework", () => {
-    expect(pkg.description).toBe(
-      "Automatic skeleton loaders for any stack. One stylesheet, one custom element.",
-    );
+  test("describes itself as a stylesheet", () => {
+    expect(pkg.description).toBe("Automatic skeleton loaders for any stack. One stylesheet.");
   });
 });
