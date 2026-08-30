@@ -35,6 +35,9 @@
         font: inherit;
         padding: 0.4rem 1rem;
       }
+      select {
+        font: inherit;
+      }
     </style>
   </head>
   <body data-bones-animate="shimmer">
@@ -46,7 +49,17 @@
         <p id="bio" data-bones-lines="2"></p>
       </div>
     </article>
-    <button id="toggle" type="button">Toggle loading</button>
+    <p>
+      <label
+        >Request takes
+        <select id="speed">
+          <option value="50">50 ms (no skeleton)</option>
+          <option value="1500" selected>1.5 s</option>
+          <option value="4000">4 s</option>
+        </select></label
+      >
+      <button id="reload" type="button">Reload</button>
+    </p>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
