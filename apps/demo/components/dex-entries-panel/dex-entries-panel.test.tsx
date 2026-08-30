@@ -25,4 +25,9 @@ describe("DexEntriesPanel", () => {
     expect(container.querySelectorAll("span").length).toBe(3 + 9 * 2);
     expect(container.textContent).toBe("");
   });
+
+  test("forwards inert so a skeleton's controls leave the tab order", () => {
+    const { container } = render(<DexEntriesPanel aria-busy="true" inert />);
+    expect(container.firstElementChild?.hasAttribute("inert")).toBe(true);
+  });
 });

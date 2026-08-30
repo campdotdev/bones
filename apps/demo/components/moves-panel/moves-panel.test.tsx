@@ -63,4 +63,9 @@ describe("MovesPanel", () => {
     expect(container.firstElementChild?.getAttribute("aria-busy")).toBe("true");
     expect(screen.getByText("tackle")).toBeDefined();
   });
+
+  test("forwards inert so a skeleton's buttons leave the tab order", () => {
+    const { container } = render(<MovesPanel aria-busy="true" inert />);
+    expect(container.firstElementChild?.hasAttribute("inert")).toBe(true);
+  });
 });

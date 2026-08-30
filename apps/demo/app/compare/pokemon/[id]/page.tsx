@@ -58,12 +58,12 @@ export default function ComparePokemonPage() {
           {
             id: "moves",
             label: "Moves",
-            content: <MovesPanel aria-busy="true" />,
+            content: <MovesPanel aria-busy="true" inert />,
           },
           {
             id: "dex-entries",
             label: "Dex Entries",
-            content: <DexEntriesPanel aria-busy="true" />,
+            content: <DexEntriesPanel aria-busy="true" inert />,
           },
           {
             id: "locations",

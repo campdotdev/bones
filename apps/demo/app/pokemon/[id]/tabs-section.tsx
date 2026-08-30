@@ -26,7 +26,7 @@ export function TabsSection({
           id: "moves",
           label: "Moves",
           content: (
-            <Suspense fallback={<MovesPanel aria-busy="true" />}>
+            <Suspense fallback={<MovesPanel aria-busy="true" inert />}>
               <Await promise={Promise.all([moves, moveDetails])}>
                 {([movesData, details]) => <MovesPanel moves={movesData} moveDetails={details} />}
               </Await>
@@ -37,7 +37,7 @@ export function TabsSection({
           id: "dex-entries",
           label: "Dex Entries",
           content: (
-            <Suspense fallback={<DexEntriesPanel aria-busy="true" />}>
+            <Suspense fallback={<DexEntriesPanel aria-busy="true" inert />}>
               <Await promise={flavorTextEntries}>
                 {(entries) => <DexEntriesPanel entries={entries} />}
               </Await>
