@@ -4,8 +4,8 @@ import "../../src/css/bones.css";
 // ---------------------------------------------------------------------------
 // The shapes the visual baselines cover, pinned by computed style so the
 // contract stays green independent of screenshot harvesting: a multi-line
-// element is N line heights tall, an img with no src becomes a box, and a
-// padded leaf keeps its bar inside its padding.
+// element is N line heights tall, an img with no src becomes a box, a padded
+// leaf keeps its bar inside its padding, and data-bones-length sets a width.
 // ---------------------------------------------------------------------------
 
 afterEach(() => {
@@ -90,6 +90,30 @@ test("a block leaf still takes its share of the width", () => {
     `<div aria-busy="true" style="width: 320px; font: 16px/1.5 sans-serif"><h3 style="margin: 0"></h3></div>`,
   );
   expect(root.querySelector("h3")!.getBoundingClientRect().width).toBeCloseTo(0.85 * 320, 0);
+});
+
+test("data-bones-length sets the width in characters on block and inline-block leaves", () => {
+  const root = mount(
+    `<div aria-busy="true" style="width: 320px; font: 16px/1.5 sans-serif">
+       <h3 style="margin: 0; font: 16px/1.5 sans-serif" data-bones-length="9"></h3>
+       <span style="${PILL}" data-bones-length="7"></span>
+       <span data-bones-length="12"></span>
+     </div>`,
+  );
+  // Probes sit in <body>, whose default font is a serif; match the fixture's.
+  const ch = (n: number, style = "font: 16px/1.5 sans-serif") => {
+    const probe = mount(`<span style="display: inline-block; width: ${n}ch; ${style}"></span>`);
+    return probe.getBoundingClientRect().width;
+  };
+  expect(root.querySelector("h3")!.getBoundingClientRect().width).toBeCloseTo(ch(9), 0);
+  const [pill, inline] = root.querySelectorAll("span");
+  const pad = parseFloat(getComputedStyle(pill).paddingLeft);
+  expect(pill.getBoundingClientRect().width).toBeCloseTo(
+    ch(7, "font: 12px/1.6 sans-serif") + 2 * pad,
+    0,
+  );
+  // width does nothing on an inline box; the empty leaf's ::before carries it.
+  expect(inline.getBoundingClientRect().width).toBeCloseTo(ch(12), 0);
 });
 
 test("a page reset that zeroes padding on ::after does not pull the bar out of the padding", () => {

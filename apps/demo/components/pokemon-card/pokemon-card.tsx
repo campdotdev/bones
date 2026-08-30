@@ -19,10 +19,12 @@ export function PokemonCard({
         width={120}
         height={120}
       />
-      <h3 className={styles.cardName}>{pokemon?.name}</h3>
+      <h3 className={styles.cardName} data-bones-length="9">
+        {pokemon?.name}
+      </h3>
       <div className={styles.cardTypes}>
         {(pokemon?.types ?? Array.from({ length: 2 })).map((type, i) => (
-          <TypeBadge key={type ?? i} type={type} />
+          <TypeBadge key={type ?? i} type={type} data-bones-length="7" />
         ))}
       </div>
     </div>

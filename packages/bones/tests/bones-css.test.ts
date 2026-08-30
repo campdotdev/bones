@@ -200,14 +200,15 @@ describe("bar geometry is the same in both strengths", () => {
   });
 
   test("empty inline leaves get width from ::before", () => {
-    const rule = '&:empty::before { content: ""; display: inline-block; min-width: 4ch; }';
+    const rule =
+      '&:empty::before { content: ""; display: inline-block; min-width: calc(var(--bones-length, 4) * 1ch); }';
     expect(blockAt(layered, `&${TEXT_TAIL} {`)).toContain(rule);
     // Unlike the inferred rule, the explicit `:empty::before` sits beside
     // `&${EXPLICIT_TEXT_TAIL}`, not nested inside it, so a lines element
     // (display: block, no inline width trick needed) is unaffected. Check
     // it directly against the unlayered text, not inside that rule's block.
     expect(unlayered).toContain(
-      '&[data-bones-type="text"]:empty::before { content: ""; display: inline-block; min-width: 4ch; }',
+      '&[data-bones-type="text"]:empty::before { content: ""; display: inline-block; min-width: calc(var(--bones-length, 4) * 1ch); }',
     );
   });
 
@@ -432,6 +433,31 @@ describe("width variance", () => {
     expect(paragraphs[3].matches(TEXT_TAIL + buckets[3].nth)).toBe(true);
     expect(paragraphs[4].matches(TEXT_TAIL + buckets[0].nth)).toBe(true);
     expect(paragraphs[0].matches(TEXT_TAIL + buckets[1].nth)).toBe(false);
+  });
+});
+
+describe("data-bones-length", () => {
+  test("enumerates 1 through 40 and reads any value with advanced attr()", () => {
+    for (let n = 1; n <= 40; n++) {
+      expect(unlayered).toContain(`[data-bones-length="${n}"] { --bones-length: ${n}; }`);
+    }
+    const supports = blockAt(unlayered, "@supports (x: attr(x type(*))) {");
+    expect(supports).toContain(
+      "[data-bones-length] { --bones-length: attr(data-bones-length type(<number>), 4); }",
+    );
+  });
+
+  test("sets the width in characters, unlayered, inside the busy scope only", () => {
+    const rule =
+      "&[data-bones-length] { width: calc(var(--bones-length, 4) * 1ch); max-width: 100%; }";
+    expect(blockAt(unlayered, `${BUSY} {`)).toContain(rule);
+    expect(layered).not.toContain("data-bones-length");
+  });
+
+  test("a length element is still inferred; length is a modifier, not a type", () => {
+    mount('<section aria-busy="true"><h3 id="h" data-bones-length="9"></h3></section>');
+    expect(isTextLeaf(el("h"))).toBe(true);
+    expect(isExplicitText(el("h"))).toBe(false);
   });
 });
 

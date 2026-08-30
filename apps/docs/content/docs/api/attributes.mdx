@@ -7,7 +7,7 @@ description: The stylesheet's contract, one attribute at a time.
 import "@camp.dev/bones/css";
 ```
 
-The stylesheet keys on one thing: an element with `aria-busy="true"`. On that element and under it, every leaf with no element children becomes a text bar and every image or form control becomes a block. Four attributes adjust that. Outside a busy region every attribute is inert, so the markup you ship is the markup you style.
+The stylesheet keys on one thing: an element with `aria-busy="true"`. On that element and under it, every leaf with no element children becomes a text bar and every image or form control becomes a block. Five attributes adjust that. Outside a busy region every attribute is inert, so the markup you ship is the markup you style.
 
 ## `aria-busy="true"`
 
@@ -35,6 +35,18 @@ An integer. Paints that many stacked bars in one element, one per line height, w
 ```
 
 Values 2 through 8 work in every supported browser. Any other integer works where the browser supports `attr()` with a type: Chrome 133, Firefox 155, and Safari after it ships its Interop 2026 work. Elsewhere an out-of-range value paints one line.
+
+## `data-bones-length`
+
+An integer. Makes the bar that many characters wide, measured in the element's own font. A block leaf with a length no longer takes a share of its container, and an inline-block leaf no longer sizes to its content.
+
+```html
+<h3 data-bones-length="9"></h3>
+```
+
+Values 1 through 40 work in every supported browser. Any other integer works where the browser supports `attr()` with a type, as for `data-bones-lines`. Elsewhere an out-of-range value paints 4 characters.
+
+A length is a modifier, not a type. An inferred leaf with a length is still inferred. The width itself is unlayered, so a page rule that sets `width` on the element does not override the length. On an inline element `width` does nothing, so the length sets the placeholder width of an empty inline leaf and leaves a non-empty one at its text width.
 
 ## `data-bones-auto="off"`
 
