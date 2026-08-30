@@ -20,16 +20,16 @@ describe("AnimationsDemo", () => {
     expect(screen.getByText("Pulse")).toBeDefined();
   });
 
-  test("renders three PokemonCard skeletons", () => {
+  test("renders three busy PokemonCard shells", () => {
     const { container } = render(<AnimationsDemo />);
-    const skeletons = container.querySelectorAll('img[alt="Pokemon"][data-bone]');
-    expect(skeletons.length).toBe(3);
+    expect(container.querySelectorAll('[aria-busy="true"] img[alt="Pokemon"]').length).toBe(3);
   });
 
-  test("applies correct data-bone-animate values", () => {
+  test("applies the three data-bones-animate values", () => {
     const { container } = render(<AnimationsDemo />);
-    const demos = container.querySelectorAll("[data-bone-animate]");
-    const values = Array.from(demos).map((el) => el.getAttribute("data-bone-animate"));
+    const values = [...container.querySelectorAll("[data-bones-animate]")].map((el) =>
+      el.getAttribute("data-bones-animate"),
+    );
     expect(values).toEqual(["none", "shimmer", "pulse"]);
   });
 });

@@ -36,8 +36,7 @@ app.get("/", (c) => {
 // so the demo always runs the current build. Only these two subtrees exist.
 app.get("/assets/*", async (c) => {
   const rel = c.req.path.slice("/assets/".length);
-  const allowed =
-    (rel.startsWith("dist/element/") || rel.startsWith("src/css/")) && !rel.includes("..");
+  const allowed = (rel.startsWith("dist/") || rel.startsWith("src/css/")) && !rel.includes("..");
   const type = TYPES[path.extname(rel)];
   if (!allowed || type === undefined) return c.notFound();
   try {

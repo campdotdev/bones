@@ -1,4 +1,4 @@
-import { createBones } from "@camp.dev/bones/react";
+import type { ComponentProps } from "react";
 import type { PokemonData } from "@/lib/pokeapi";
 import styles from "./styles.module.css";
 
@@ -13,38 +13,42 @@ const STAT_LABELS: Record<string, string> = {
   speed: "Speed",
 };
 
-export function BaseStatsCard({ pokemon }: { pokemon?: PokemonData | Promise<PokemonData> }) {
-  const { bone, data } = createBones(pokemon);
-  const total = data?.stats.reduce((sum, s) => sum + s.value, 0) ?? 0;
-  const statsByName = data ? Object.fromEntries(data.stats.map((s) => [s.name, s])) : null;
+export function BaseStatsCard({
+  pokemon,
+  ...rest
+}: { pokemon?: PokemonData } & ComponentProps<"div">) {
+  const total = pokemon?.stats.reduce((sum, s) => sum + s.value, 0) ?? 0;
+  const statsByName = pokemon ? Object.fromEntries(pokemon.stats.map((s) => [s.name, s])) : null;
 
   return (
-    <div className={styles.card}>
-      <div className={styles.label}>Base Stats</div>
+    <div className={styles.card} {...rest}>
+      <div className={styles.label} data-bones-auto="off">
+        Base Stats
+      </div>
       <div className={styles.stats}>
         {STAT_KEYS.map((key) => {
           const stat = statsByName?.[key];
           const pct = stat ? (stat.value / 255) * 100 : 0;
           return (
             <div key={key} className={styles.row}>
-              <span className={styles.name}>{STAT_LABELS[key]}</span>
+              <span className={styles.name} data-bones-auto="off">
+                {STAT_LABELS[key]}
+              </span>
               <div className={styles.track}>
                 <div
                   className={styles.fill}
                   style={{ width: stat ? `${pct}%` : "60%" }}
-                  {...bone("block")}
+                  data-bones-type="block"
                 />
               </div>
-              <span className={styles.value} {...bone("text", { length: 2 })}>
-                {stat && String(stat.value)}
-              </span>
+              <span className={styles.value}>{stat && String(stat.value)}</span>
             </div>
           );
         })}
       </div>
       <div className={styles.total}>
-        <span>Total</span>
-        <span {...bone("text", { length: 3 })}>{data && String(total)}</span>
+        <span data-bones-auto="off">Total</span>
+        <span>{pokemon && String(total)}</span>
       </div>
     </div>
   );

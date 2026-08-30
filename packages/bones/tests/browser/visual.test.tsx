@@ -1,56 +1,26 @@
 /// <reference types="vite-plus/client" />
-import type { ReactNode } from "react";
-import { flushSync } from "react-dom";
-import { createRoot, type Root } from "react-dom/client";
 import { afterEach, expect, test } from "vite-plus/test";
 import { page } from "vite-plus/test/browser";
-import "../../src/element/index.ts";
+import "../../src/index.ts";
 import "../../src/css/bones.css";
-import { createBones, forceBones } from "../../src/react/index.ts";
 
 // ---------------------------------------------------------------------------
-// One card, three renderers. The auto half of bones.css restates the marked
-// text-bar geometry and only a selector-text test pins the copies; these
-// screenshots pin what a user actually sees. data-bone-animate="none"
-// everywhere so the shimmer cannot make an image non-deterministic.
+// One card, several renderers, plus the shapes only a screenshot can check:
+// multi-line bars, a block on a div, an img with no src. The selector tests
+// pin the two copies of the bar geometry equal; these screenshots pin what a
+// user sees. data-bones-animate="none" everywhere so the shimmer cannot make
+// an image non-deterministic.
 // ---------------------------------------------------------------------------
 
 const CARD_STYLE = "width: 320px; padding: 16px; font: 16px/1.5 sans-serif; background: #fff;";
 
-const roots: Root[] = [];
-
 afterEach(() => {
-  for (const root of roots.splice(0)) root.unmount();
   document.body.innerHTML = "";
 });
 
 function mountHtml(html: string): HTMLElement {
   document.body.insertAdjacentHTML("beforeend", html);
   return document.body.lastElementChild as HTMLElement;
-}
-
-function renderReact(node: ReactNode): HTMLElement {
-  const host = document.createElement("div");
-  document.body.append(host);
-  const root = createRoot(host);
-  roots.push(root);
-  flushSync(() => root.render(node));
-  return host.firstElementChild as HTMLElement;
-}
-
-function ReactCard() {
-  const { bone } = createBones<{ title: string }>(forceBones);
-  return (
-    <div
-      data-testid="react-card"
-      data-bone-animate="none"
-      style={{ width: 320, padding: 16, font: "16px/1.5 sans-serif", background: "#fff" }}
-    >
-      <div {...bone("block")} style={{ width: 48, height: 48 }} />
-      <h3 {...bone("text")}>Placeholder title</h3>
-      <p {...bone("text")}>Placeholder body copy that runs a little longer.</p>
-    </div>
-  );
 }
 
 const CONTENT = `
@@ -67,23 +37,29 @@ const CONTENT = `
 // internal copy, so `Assertion<Locator>` here has no merged type even
 // though the matcher exists and passes at runtime (proven by this file).
 
-test("react renderer with forceBones", async () => {
-  renderReact(<ReactCard />);
+test("explicit markup under a busy wrapper", async () => {
+  mountHtml(
+    `<div aria-busy="true" data-testid="explicit-card" data-bones-animate="none" style="${CARD_STYLE}">
+       <div data-bones-type="block" style="width: 48px; height: 48px"></div>
+       <h3 data-bones-type="text">Placeholder title</h3>
+       <p data-bones-type="text">Placeholder body copy that runs a little longer.</p>
+     </div>`,
+  );
   // @ts-expect-error — see the file-level comment above.
-  await expect(page.getByTestId("react-card")).toMatchScreenshot("react-force");
+  await expect(page.getByTestId("explicit-card")).toMatchScreenshot("explicit-force");
 });
 
-test("element renderer with auto rules", async () => {
+test("element renderer with inferred rules", async () => {
   mountHtml(
-    `<bones-boundary force data-testid="element-card" data-bone-animate="none" style="${CARD_STYLE} display: block;">${CONTENT}</bones-boundary>`,
+    `<bones-boundary force data-testid="element-card" data-bones-animate="none" style="${CARD_STYLE} display: block;">${CONTENT}</bones-boundary>`,
   );
   // @ts-expect-error — see the file-level comment above.
   await expect(page.getByTestId("element-card")).toMatchScreenshot("element-force");
 });
 
-test("bare aria-busy region with auto rules", async () => {
+test("bare aria-busy region with inferred rules", async () => {
   mountHtml(
-    `<div aria-busy="true" data-testid="bare-card" data-bone-animate="none" style="${CARD_STYLE}">${CONTENT}</div>`,
+    `<div aria-busy="true" data-testid="bare-card" data-bones-animate="none" style="${CARD_STYLE}">${CONTENT}</div>`,
   );
   // @ts-expect-error — see the file-level comment above.
   await expect(page.getByTestId("bare-card")).toMatchScreenshot("bare-busy");
@@ -91,7 +67,7 @@ test("bare aria-busy region with auto rules", async () => {
 
 test("measured overlay over the card content", async () => {
   mountHtml(
-    `<bones-boundary force precision="measured" data-testid="measured-card" data-bone-animate="none" style="${CARD_STYLE}">${CONTENT}</bones-boundary>`,
+    `<bones-boundary force precision="measured" data-testid="measured-card" data-bones-animate="none" style="${CARD_STYLE}">${CONTENT}</bones-boundary>`,
   );
   // @ts-expect-error — see the file-level comment above.
   await expect(page.getByTestId("measured-card")).toMatchScreenshot("measured-force");
@@ -103,4 +79,36 @@ test("the same card content, idle, for contrast", async () => {
   );
   // @ts-expect-error — see the file-level comment above.
   await expect(page.getByTestId("idle-card")).toMatchScreenshot("idle-content");
+});
+
+test("three lines at 16px/1.5", async () => {
+  mountHtml(
+    `<div aria-busy="true" data-testid="lines-16" data-bones-animate="none" style="${CARD_STYLE}"><p data-bones-lines="3"></p></div>`,
+  );
+  // @ts-expect-error — see the file-level comment above.
+  await expect(page.getByTestId("lines-16")).toMatchScreenshot("lines-16");
+});
+
+test("five lines at 24px/1.3 with a pill radius", async () => {
+  mountHtml(
+    `<div aria-busy="true" data-testid="lines-24" data-bones-animate="none" style="${CARD_STYLE} font: 24px/1.3 sans-serif; --bone-radius: 999px;"><p data-bones-lines="5"></p></div>`,
+  );
+  // @ts-expect-error — see the file-level comment above.
+  await expect(page.getByTestId("lines-24")).toMatchScreenshot("lines-24");
+});
+
+test("a block on a div hides its children", async () => {
+  mountHtml(
+    `<div aria-busy="true" data-testid="block-div" data-bones-animate="none" style="${CARD_STYLE}"><div data-bones-type="block" style="width: 96px; height: 96px"><p>hidden</p></div></div>`,
+  );
+  // @ts-expect-error — see the file-level comment above.
+  await expect(page.getByTestId("block-div")).toMatchScreenshot("block-div");
+});
+
+test("an img with no src and one with an empty src get clean boxes", async () => {
+  mountHtml(
+    `<div aria-busy="true" data-testid="img-no-src" data-bones-animate="none" style="${CARD_STYLE}"><img alt="Pikachu" width="64" height="64" /> <img alt="Pikachu" src="" width="64" height="64" /></div>`,
+  );
+  // @ts-expect-error — see the file-level comment above.
+  await expect(page.getByTestId("img-no-src")).toMatchScreenshot("img-no-src");
 });

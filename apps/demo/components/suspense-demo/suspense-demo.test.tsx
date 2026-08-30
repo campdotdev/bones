@@ -1,3 +1,4 @@
+import { act } from "react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vite-plus/test";
 import { SuspenseDemo } from "./suspense-demo";
@@ -11,7 +12,7 @@ vi.mock("@/lib/pokeapi", () => ({
   fetchPokemonList: () =>
     pokeapi.pending
       ? new Promise(() => {})
-      : [
+      : Promise.resolve([
           {
             id: 1,
             name: "bulbasaur",
@@ -19,7 +20,7 @@ vi.mock("@/lib/pokeapi", () => ({
             types: ["grass", "poison"],
           },
           { id: 4, name: "charmander", sprite: "https://example.com/4.png", types: ["fire"] },
-        ],
+        ]),
 }));
 
 afterEach(cleanup);
@@ -33,8 +34,10 @@ describe("SuspenseDemo", () => {
     expect(screen.getByRole("heading", { level: 2 }).textContent).toBe("Streaming with Suspense");
   });
 
-  test("renders pokemon names", () => {
-    render(<SuspenseDemo />);
+  test("renders pokemon names", async () => {
+    await act(async () => {
+      render(<SuspenseDemo />);
+    });
     expect(screen.getByText("bulbasaur")).toBeDefined();
     expect(screen.getByText("charmander")).toBeDefined();
   });
@@ -42,6 +45,6 @@ describe("SuspenseDemo", () => {
   test("renders the fallback as twelve skeleton cards while the list is pending", () => {
     pokeapi.pending = true;
     const { container } = render(<SuspenseDemo />);
-    expect(container.querySelectorAll('img[alt="Pokemon"][data-bone]').length).toBe(12);
+    expect(container.querySelectorAll('[aria-busy="true"] img[alt="Pokemon"]').length).toBe(12);
   });
 });

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, test, vi } from "vite-plus/test";
-import "../src/element/index.ts";
+import "../src/index.ts";
 import { BOOTSTRAP_JS, BOOTSTRAP_SCRIPT } from "../src/server/bootstrap.ts";
 
 // ---------------------------------------------------------------------------

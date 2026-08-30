@@ -1,4 +1,3 @@
-import { forceBones } from "@camp.dev/bones/react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vite-plus/test";
 import { BaseStatsCard } from "./base-stats-card";
@@ -48,9 +47,12 @@ describe("BaseStatsCard", () => {
     expect(screen.getByText("318")).toBeDefined();
   });
 
-  test("renders a full skeleton under forceBones", () => {
-    const { container } = render(<BaseStatsCard pokemon={forceBones} />);
-    // a bar and a value for each of the six stats, plus the total
-    expect(container.querySelectorAll("[data-bone]").length).toBe(13);
+  test("with no data: six block fills, empty values, readable labels", () => {
+    const { container } = render(<BaseStatsCard aria-busy="true" />);
+    expect(container.firstElementChild?.getAttribute("aria-busy")).toBe("true");
+    expect(container.querySelectorAll("[data-bones-type='block']").length).toBe(6);
+    expect(container.querySelectorAll("[data-bones-auto='off']").length).toBe(8);
+    expect(screen.getByText("HP")).toBeDefined();
+    expect(screen.getByText("Total").nextElementSibling?.textContent).toBe("");
   });
 });

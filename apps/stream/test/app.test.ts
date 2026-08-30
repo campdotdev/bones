@@ -28,7 +28,7 @@ test("?fail=stats flushes an error chunk with rendered content", async () => {
 });
 
 test("serves the element module from the workspace build", async () => {
-  const res = await app.request("/assets/dist/element/index.mjs");
+  const res = await app.request("/assets/dist/index.mjs");
   expect(res.status).toBe(200);
   expect(res.headers.get("content-type")).toContain("text/javascript");
 });
@@ -44,5 +44,5 @@ test("refuses paths outside the two published subtrees", async () => {
   // this 404 comes from the prefix allowlist, not the `rel.includes("..")` guard in app.ts — that
   // guard is only reachable via raw HTTP requests that skip normalization (e.g. `curl --path-as-is`).
   expect((await app.request("/assets/src/css/../../package.json")).status).toBe(404);
-  expect((await app.request("/assets/dist/index.mjs")).status).toBe(404);
+  expect((await app.request("/assets/dist/nope.mjs")).status).toBe(404);
 });

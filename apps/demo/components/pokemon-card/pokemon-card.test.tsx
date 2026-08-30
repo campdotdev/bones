@@ -1,4 +1,3 @@
-import { forceBones } from "@camp.dev/bones/react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vite-plus/test";
 import { PokemonCard } from "./pokemon-card";
@@ -46,16 +45,18 @@ describe("PokemonCard", () => {
     expect(img.src).toBe("https://example.com/pikachu.png");
   });
 
-  test("falls back to 'Pokemon' alt text when no data", () => {
-    render(<PokemonCard />);
-    expect(screen.getByAltText("Pokemon")).toBeDefined();
+  test("renders the shell with no data: empty name, two badge slots, a placeholder image", () => {
+    const { container } = render(<PokemonCard />);
+    expect(container.querySelector("h3")?.textContent).toBe("");
+    expect(container.querySelectorAll("span").length).toBe(2);
+    expect(container.textContent).toBe("");
+    const img = screen.getByAltText("Pokemon") as HTMLImageElement;
+    expect(img.src.startsWith("data:image/gif")).toBe(true);
   });
 
-  test("renders a full skeleton under forceBones", () => {
-    const { container } = render(<PokemonCard pokemon={forceBones} />);
-    // image, name, and two type badges
-    expect(container.querySelectorAll("[data-bone]").length).toBe(4);
+  test("forwards aria-busy to its root so the stylesheet paints it", () => {
+    const { container } = render(<PokemonCard aria-busy="true" />);
+    expect(container.firstElementChild?.getAttribute("aria-busy")).toBe("true");
     expect(container.querySelector("a")).toBeNull();
-    expect(container.textContent).toBe("");
   });
 });

@@ -1,8 +1,8 @@
 /// <reference types="vite-plus/client" />
 import { afterEach, expect, test } from "vite-plus/test";
 import "../../src/css/bones.css";
-import "../../src/element/index.ts";
-import type { BonesBoundary } from "../../src/element/index.ts";
+import "../../src/index.ts";
+import type { BonesBoundary } from "../../src/index.ts";
 
 // ---------------------------------------------------------------------------
 // Mutation-driven re-measurement. The host height is pinned in every fixture,

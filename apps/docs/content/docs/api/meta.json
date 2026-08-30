@@ -1,4 +1,4 @@
 {
   "title": "API Reference",
-  "pages": ["create-bones", "force-bones", "bones-boundary", "bone-attributes"]
+  "pages": ["attributes", "bones-boundary"]
 }

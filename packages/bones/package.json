@@ -1,7 +1,7 @@
 {
   "name": "@camp.dev/bones",
   "version": "0.4.1",
-  "description": "Skeleton loaders designed for React Server Components and streaming.",
+  "description": "Automatic skeleton loaders for any stack. One stylesheet, one custom element.",
   "homepage": "https://github.com/campdotdev/bones#readme",
   "bugs": {
     "url": "https://github.com/campdotdev/bones/issues"
@@ -19,12 +19,10 @@
   "type": "module",
   "sideEffects": [
     "*.css",
-    "./dist/element/index.mjs"
+    "./dist/index.mjs"
   ],
   "exports": {
     ".": "./dist/index.mjs",
-    "./element": "./dist/element/index.mjs",
-    "./react": "./dist/react/index.mjs",
     "./server": "./dist/server/index.mjs",
     "./package.json": "./package.json",
     "./css": {
@@ -44,29 +42,12 @@
     "prepublishOnly": "vp run build"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
     "@types/node": "^25.5.0",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
     "@typescript/native-preview": "7.0.0-dev.20260328.1",
     "@vitest/coverage-v8": "^4.1.5",
     "jsdom": "^29.0.2",
     "playwright": "^1.62.1",
-    "react": "^19.2.5",
     "typescript": "^6.0.2",
     "vite-plus": "^0.1.14"
-  },
-  "peerDependencies": {
-    "react": ">=18",
-    "react-dom": ">=18"
-  },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    },
-    "react-dom": {
-      "optional": true
-    }
   }
 }

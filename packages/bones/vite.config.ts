@@ -6,7 +6,7 @@ export default defineConfig({
     "*": "vp check --fix",
   },
   pack: {
-    entry: ["src/index.ts", "src/react/index.ts", "src/element/index.ts", "src/server/index.ts"],
+    entry: ["src/index.ts", "src/server/index.ts"],
     unbundle: true,
     copy: "src/css",
     dts: {
@@ -20,9 +20,6 @@ export default defineConfig({
         },
       },
     },
-    deps: {
-      neverBundle: ["react", "react-dom", /^react\//],
-    },
   },
   test: {
     coverage: {
@@ -35,7 +32,7 @@ export default defineConfig({
         test: {
           name: "unit",
           environment: "jsdom",
-          include: ["tests/*.test.{ts,tsx}"],
+          include: ["tests/*.test.ts"],
         },
       },
       {

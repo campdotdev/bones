@@ -78,16 +78,16 @@ test("control: outside a busy region a loaded image paints its own pixels", asyn
   expect(await centerPixel(img)).toEqual([255, 0, 0]);
 });
 
-test("auto rules: a loaded image inside a busy region paints its bone color", async () => {
+test("inferred: a loaded image inside a busy region paints its bone color", async () => {
   const img = await mountImage(
-    `<section aria-busy="true" data-bone-animate="none" style="${PAGE}"><img src="${RED_PNG}" width="48" height="48" alt="" /></section>`,
+    `<section aria-busy="true" data-bones-animate="none" style="${PAGE}"><img src="${RED_PNG}" width="48" height="48" alt="" /></section>`,
   );
   await expectBonePixel(img);
 });
 
-test("bones.css: a loaded image marked as a block bone paints its bone color", async () => {
+test("explicit: a loaded image marked as a block bone paints its bone color", async () => {
   const img = await mountImage(
-    `<div data-bone-animate="none" style="${PAGE}"><img data-bone="block" src="${RED_PNG}" width="48" height="48" alt="" /></div>`,
+    `<div aria-busy="true" data-bones-animate="none" style="${PAGE}"><img data-bones-type="block" src="${RED_PNG}" width="48" height="48" alt="" /></div>`,
   );
   await expectBonePixel(img);
 });

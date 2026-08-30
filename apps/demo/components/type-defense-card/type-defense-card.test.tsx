@@ -1,4 +1,3 @@
-import { forceBones } from "@camp.dev/bones/react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vite-plus/test";
 import { TypeDefenseCard } from "./type-defense-card";
@@ -46,13 +45,14 @@ describe("TypeDefenseCard", () => {
     expect(screen.getByText("Immune to")).toBeDefined();
   });
 
-  test("renders placeholder groups under forceBones", () => {
-    const { container } = render(<TypeDefenseCard typeDefense={forceBones} />);
+  test("renders three placeholder groups with twelve empty pills and readable labels", () => {
+    const { container } = render(<TypeDefenseCard aria-busy="true" />);
+    expect(container.firstElementChild?.getAttribute("aria-busy")).toBe("true");
     expect(screen.getByText("Weak to")).toBeDefined();
     expect(screen.getByText("Resistant to")).toBeDefined();
     expect(screen.getByText("Neutral")).toBeDefined();
-    expect(screen.queryByText("Immune to")).toBeNull();
-    // three weak, four resistant, and five neutral pills
-    expect(container.querySelectorAll("[data-bone]").length).toBe(12);
+    const pills = container.querySelectorAll("span:not([data-bones-auto])");
+    expect(pills.length).toBe(12);
+    for (const pill of pills) expect(pill.textContent).toBe("");
   });
 });

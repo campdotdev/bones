@@ -7,12 +7,12 @@ All skeleton visuals are controlled by CSS custom properties. Override them glob
 
 ## CSS custom properties
 
-| Property           | Default                       | Description                    |
-| ------------------ | ----------------------------- | ------------------------------ |
-| `--bone-base`      | the text color at 12% opacity | Skeleton background color      |
-| `--bone-highlight` | the text color at 6% opacity  | Highlight color (for shimmer)  |
-| `--bone-radius`    | `4px`                         | Border radius of skeleton bars |
-| `--bone-duration`  | `1.5s`                        | Animation duration             |
+| Property           | Default                       | Description                                                             |
+| ------------------ | ----------------------------- | ----------------------------------------------------------------------- |
+| `--bone-base`      | the text color at 12% opacity | Skeleton background color                                               |
+| `--bone-highlight` | the text color at 6% opacity  | Highlight color (for shimmer)                                           |
+| `--bone-radius`    | `4px`                         | Border radius of skeleton bars. Must have a unit; write `0px`, not `0`. |
+| `--bone-duration`  | `1.5s`                        | Animation duration                                                      |
 
 The color defaults derive from the text color in effect at the skeleton, so bones contrast with whatever background the text around them is readable on. A `#333`-on-white article gets translucent dark bars. The same markup inside a dark card with light text gets translucent light bars.
 
@@ -28,7 +28,7 @@ Override properties on any container to theme a section:
     "--bone-radius": "8px",
   }}
 >
-  <UserCard user={forceBones} />
+  <UserCard aria-busy="true" />
 </div>
 ```
 
@@ -58,7 +58,7 @@ One case needs a manual override: text that depends on its background for contra
 
 ## Animations
 
-Bones shimmer by default. Set `data-bone-animate` on an element to change the animation for the bones inside it. The attribute also works on a bone itself and on the `aria-busy` element of an automatic region.
+Bones shimmer by default. Set `data-bones-animate` on an element to change the animation for the bones inside it. The attribute also works on a bone itself and on the `aria-busy` element of an automatic region.
 
 - `shimmer` - horizontal highlight sweep (the default)
 - `pulse` - gentle opacity fade (also kicks in automatically for `prefers-reduced-motion: reduce`)
@@ -66,18 +66,18 @@ Bones shimmer by default. Set `data-bone-animate` on an element to change the an
 
 ```tsx
 {/* Pulse one section */}
-<div data-bone-animate="pulse">
-  <UserCard user={fetchUser()} />
+<div data-bones-animate="pulse">
+  <UserCard aria-busy="true" />
 </div>
 
 {/* Keep every skeleton in the app still */}
-<body data-bone-animate="none">
+<body data-bones-animate="none">
 ```
 
 Speed is controlled by `--bone-duration`. Shimmer colors use `--bone-base` and `--bone-highlight`.
 
 ## Accessibility
 
-- Skeleton elements get `aria-busy="true"` automatically.
+- Bones only paint under `aria-busy="true"`, which is the attribute assistive technology already reads.
 - `pulse` replaces `shimmer` for users who prefer reduced motion. `none` stays still.
 - Skeleton pseudo-elements have `pointer-events: none`.

@@ -1,154 +1,56 @@
 ---
 title: Introduction
-description: Skeleton loaders designed for React Server Components and streaming.
+description: Automatic skeleton loaders for any stack.
 ---
 
 <div className="flex flex-wrap gap-2 not-prose mb-8 -mt-8">
   <span className="rounded-full bg-green-500/10 px-3 py-1 text-xs font-mono text-green-600 dark:text-green-400">
-    ~4.16 kB gzipped
+    ~8.5 kB gzipped
   </span>
   <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-mono text-blue-600 dark:text-blue-400">
     0 dependencies
   </span>
   <span className="rounded-full bg-purple-500/10 px-3 py-1 text-xs font-mono text-purple-600 dark:text-purple-400">
-    RSC ready
+    Any stack
   </span>
 </div>
 
-With React Server Components, your component renders once on the server. There's no re-render from "loading" to "loaded," so `{data || <Skeleton />}` doesn't work. Instead, you write your component, then write a second component that looks like it but shows placeholder blocks, and wire the two together with `<Suspense>`.
+Set `aria-busy="true"` on a region and its content becomes a skeleton. No skeleton components, no placeholder markup, no JavaScript. The stylesheet infers a text bar for every leaf and a box for every image or control, and a handful of `data-bones-*` attributes adjust the result when inference gets something wrong.
 
-## The problem with Suspense fallbacks
-
-Every async component needs a matching skeleton component. The two look alike but share no code, so they fall out of sync over time.
-
-```tsx title="PokemonCard.tsx — two components that must stay in sync"
-async function PokemonCard() {
-  const data = await fetchPokemon();
-
-  return (
-    <div className="card">
-      <img className="card-image" src={data.sprite} alt={data.name} />
-      <h3 className="card-name">{data.name}</h3>
-      <div className="card-types">
-        {data.types.map((t) => (
-          <span key={t} className="badge">
-            {t}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function PokemonCardSkeleton() {
-  return (
-    <div className="card">
-      <div className="skeleton card-image" />
-      <div className="skeleton card-name" />
-      <div className="card-types">
-        <div className="skeleton badge" />
-        <div className="skeleton badge" />
-      </div>
-    </div>
-  );
-}
+```html
+<section aria-busy="true">
+  <img src="/avatar.png" width="64" height="64" alt="" />
+  <h2>Sasha Greenfield</h2>
+  <p>Collects tape loops, birdsong, and the hum of old refrigerators.</p>
+</section>
 ```
 
-```tsx title="Page.tsx"
-function Page() {
-  return (
-    <Suspense fallback={<PokemonCardSkeleton />}>
-      <PokemonCard />
-    </Suspense>
-  );
-}
-```
+## The problem with skeleton components
 
-Add a field to the card? You have to update both components. Rename a class? Both. Change the layout? Both. The skeleton is a copy of your UI that contributes nothing except loading state.
+Every async component tends to grow a matching skeleton component. The two look alike but share no code, so they fall out of sync. Add a field, update both. Rename a class, both. A dashboard with three async components means three copies of the UI that contribute nothing except loading state.
 
-It gets worse fast. A dashboard with three async components means three skeleton components:
+## One component, both states
 
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4 comparison-grid">
-<div>
-
-```tsx title="Suspense — one boundary, three skeletons"
-function Dashboard() {
-  return (
-    <Suspense
-      fallback={
-        <>
-          <UserCardSkeleton />
-          <StatsSkeleton />
-          <ActivityFeedSkeleton />
-        </>
-      }
-    >
-      <UserCard />
-      <Stats />
-      <ActivityFeed />
-    </Suspense>
-  );
-}
-```
-
-</div>
-<div>
-
-```tsx title="Bones — the fallback is the same components"
-function Dashboard() {
-  const user = fetchUser();
-  const stats = fetchStats();
-  const feed = fetchFeed();
-  return (
-    <Suspense
-      fallback={
-        <>
-          <UserCard user={forceBones} />
-          <Stats stats={forceBones} />
-          <ActivityFeed feed={forceBones} />
-        </>
-      }
-    >
-      <UserCard user={user} />
-      <Stats stats={stats} />
-      <ActivityFeed feed={feed} />
-    </Suspense>
-  );
-}
-```
-
-</div>
-</div>
-
-## How Bones works
-
-Every `createBones()` call decides between two renders of the same markup. Given data, `bone()` returns an empty object and the component renders normally. Given the `forceBones` sentinel, `bone()` returns HTML attributes that apply skeleton styles with CSS — so a Suspense fallback is just the same component with `forceBones` in the promise's place. Given a pending promise, `createBones` suspends to the nearest boundary. No context, no hooks, no `'use client'`.
+Write the component so it renders its shell with no data, and forward its props to the root. The skeleton is then the component with `aria-busy` and nothing else, in a Suspense fallback, a Storybook story, or a visual test.
 
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 comparison-grid">
 <div>
 
 ```tsx title="PokemonCard.tsx"
-import { createBones } from "@camp.dev/bones/react";
-
-function PokemonCard({ pokemon }: { pokemon?: PokemonData | Promise<PokemonData> }) {
-  const { bone, data, repeat } = createBones(pokemon);
-
+function PokemonCard({ pokemon, ...rest }: { pokemon?: Pokemon } & ComponentProps<"div">) {
   return (
-    <div className="card">
+    <div className="card" {...rest}>
       <img
         className="card-image"
-        src={data?.sprite}
-        alt={data?.name ?? "Pokemon"}
+        src={pokemon?.sprite}
+        alt={pokemon?.name ?? "Pokemon"}
         width={120}
         height={120}
-        {...bone("block")}
       />
-      <h3 className="card-name" {...bone("text", { length: 6 })}>
-        {data?.name}
-      </h3>
+      <h3 className="card-name">{pokemon?.name}</h3>
       <div className="card-types">
-        {repeat(data?.types, 2, (type, i) => (
-          <span key={type ?? i} className="badge" {...bone("text", { contained: true, length: 7 })}>
+        {(pokemon?.types ?? Array.from({ length: 2 })).map((type, i) => (
+          <span key={type ?? i} className="badge">
             {type}
           </span>
         ))}
@@ -156,6 +58,14 @@ function PokemonCard({ pokemon }: { pokemon?: PokemonData | Promise<PokemonData>
     </div>
   );
 }
+
+async function Card() {
+  return <PokemonCard pokemon={await fetchPokemon()} />;
+}
+
+<Suspense fallback={<PokemonCard aria-busy="true" />}>
+  <Card />
+</Suspense>;
 ```
 
 </div>
@@ -164,130 +74,44 @@ function PokemonCard({ pokemon }: { pokemon?: PokemonData | Promise<PokemonData>
 </div>
 </div>
 
-Same component, same markup. The skeleton can't get out of sync with the real UI because there's only one version of it.
-
 ## Key ideas
 
-- Works in Server Components without hooks, context, or `'use client'`.
-- One component handles both loading and loaded states.
-- Pass data or a promise. A pending promise suspends to your `<Suspense>` boundary; `forceBones` renders the skeleton.
-- Skeletons are pure CSS, themed with custom properties.
-- Loading elements get `aria-busy="true"` automatically.
+- The stylesheet is the API. Attributes are inert until a region is busy, so you annotate real markup once.
+- Works in any stack: server-rendered HTML, React Server Components, htmx, Turbo, a plain `fetch`.
+- `<bones-boundary>` adds timing and a crossfade when you want them.
+- The streaming kit renders busy boundaries in the shell and swaps content in as it resolves.
+- Bones derive their color from the text color, so they contrast on any background.
 
 ## Nested and independent loading
 
-All components inside one `<Suspense>` boundary show skeletons until the slowest promise resolves. If you want components to load independently, give each one its own boundary:
+Every component inside one `<Suspense>` boundary shows bones until the slowest promise resolves. For independent loading, give each its own boundary:
 
 ```tsx
+async function User() {
+  return <UserCard user={await fetchUser()} />;
+}
+async function StatsSection() {
+  return <Stats stats={await fetchStats()} />;
+}
+async function Feed() {
+  return <ActivityFeed feed={await fetchFeed()} />;
+}
+
 function Dashboard() {
-  const user = fetchUser();
-  const stats = fetchStats();
-  const feed = fetchFeed();
   return (
     <>
-      <Suspense fallback={<UserCard user={forceBones} />}>
-        <UserCard user={user} />
+      <Suspense fallback={<UserCard aria-busy="true" />}>
+        <User />
       </Suspense>
-      <Suspense fallback={<Stats stats={forceBones} />}>
-        <Stats stats={stats} />
+      <Suspense fallback={<Stats aria-busy="true" />}>
+        <StatsSection />
       </Suspense>
-      <Suspense fallback={<ActivityFeed feed={forceBones} />}>
-        <ActivityFeed feed={feed} />
+      <Suspense fallback={<ActivityFeed aria-busy="true" />}>
+        <Feed />
       </Suspense>
     </>
   );
 }
 ```
 
-## What about a `loading` prop?
-
-You don't need two components to solve this. You could keep both states in one component with a `loading` prop:
-
-```tsx title="Single component with loading prop"
-function PokemonCard({ loading }: { loading?: boolean }) {
-  const data = loading ? undefined : use(fetchPokemon());
-
-  return (
-    <div className="card">
-      {loading ? <div className="skeleton skeleton-image" /> : <img src={data.sprite} />}
-      {loading ? <div className="skeleton skeleton-title" /> : <h3>{data.name}</h3>}
-      {loading
-        ? Array.from({ length: 2 }, (_, i) => <div key={i} className="skeleton skeleton-badge" />)
-        : data.types.map((t) => <span key={t}>{t}</span>)}
-    </div>
-  );
-}
-
-function Page() {
-  return (
-    <Suspense fallback={<PokemonCard loading />}>
-      <PokemonCard />
-    </Suspense>
-  );
-}
-```
-
-This avoids a separate file, but every element still has two branches that can get out of sync. `loading` also has to be passed through every layer of the tree. If a user card lives inside a sidebar inside a dashboard, all three components need the prop even though only the card uses it.
-
-With `createBones()`, a component at any depth gets skeletons without prop drilling:
-
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4 comparison-grid">
-<div>
-
-```tsx title="Loading prop — two branches per element"
-function PokemonCard({ loading }: { loading?: boolean }) {
-  const data = loading ? undefined : use(fetchPokemon());
-
-  return (
-    <div className="card">
-      {loading ? <div className="skeleton skeleton-image" /> : <img src={data.sprite} />}
-      {loading ? <div className="skeleton skeleton-title" /> : <h3>{data.name}</h3>}
-      {loading
-        ? [1, 2].map((i) => <div key={i} className="skeleton skeleton-badge" />)
-        : data.types.map((t) => <span key={t}>{t}</span>)}
-    </div>
-  );
-}
-
-// Page.tsx — you still manage loading state
-function Page() {
-  return (
-    <Suspense fallback={<PokemonCard loading />}>
-      <PokemonCard />
-    </Suspense>
-  );
-}
-```
-
-</div>
-<div>
-
-```tsx title="Bones — single code path"
-function PokemonCard({ pokemon }: { pokemon?: PokemonData | Promise<PokemonData> }) {
-  const { bone, data, repeat } = createBones(pokemon);
-
-  return (
-    <div className="card">
-      <img src={data?.sprite} alt="" {...bone("block")} />
-      <h3 {...bone("text", { length: 6 })}>{data?.name}</h3>
-      {repeat(data?.types, 2, (item, i) => (
-        <span key={item ?? i} className="badge">
-          {item}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-// Page.tsx — the fallback is the same component
-function Page() {
-  return (
-    <Suspense fallback={<PokemonCard pokemon={forceBones} />}>
-      <PokemonCard pokemon={fetchPokemon()} />
-    </Suspense>
-  );
-}
-```
-
-</div>
-</div>
+Each async child suspends its own boundary, so the three fetches run at once and each section swaps in as its data lands.

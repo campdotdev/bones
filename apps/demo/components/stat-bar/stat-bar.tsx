@@ -1,25 +1,20 @@
-import { createBones } from "@camp.dev/bones/react";
+import type { ComponentProps } from "react";
 import styles from "./styles.module.css";
 
 type Stat = { name: string; value: number };
 
-export function StatBar({ stat }: { stat?: Stat | Promise<Stat> }) {
-  const { bone, data } = createBones(stat);
-  const pct = data ? (data.value / 255) * 100 : 0;
+export function StatBar({ stat, ...rest }: { stat?: Stat } & ComponentProps<"div">) {
+  const pct = stat ? (stat.value / 255) * 100 : 0;
 
   return (
-    <div className={styles.statRow}>
-      <span className={styles.statName} {...bone("text")}>
-        {data?.name}
-      </span>
-      <span className={styles.statValue} {...bone("text")}>
-        {data && String(data.value)}
-      </span>
+    <div className={styles.statRow} {...rest}>
+      <span className={styles.statName}>{stat?.name}</span>
+      <span className={styles.statValue}>{stat && String(stat.value)}</span>
       <div className={styles.statBarTrack}>
         <div
           className={styles.statBarFill}
-          style={{ width: data ? `${pct}%` : "60%" }}
-          {...bone("block")}
+          style={{ width: stat ? `${pct}%` : "60%" }}
+          data-bones-type="block"
         />
       </div>
     </div>

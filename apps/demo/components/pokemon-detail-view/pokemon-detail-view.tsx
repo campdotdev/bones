@@ -1,60 +1,51 @@
 import Image from "next/image";
-import { createBones, forceBones } from "@camp.dev/bones/react";
+import type { ComponentProps } from "react";
 import type { PokemonDetail } from "@/lib/pokeapi";
+import { TRANSPARENT_PIXEL } from "@/lib/pixel";
 import { StatBar } from "@/components/stat-bar/stat-bar";
 import { TypeBadge } from "@/components/type-badge/type-badge";
 import styles from "./styles.module.css";
 
 export function PokemonDetailView({
   pokemon,
-}: {
-  pokemon?: PokemonDetail | Promise<PokemonDetail>;
-}) {
-  const { bone, data, repeat, lines } = createBones(pokemon);
-
+  ...rest
+}: { pokemon?: PokemonDetail } & ComponentProps<"div">) {
   return (
-    <div className={styles.detail}>
+    <div className={styles.detail} {...rest}>
       <div className={styles.detailHeader}>
         <Image
           className={styles.detailImage}
-          src={data?.artwork ?? ""}
-          alt={data?.name ?? "Pokemon"}
+          src={pokemon?.artwork ?? TRANSPARENT_PIXEL}
+          alt={pokemon?.name ?? "Pokemon"}
           width={475}
           height={475}
-          {...bone("block")}
         />
         <div className={styles.detailInfo}>
-          <h1 className={styles.detailName} {...bone("text")}>
-            {data?.name}
-          </h1>
+          <h1 className={styles.detailName}>{pokemon?.name}</h1>
           <div className={styles.detailTypes}>
-            {repeat(data?.types, 2, (item, i) => (
-              <TypeBadge key={item ?? i} type={item} style={{ width: 56 }} {...bone("text")} />
+            {(pokemon?.types ?? Array.from({ length: 2 })).map((type, i) => (
+              <TypeBadge key={type ?? i} type={type} style={{ width: 56 }} />
             ))}
           </div>
           <div className={styles.detailMeta}>
-            <span className={styles.metaItem} {...bone("text")}>
-              {data && `${data.height / 10} m`}
-            </span>
-            <span className={styles.metaItem} {...bone("text")}>
-              {data && `${data.weight / 10} kg`}
-            </span>
+            <span className={styles.metaItem}>{pokemon && `${pokemon.height / 10} m`}</span>
+            <span className={styles.metaItem}>{pokemon && `${pokemon.weight / 10} kg`}</span>
           </div>
         </div>
       </div>
 
       <section className={styles.detailSection}>
-        <h2>Description</h2>
-        {lines(data?.description, 3, (item) => (
-          <p className={styles.detailDescription}>{item}</p>
-        ))}
+        <h2 data-bones-auto="off">Description</h2>
+        <p className={styles.detailDescription} data-bones-lines="3">
+          {pokemon?.description}
+        </p>
       </section>
 
       <section className={styles.detailSection}>
-        <h2>Base Stats</h2>
+        <h2 data-bones-auto="off">Base Stats</h2>
         <div className={styles.stats}>
-          {repeat(data?.stats, 6, (item, i) => (
-            <StatBar key={item?.name ?? i} stat={item ?? forceBones} />
+          {(pokemon?.stats ?? Array.from({ length: 6 })).map((stat, i) => (
+            <StatBar key={stat?.name ?? i} stat={stat} />
           ))}
         </div>
       </section>

@@ -1,4 +1,3 @@
-import { forceBones } from "@camp.dev/bones/react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vite-plus/test";
 import { InfoCard } from "./info-card";
@@ -19,12 +18,15 @@ describe("InfoCard", () => {
     expect(screen.getByText("64")).toBeDefined();
   });
 
-  test("renders a skeleton value for every label under forceBones", () => {
+  test("renders an empty value for every label with no data, and keeps labels readable", () => {
     const { container } = render(
-      <InfoCard title="Training" labels={["Catch Rate", "Base Exp"]} rows={forceBones} />,
+      <InfoCard title="Training" labels={["Catch Rate", "Base Exp"]} aria-busy="true" />,
     );
-    expect(screen.getByText("Catch Rate")).toBeDefined();
-    expect(screen.getByText("Base Exp")).toBeDefined();
-    expect(container.querySelectorAll("[data-bone]").length).toBe(2);
+    expect(container.firstElementChild?.getAttribute("aria-busy")).toBe("true");
+    expect(screen.getByText("Training").getAttribute("data-bones-auto")).toBe("off");
+    expect(screen.getByText("Catch Rate").getAttribute("data-bones-auto")).toBe("off");
+    const values = container.querySelectorAll("span:not([data-bones-auto])");
+    expect(values.length).toBe(2);
+    for (const value of values) expect(value.textContent).toBe("");
   });
 });

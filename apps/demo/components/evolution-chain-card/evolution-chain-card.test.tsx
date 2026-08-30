@@ -1,4 +1,3 @@
-import { forceBones } from "@camp.dev/bones/react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vite-plus/test";
 import { EvolutionChainCard } from "./evolution-chain-card";
@@ -47,10 +46,11 @@ describe("EvolutionChainCard", () => {
     expect(screen.queryByText("→")).toBeNull();
   });
 
-  test("renders a three-stage skeleton under forceBones", () => {
-    const { container } = render(<EvolutionChainCard chain={forceBones} />);
+  test("renders a three-stage shell with no data", () => {
+    const { container } = render(<EvolutionChainCard aria-busy="true" />);
+    expect(container.firstElementChild?.getAttribute("aria-busy")).toBe("true");
     expect(screen.getAllByText("→").length).toBe(2);
-    // a sprite and a name for each of three stages, plus two triggers
-    expect(container.querySelectorAll("[data-bone]").length).toBe(8);
+    expect(container.querySelectorAll("[data-bones-type='block']").length).toBe(3);
+    expect(container.querySelectorAll("img").length).toBe(0);
   });
 });

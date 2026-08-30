@@ -1,7 +1,6 @@
-import { boneAttributes, minMax } from "@camp.dev/bones";
 import "@camp.dev/bones/css";
 
-import { applyBone, clearBone, lineBones } from "./apply.ts";
+import { setLoading } from "./apply.ts";
 
 const AVATAR =
   "data:image/svg+xml," +
@@ -16,33 +15,20 @@ const profile = {
   bio: "Collects tape loops, birdsong, and the hum of old refrigerators.",
 };
 
-const avatar = document.querySelector("img")!;
-const bio = document.getElementById("bio")!;
-const fields = ["name", "role"] as const;
-const text = fields.map((id, index) => ({
-  el: document.getElementById(id)!,
-  attrs: boneAttributes("text", { length: minMax(12, 32) }, index),
-}));
+const card = document.querySelector<HTMLElement>(".card")!;
+const avatar = card.querySelector("img")!;
+const fields = ["name", "role", "bio"] as const;
 
 let loading = true;
 
 function render() {
+  setLoading(card, loading);
   if (loading) {
-    applyBone(avatar, boneAttributes("block"));
-    for (const { el, attrs } of text) {
-      el.textContent = "";
-      applyBone(el, attrs);
-    }
-    // The bio wraps, so it gets one bar per expected line.
-    lineBones(bio, 2);
+    avatar.removeAttribute("src");
+    for (const id of fields) document.getElementById(id)!.textContent = "";
   } else {
-    clearBone(avatar);
     avatar.src = profile.avatar;
-    for (const [index, { el }] of text.entries()) {
-      clearBone(el);
-      el.textContent = profile[fields[index]];
-    }
-    bio.textContent = profile.bio;
+    for (const id of fields) document.getElementById(id)!.textContent = profile[id];
   }
 }
 

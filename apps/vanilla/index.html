@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Bones — vanilla core demo</title>
+    <title>Bones — vanilla demo</title>
     <style>
       body {
         font-family: system-ui, sans-serif;
@@ -37,13 +37,13 @@
       }
     </style>
   </head>
-  <body data-bone-animate="shimmer">
+  <body data-bones-animate="shimmer">
     <article class="card">
       <img id="avatar" width="72" height="72" alt="" />
       <div>
         <h2 id="name"></h2>
         <p id="role"></p>
-        <p id="bio"></p>
+        <p id="bio" data-bones-lines="2"></p>
       </div>
     </article>
     <button id="toggle" type="button">Toggle loading</button>

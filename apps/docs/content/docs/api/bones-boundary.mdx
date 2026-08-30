@@ -4,10 +4,10 @@ description: A custom element that manages the loading state of its subtree.
 ---
 
 ```ts
-import "@camp.dev/bones/element";
+import "@camp.dev/bones";
 ```
 
-`<bones-boundary>` sets `aria-busy="true"` and `inert` on itself while its subtree is loading, and removes them when it is not. It draws nothing. `@camp.dev/bones/css` styles `data-bone` markup wherever it appears, and unmarked leaves only inside an `aria-busy="true"` region.
+`<bones-boundary>` sets `aria-busy="true"` and `inert` on itself while its subtree is loading, and removes them when it is not. It draws nothing. `@camp.dev/bones/css` paints every leaf under `aria-busy="true"` and honors the `data-bones-*` attributes described in [Attributes](/api/attributes).
 
 Set `busy` when loading starts and remove it when loading ends. The element waits `delay` before it shows bones, so a fast response never flashes a skeleton, and it keeps bones for at least `min-duration`, so a slow one never strobes.
 
@@ -16,7 +16,7 @@ Set `busy` when loading starts and remove it when loading ends. The element wait
 ```html
 <link rel="stylesheet" href="https://unpkg.com/@camp.dev/bones/src/css/bones.css" />
 <script type="module">
-  import "https://unpkg.com/@camp.dev/bones/dist/element/index.mjs";
+  import "https://unpkg.com/@camp.dev/bones/dist/index.mjs";
 </script>
 
 <bones-boundary id="profile" busy>
@@ -112,39 +112,52 @@ Three edges to know about:
 
 ## React
 
-`@camp.dev/bones/react` exports a typed wrapper. Import the element once in a client entry so the tag is registered.
+Register the element once in a client entry, then write the tag in JSX. React 19 passes unknown props on a custom element through as attributes and turns an `on*` prop into `addEventListener` with the rest of the name as the event type.
 
 ```tsx
-import "@camp.dev/bones/element";
-import { BonesBoundary } from "@camp.dev/bones/react";
+"use client";
+import "@camp.dev/bones";
 
 function Profile({ loading, user }: { loading: boolean; user?: User }) {
   return (
-    <BonesBoundary busy={loading} minDuration={600} onHide={() => track("profile:visible")}>
-      <h2>{user?.name ?? "Loading"}</h2>
-      <p>{user?.bio ?? "Three lines of copy become three bones while busy."}</p>
-    </BonesBoundary>
+    <bones-boundary
+      busy={loading || undefined}
+      min-duration={600}
+      onbones:hide={() => track("profile:visible")}
+    >
+      <h2>{user?.name}</h2>
+      <p data-bones-lines="3">{user?.bio}</p>
+    </bones-boundary>
   );
 }
 ```
 
-| Prop          | Maps to        | Notes                                                                                |
-| ------------- | -------------- | ------------------------------------------------------------------------------------ |
-| `busy`        | `busy`         |                                                                                      |
-| `force`       | `force`        | Also renders `aria-busy="true"` and `inert` on the server.                           |
-| `delay`       | `delay`        |                                                                                      |
-| `minDuration` | `min-duration` |                                                                                      |
-| `transition`  | `transition`   |                                                                                      |
-| `precision`   | `precision`    | `"css"` or `"measured"`. Enables measured bones (see above).                         |
-| `onShow`      | `bones:show`   | Listener. Passing a function from a server component is an error, as with `onClick`. |
-| `onHide`      | `bones:hide`   | Same.                                                                                |
+TypeScript needs to know the tag. Add this once to a `.d.ts` in your project:
 
-The wrapper uses no hooks, so it renders inside server components. Suspense does not need it: a fallback built from the same components with `forceBones` renders `data-bone` markup that the stylesheet styles on its own.
+```ts
+import type { BonesBoundary } from "@camp.dev/bones";
 
-The wrapper normally leaves the output attributes to the element. When `force` is true, it renders `aria-busy` and `inert` so the server paints bones, and React then owns those two attributes and removes them on a later update. The element writes them back while bones are showing. The wrapper also sets `suppressHydrationWarning`, so a boundary that already shows bones by the time React hydrates it is not reported as a mismatch.
+declare module "react" {
+  namespace JSX {
+    interface IntrinsicElements {
+      "bones-boundary": React.HTMLAttributes<HTMLElement> & {
+        busy?: boolean;
+        force?: boolean;
+        delay?: number;
+        "min-duration"?: number;
+        transition?: "auto" | "none";
+        precision?: "css" | "measured";
+        "onbones:show"?: (event: CustomEvent) => void;
+        "onbones:hide"?: (event: CustomEvent) => void;
+        ref?: React.Ref<BonesBoundary>;
+      };
+    }
+  }
+}
+```
 
-The package augments `JSX.IntrinsicElements` with `"bones-boundary"`. A project that already declares the same tag gets a conflicting-declaration error from TypeScript. Delete the local declaration and use this one.
+A Suspense fallback does not need the element: the same component with `aria-busy="true"` and no data paints on the server with no JavaScript. Reach for the element when you want the delay, the minimum duration, or the crossfade on a client-side swap.
 
 ## Browser support
 
-Custom elements, `inert` (Chrome 102, Safari 15.5, Firefox 112), and the `:has()` selector the stylesheet needs. View Transitions are detected at runtime.
+Custom elements, `inert` (Chrome 102, Safari 15.5, Firefox 112), and the stylesheet's floor: CSS nesting, `@scope`, `:has()`, relative color syntax, `lh`, and `mask` (Baseline 2024). View Transitions are detected at runtime.

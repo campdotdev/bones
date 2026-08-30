@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { createBones, minMax } from "@camp.dev/bones/react";
+import { useState, useMemo, type ComponentProps } from "react";
 import type { PokemonMoveEntry, MoveDetail } from "@/lib/pokeapi";
 import { TypeBadge } from "@/components/type-badge/type-badge";
 import styles from "./styles.module.css";
@@ -14,14 +13,18 @@ const METHOD_LABELS: Record<string, string> = {
   tutor: "Tutor",
 };
 
-interface MovesInteractiveProps {
+interface MovesInteractiveProps extends ComponentProps<"div"> {
   moves?: PokemonMoveEntry[];
   moveDetails?: Record<string, MoveDetail>;
 }
 
-export function MovesInteractive({ moves = [], moveDetails }: MovesInteractiveProps) {
-  const { bone, repeat } = createBones({ loading: !moveDetails });
+interface FilteredMove {
+  name: string;
+  level: number;
+  detail: MoveDetail | undefined;
+}
 
+export function MovesInteractive({ moves = [], moveDetails, ...rest }: MovesInteractiveProps) {
   const versionGroups = useMemo(() => {
     const set = new Set<string>();
     for (const move of moves) {
@@ -36,11 +39,7 @@ export function MovesInteractive({ moves = [], moveDetails }: MovesInteractivePr
   const [activeMethod, setActiveMethod] = useState<string>("level-up");
 
   const filteredMoves = useMemo(() => {
-    const result: {
-      name: string;
-      level: number;
-      detail: MoveDetail | undefined;
-    }[] = [];
+    const result: FilteredMove[] = [];
 
     for (const move of moves) {
       for (const vd of move.versionDetails) {
@@ -76,9 +75,15 @@ export function MovesInteractive({ moves = [], moveDetails }: MovesInteractivePr
   }, [moves, activeGame]);
 
   return (
-    <div className={styles.panel}>
+    <div className={styles.panel} aria-busy={moveDetails ? undefined : "true"} {...rest}>
+      {/* The panel stays busy until the move details arrive, even when the
+          move list is already here, so this is the one place a component sets
+          its own aria-busy. A caller's aria-busy still wins through ...rest. */}
       <div className={styles.gamePills}>
-        {repeat(versionGroups, 25, (item, i) => (
+        {(versionGroups.length
+          ? versionGroups
+          : Array.from<string | undefined>({ length: 25 })
+        ).map((item, i) => (
           <button
             key={item ?? i}
             className={`${styles.pill} ${item === activeGame ? styles.pillActive : ""}`}
@@ -88,23 +93,22 @@ export function MovesInteractive({ moves = [], moveDetails }: MovesInteractivePr
               setActiveMethod("level-up");
             }}
           >
-            <span {...bone("text", { length: minMax(4, 12), contained: true })}>
-              {item?.replace(/-/g, " ")}
-            </span>
+            <span>{item?.replace(/-/g, " ")}</span>
           </button>
         ))}
       </div>
 
       <div className={styles.methodTabs}>
-        {repeat(availableMethods, 4, (item, i) => (
+        {(availableMethods.length
+          ? availableMethods
+          : Array.from<(typeof LEARN_METHODS)[number] | undefined>({ length: 4 })
+        ).map((item, i) => (
           <button
             key={item ?? i}
             className={`${styles.methodTab} ${item === activeMethod ? styles.methodTabActive : ""}`}
             onClick={() => item && setActiveMethod(item)}
           >
-            <span {...bone("text", { length: minMax(2, 12), contained: true })}>
-              {item && (METHOD_LABELS[item] ?? item)}
-            </span>
+            <span>{item && (METHOD_LABELS[item] ?? item)}</span>
           </button>
         ))}
       </div>
@@ -113,7 +117,7 @@ export function MovesInteractive({ moves = [], moveDetails }: MovesInteractivePr
         <p className={styles.empty}>No moves for this method in the selected game.</p>
       ) : (
         <table className={styles.table}>
-          <thead>
+          <thead data-bones-auto="off">
             <tr>
               <th className={styles.thLeft}>{activeMethod === "level-up" ? "Lv." : "#"}</th>
               <th className={styles.thLeft}>Move</th>
@@ -125,10 +129,13 @@ export function MovesInteractive({ moves = [], moveDetails }: MovesInteractivePr
             </tr>
           </thead>
           <tbody>
-            {repeat(filteredMoves, 10, (item, i) => (
+            {(filteredMoves.length
+              ? filteredMoves
+              : Array.from<FilteredMove | undefined>({ length: 10 })
+            ).map((item, i) => (
               <tr key={item ? `${item.name}-${i}` : i}>
                 <td className={styles.tdMuted}>
-                  <span {...bone("text", { length: 2, contained: true })}>
+                  <span>
                     {item &&
                       (activeMethod === "machine"
                         ? (item.detail?.machineNumbers[activeGame] ?? "—")
@@ -136,36 +143,22 @@ export function MovesInteractive({ moves = [], moveDetails }: MovesInteractivePr
                   </span>
                 </td>
                 <td className={styles.tdName}>
-                  <span {...bone("text", { length: minMax(5, 10), contained: true })}>
-                    {item?.name.replace(/-/g, " ")}
-                  </span>
+                  <span>{item?.name.replace(/-/g, " ")}</span>
                 </td>
                 <td>
-                  <TypeBadge
-                    type={item?.detail?.type}
-                    className={styles.moveType}
-                    {...bone("text", { contained: true, length: 5 })}
-                  />
+                  <TypeBadge type={item?.detail?.type} className={styles.moveType} />
                 </td>
                 <td className={styles.tdMuted}>
-                  <span {...bone("text", { length: 4, contained: true })}>
-                    {item && (item.detail?.damageClass ?? "—")}
-                  </span>
+                  <span>{item && (item.detail?.damageClass ?? "—")}</span>
                 </td>
                 <td className={styles.tdRight}>
-                  <span {...bone("text", { length: 2, contained: true })}>
-                    {item && (item.detail?.power ?? "—")}
-                  </span>
+                  <span>{item && (item.detail?.power ?? "—")}</span>
                 </td>
                 <td className={styles.tdRight}>
-                  <span {...bone("text", { length: 2, contained: true })}>
-                    {item && (item.detail?.accuracy ?? "—")}
-                  </span>
+                  <span>{item && (item.detail?.accuracy ?? "—")}</span>
                 </td>
                 <td className={styles.tdRight}>
-                  <span {...bone("text", { length: 2, contained: true })}>
-                    {item && (item.detail?.pp ?? "—")}
-                  </span>
+                  <span>{item && (item.detail?.pp ?? "—")}</span>
                 </td>
               </tr>
             ))}

@@ -1,4 +1,3 @@
-import { forceBones } from "@camp.dev/bones/react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vite-plus/test";
 import { MovesPanel } from "./moves-panel";
@@ -40,8 +39,8 @@ const moveDetails = {
 };
 
 // MovesInteractive's loading layout: 25 game pills, 4 method tabs, and 10
-// table rows with seven cells each.
-const LOADING_BONES = 25 + 4 + 10 * 7;
+// table rows.
+const LOADING_ROWS = 10;
 
 describe("MovesPanel", () => {
   test("renders the moves for the first game and method", () => {
@@ -49,17 +48,19 @@ describe("MovesPanel", () => {
     expect(screen.getByText("tackle")).toBeDefined();
     expect(screen.getByText("vine whip")).toBeDefined();
     expect(screen.getByText("red blue")).toBeDefined();
-    expect(container.querySelectorAll("[data-bone]").length).toBe(0);
+    expect(container.firstElementChild?.hasAttribute("aria-busy")).toBe(false);
   });
 
-  test("renders a full skeleton when both sources are forced", () => {
-    const { container } = render(<MovesPanel moves={forceBones} moveDetails={forceBones} />);
-    expect(container.querySelectorAll("[data-bone]").length).toBe(LOADING_BONES);
+  test("renders the shell and sets aria-busy while nothing has loaded", () => {
+    const { container } = render(<MovesPanel />);
+    expect(container.firstElementChild?.getAttribute("aria-busy")).toBe("true");
+    expect(container.querySelectorAll("tbody tr").length).toBe(LOADING_ROWS);
+    expect(container.querySelector("thead")?.getAttribute("data-bones-auto")).toBe("off");
   });
 
-  test("stays a skeleton while only the move details are pending", () => {
-    const { container } = render(<MovesPanel moves={moves} moveDetails={forceBones} />);
-    expect(screen.queryByText("tackle")).toBeNull();
-    expect(container.querySelectorAll("[data-bone]").length).toBe(LOADING_BONES);
+  test("stays busy while only the move details are pending", () => {
+    const { container } = render(<MovesPanel moves={moves} />);
+    expect(container.firstElementChild?.getAttribute("aria-busy")).toBe("true");
+    expect(screen.getByText("tackle")).toBeDefined();
   });
 });

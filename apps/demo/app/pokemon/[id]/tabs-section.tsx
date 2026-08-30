@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { forceBones } from "@camp.dev/bones/react";
+import { Await } from "@/lib/await";
 import type { PokemonMoveEntry, MoveDetail, EncounterLocation } from "@/lib/pokeapi";
 import { DetailTabs } from "@/components/detail-tabs/detail-tabs";
 import { MovesPanel } from "@/components/moves-panel/moves-panel";
@@ -7,12 +7,10 @@ import { DexEntriesPanel } from "@/components/dex-entries-panel/dex-entries-pane
 import { LocationsPanel } from "@/components/locations-panel/locations-panel";
 
 interface TabsSectionProps {
-  moves: PokemonMoveEntry[] | Promise<PokemonMoveEntry[]>;
-  moveDetails: Record<string, MoveDetail> | Promise<Record<string, MoveDetail>>;
-  flavorTextEntries:
-    | { text: string; version: string }[]
-    | Promise<{ text: string; version: string }[]>;
-  encounters: EncounterLocation[] | Promise<EncounterLocation[]>;
+  moves: Promise<PokemonMoveEntry[]>;
+  moveDetails: Promise<Record<string, MoveDetail>>;
+  flavorTextEntries: Promise<{ text: string; version: string }[]>;
+  encounters: Promise<EncounterLocation[]>;
 }
 
 export function TabsSection({
@@ -28,8 +26,10 @@ export function TabsSection({
           id: "moves",
           label: "Moves",
           content: (
-            <Suspense fallback={<MovesPanel moves={forceBones} moveDetails={forceBones} />}>
-              <MovesPanel moves={moves} moveDetails={moveDetails} />
+            <Suspense fallback={<MovesPanel aria-busy="true" />}>
+              <Await promise={Promise.all([moves, moveDetails])}>
+                {([movesData, details]) => <MovesPanel moves={movesData} moveDetails={details} />}
+              </Await>
             </Suspense>
           ),
         },
@@ -37,8 +37,10 @@ export function TabsSection({
           id: "dex-entries",
           label: "Dex Entries",
           content: (
-            <Suspense fallback={<DexEntriesPanel entries={forceBones} />}>
-              <DexEntriesPanel entries={flavorTextEntries} />
+            <Suspense fallback={<DexEntriesPanel aria-busy="true" />}>
+              <Await promise={flavorTextEntries}>
+                {(entries) => <DexEntriesPanel entries={entries} />}
+              </Await>
             </Suspense>
           ),
         },
@@ -46,8 +48,10 @@ export function TabsSection({
           id: "locations",
           label: "Locations",
           content: (
-            <Suspense fallback={<LocationsPanel locations={forceBones} />}>
-              <LocationsPanel locations={encounters} />
+            <Suspense fallback={<LocationsPanel />}>
+              <Await promise={encounters}>
+                {(locations) => <LocationsPanel locations={locations} />}
+              </Await>
             </Suspense>
           ),
         },

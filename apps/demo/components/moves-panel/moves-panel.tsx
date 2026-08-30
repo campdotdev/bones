@@ -1,14 +1,12 @@
-import { createBones } from "@camp.dev/bones/react";
+import type { ComponentProps } from "react";
 import type { PokemonMoveEntry, MoveDetail } from "@/lib/pokeapi";
 import { MovesInteractive } from "./moves-interactive";
 
-interface MovesPanelProps {
-  moves?: PokemonMoveEntry[] | Promise<PokemonMoveEntry[]>;
-  moveDetails?: Record<string, MoveDetail> | Promise<Record<string, MoveDetail>>;
+interface MovesPanelProps extends ComponentProps<"div"> {
+  moves?: PokemonMoveEntry[];
+  moveDetails?: Record<string, MoveDetail>;
 }
 
-export function MovesPanel({ moves, moveDetails }: MovesPanelProps) {
-  const { data: movesData } = createBones(moves);
-  const { data: detailsData } = createBones(moveDetails);
-  return <MovesInteractive moves={movesData ?? undefined} moveDetails={detailsData ?? undefined} />;
+export function MovesPanel({ moves, moveDetails, ...rest }: MovesPanelProps) {
+  return <MovesInteractive moves={moves} moveDetails={moveDetails} {...rest} />;
 }

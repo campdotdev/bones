@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { createBones } from "@camp.dev/bones/react";
 import styles from "./pokemon-card.module.css";
 
 interface Pokemon {
@@ -18,29 +17,25 @@ const MOCK_POKEMON: Pokemon = {
   types: ["ground"],
 };
 
-function PokemonCard({ pokemon, loading }: { pokemon?: Pokemon; loading?: boolean }) {
-  const { bone, data, repeat } = createBones(pokemon, { loading });
+// next/image refuses an empty src; the stylesheet's block rule hides
+// whatever this pixel would show.
+const TRANSPARENT_PIXEL =
+  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
+function PokemonCard({ pokemon }: { pokemon?: Pokemon }) {
   return (
     <div className={styles.card}>
       <Image
         className={styles.cardImage}
-        src={data?.sprite ?? ""}
-        alt={data?.name ?? "Pokemon"}
+        src={pokemon?.sprite ?? TRANSPARENT_PIXEL}
+        alt={pokemon?.name ?? "Pokemon"}
         width={120}
         height={120}
-        {...bone("block")}
       />
-      <h3 className={styles.cardName} {...bone("text", { length: 5 })}>
-        {data?.name}
-      </h3>
+      <h3 className={styles.cardName}>{pokemon?.name}</h3>
       <div className={styles.cardTypes}>
-        {repeat(data?.types, 2, (type, i) => (
-          <span
-            key={type ?? i}
-            className={`${styles.badge}${type ? ` ${styles[type]}` : ""}`}
-            {...bone("text", { contained: true, length: 7 })}
-          >
+        {(pokemon?.types ?? Array.from({ length: 2 })).map((type, i) => (
+          <span key={type ?? i} className={`${styles.badge}${type ? ` ${styles[type]}` : ""}`}>
             {type}
           </span>
         ))}
@@ -58,8 +53,13 @@ export function DemoPokemonCard() {
         <div style={{ opacity: 1 - blend }}>
           <PokemonCard pokemon={MOCK_POKEMON} />
         </div>
-        <div className={styles.cardOverlay} data-bone-animate="shimmer" style={{ opacity: blend }}>
-          <PokemonCard pokemon={MOCK_POKEMON} loading />
+        <div
+          className={styles.cardOverlay}
+          aria-busy="true"
+          data-bones-animate="shimmer"
+          style={{ opacity: blend }}
+        >
+          <PokemonCard />
         </div>
       </div>
       <div className={styles.sliderRow}>

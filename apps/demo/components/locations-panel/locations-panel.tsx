@@ -1,4 +1,3 @@
-import { createBones } from "@camp.dev/bones/react";
 import type { EncounterLocation } from "@/lib/pokeapi";
 import styles from "./styles.module.css";
 
@@ -58,12 +57,7 @@ function romanToNum(r: string): number {
   return map[r] ?? 99;
 }
 
-export function LocationsPanel({
-  locations: locationsInput,
-}: {
-  locations?: EncounterLocation[] | Promise<EncounterLocation[]>;
-}) {
-  const { data: locations } = createBones(locationsInput);
+export function LocationsPanel({ locations }: { locations?: EncounterLocation[] }) {
   if (!locations) return null;
 
   if (locations.length === 0) {

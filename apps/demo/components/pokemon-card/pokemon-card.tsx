@@ -1,41 +1,36 @@
 import Image from "next/image";
-import { createBones } from "@camp.dev/bones/react";
 import Link from "next/link";
+import type { ComponentProps } from "react";
 import type { PokemonListItem } from "@/lib/pokeapi";
+import { TRANSPARENT_PIXEL } from "@/lib/pixel";
 import { TypeBadge } from "@/components/type-badge/type-badge";
 import styles from "./styles.module.css";
 
-export function PokemonCard({ pokemon }: { pokemon?: PokemonListItem | Promise<PokemonListItem> }) {
-  const { bone, data, repeat } = createBones(pokemon);
-
+export function PokemonCard({
+  pokemon,
+  ...rest
+}: { pokemon?: PokemonListItem } & ComponentProps<"div">) {
   const card = (
-    <div className={styles.card}>
+    <div className={styles.card} {...rest}>
       <Image
         className={styles.cardImage}
-        src={data?.sprite ?? ""}
-        alt={data?.name ?? "Pokemon"}
+        src={pokemon?.sprite ?? TRANSPARENT_PIXEL}
+        alt={pokemon?.name ?? "Pokemon"}
         width={120}
         height={120}
-        {...bone("block")}
       />
-      <h3 className={styles.cardName} {...bone("text", { length: 9 })}>
-        {data?.name}
-      </h3>
+      <h3 className={styles.cardName}>{pokemon?.name}</h3>
       <div className={styles.cardTypes}>
-        {repeat(data?.types, 2, (item, i) => (
-          <TypeBadge
-            key={item ?? i}
-            type={item}
-            {...bone("text", { contained: true, length: 7 })}
-          />
+        {(pokemon?.types ?? Array.from({ length: 2 })).map((type, i) => (
+          <TypeBadge key={type ?? i} type={type} />
         ))}
       </div>
     </div>
   );
 
-  if (data) {
+  if (pokemon) {
     return (
-      <Link href={`/pokemon/${data.id}`} className={styles.cardLink}>
+      <Link href={`/pokemon/${pokemon.id}`} className={styles.cardLink}>
         {card}
       </Link>
     );
