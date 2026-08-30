@@ -11,7 +11,11 @@ The stylesheet keys on one thing: an element with `aria-busy="true"`. On that el
 
 ## `aria-busy="true"`
 
-Set it on the region that is loading, or on the component root. `<bones-boundary busy>` sets it for you with timing and a crossfade. `renderBoundary` in the streaming kit renders it. An adapter for htmx or Turbo toggles it. In React, pass it to the component as a prop and forward it to the root element.
+Set it on the region that is loading, or on the component root, and remove it when the data lands. In React, pass it to the component as a prop and forward it to the root element; a Suspense fallback is the component with `aria-busy="true"` and no data. A framework that streams or swaps HTML (Astro server islands, Turbo, htmx) puts it on the placeholder and the swap takes it off.
+
+Add `inert` beside it whenever the fallback renders links or controls. A skeleton's buttons are still focusable; `inert` takes the subtree out of the tab order and the accessibility tree, and nothing does that for you.
+
+For a request you run yourself, [Delay and hold](/examples#delay-and-hold) waits before setting the attribute and keeps it long enough once set.
 
 ## `data-bones-type`
 

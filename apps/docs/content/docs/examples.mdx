@@ -135,3 +135,46 @@ Set it on `<body>` to change every skeleton in your app, and on a section to ove
   </div>
 </body>
 ```
+
+## Delay and hold
+
+Suspense shows the skeleton as the first paint, so it never flashes. A region you mark busy around your own `fetch` can flash when the response is fast, and strobe when it is barely slow. This function sets `aria-busy` and `inert` after `delay` and, once shown, keeps them for at least `minDuration`. It hides inside a view transition where the browser has one and the user has not asked for reduced motion.
+
+```js
+export function busy(region, { delay = 200, minDuration = 400 } = {}) {
+  let shownAt = 0;
+  const show = setTimeout(() => {
+    shownAt = Date.now();
+    region.setAttribute("aria-busy", "true");
+    region.toggleAttribute("inert", true);
+  }, delay);
+
+  return function done() {
+    clearTimeout(show);
+    if (shownAt === 0) return; // never shown: nothing to hide
+    const hide = () => {
+      region.removeAttribute("aria-busy");
+      region.removeAttribute("inert");
+    };
+    const remaining = Math.max(0, shownAt + minDuration - Date.now());
+    setTimeout(() => {
+      const still =
+        typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (typeof document.startViewTransition === "function" && !still) {
+        document.startViewTransition(hide);
+      } else {
+        hide();
+      }
+    }, remaining);
+  };
+}
+```
+
+```js
+const done = busy(document.querySelector("#profile"));
+const profile = await (await fetch("/api/profile")).json();
+render(profile);
+done();
+```
+
+Leave the old content in place while the request runs. If bones show, the stylesheet sizes them from it; if the response beats `delay`, nothing changes on screen. A router that already has pending-state timing (TanStack Router's `pendingMs` and `pendingMinMs`, Vue Suspense's `timeout`) makes this unnecessary; use the router's.
