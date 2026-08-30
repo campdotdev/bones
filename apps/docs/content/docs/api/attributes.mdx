@@ -24,7 +24,7 @@ For a request you run yourself, [Delay and hold](/examples#delay-and-hold) waits
 | `"text"`  | Paint a text bar even where inference would not, or would paint a block.                       |
 | `"block"` | Paint one filled box the size of the element and hide its descendants. A `div` avatar, a card. |
 
-Explicit rules are unlayered, so page CSS does not outrank them. A page rule that sets `color` on an inferred leaf keeps that text visible over its bar; on a `data-bones-type="text"` element the text hides.
+Explicit rules are unlayered, so no page rule in a layer outranks them, and an unlayered one has to beat two attribute selectors on specificity or come from a `style` attribute. A page rule that sets `color` on an inferred leaf keeps that text visible over its bar; on a `data-bones-type="text"` element the text hides.
 
 ## `data-bones-lines`
 
@@ -46,7 +46,7 @@ An integer. Makes the bar that many characters wide, measured in the element's o
 
 Values 1 through 40 work in every supported browser. Any other integer works where the browser supports `attr()` with a type, as for `data-bones-lines`. Elsewhere an out-of-range value paints 4 characters.
 
-A length is a modifier, not a type. An inferred leaf with a length is still inferred. The width itself is unlayered, so a page rule that sets `width` on the element does not override the length. On an inline element `width` does nothing, so the length sets the placeholder width of an empty inline leaf and leaves a non-empty one at its text width.
+A length is a modifier, not a type. An inferred leaf with a length is still inferred. The width itself is unlayered, so a page `width` rule does not override the length from inside a layer or at lower specificity. A more specific rule, or a `style` attribute, does; the length still holds as a minimum width. On an inline element `width` does nothing, so the length sets the placeholder width of an empty inline leaf and leaves a non-empty one at its text width.
 
 ## `data-bones-auto="off"`
 
