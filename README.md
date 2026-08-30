@@ -1,6 +1,6 @@
 # Bones
 
-Automatic skeleton loaders for any stack. One stylesheet, ~6 kB gzipped, no JavaScript, 0 dependencies.
+Automatic skeleton loaders for any stack. One stylesheet, ~4.5 kB gzipped, no JavaScript, 0 dependencies.
 
 Set `aria-busy="true"` on a region and its content becomes a skeleton: a bar for every leaf, a box for every image and control. No skeleton components, no placeholder markup, no JavaScript in the loading path. When inference gets something wrong, a `data-bones-*` attribute on the real markup fixes it, and the attribute does nothing once the region is not busy.
 
@@ -18,6 +18,12 @@ Import the stylesheet once in your root layout or entry point:
 
 ```tsx
 import "@camp.dev/bones/css";
+```
+
+Without a bundler, link it from a CDN:
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/@camp.dev/bones/src/css/bones.css" />
 ```
 
 ## Entry points

@@ -2,8 +2,8 @@ import { afterEach, expect, test } from "vite-plus/test";
 import "../../src/css/bones.css";
 
 // ---------------------------------------------------------------------------
-// BON-16: explicit bones shimmer by default, the same as inferred bones and
-// the measured overlay. data-bones-animate="none" is the opt-out.
+// BON-16: explicit bones shimmer by default, the same as inferred bones.
+// data-bones-animate="none" is the opt-out.
 // ---------------------------------------------------------------------------
 
 afterEach(() => {

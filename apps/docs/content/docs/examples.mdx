@@ -172,9 +172,12 @@ export function busy(region, { delay = 200, minDuration = 400 } = {}) {
 
 ```js
 const done = busy(document.querySelector("#profile"));
-const profile = await (await fetch("/api/profile")).json();
-render(profile);
-done();
+try {
+  const profile = await (await fetch("/api/profile")).json();
+  render(profile);
+} finally {
+  done();
+}
 ```
 
-Leave the old content in place while the request runs. If bones show, the stylesheet sizes them from it; if the response beats `delay`, nothing changes on screen. A router that already has pending-state timing (TanStack Router's `pendingMs` and `pendingMinMs`, Vue Suspense's `timeout`) makes this unnecessary; use the router's.
+The `finally` keeps a failed request from leaving the region busy and inert. Leave the old content in place while the request runs. If bones show, the stylesheet sizes them from it; if the response beats `delay`, nothing changes on screen. A router that already has pending-state timing (TanStack Router's `pendingMs` and `pendingMinMs`, Vue Suspense's `timeout`) makes this unnecessary; use the router's.

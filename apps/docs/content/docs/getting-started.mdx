@@ -17,6 +17,12 @@ Import it once in your root layout or entry point:
 import "@camp.dev/bones/css";
 ```
 
+Without a bundler, link it from a CDN:
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/@camp.dev/bones/src/css/bones.css" />
+```
+
 ## Mark a region busy
 
 Set `aria-busy="true"` on the element that is loading. Every leaf under it becomes a bar and every image becomes a box. Remove the attribute when the data lands.
