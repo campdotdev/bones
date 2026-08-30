@@ -17,57 +17,44 @@ Browsers render streamed HTML in order. To fill a region near the top of the pag
 
 **The shell.** The head, the body up to and including every slow region, and the swap function. Do not close `body` or `html`; both closing tags are optional, and later chunks parse inside the still-open body.
 
+{/* prettier-ignore */}
 ```html
 <!doctype html>
 <html lang="en">
-  <head>
-    <link rel="stylesheet" href="/bones.css" />
-  </head>
-  <body>
-    <h1>Dashboard</h1>
-    <section aria-busy="true" inert data-slot="stats">
-      <h2>This week</h2>
-      <p>Deploy counts and commit totals load here.</p>
-    </section>
-    <script nonce="…">
-      function swap(id) {
-        var t = document.querySelector('template[data-chunk="' + id + '"]');
-        var b = document.querySelector('[data-slot="' + id + '"]');
-        if (!b) {
-          if (t) t.remove();
-          return;
-        }
-        if (t) {
-          b.replaceChildren(t.content);
-          t.remove();
-        }
-        b.removeAttribute("aria-busy");
-        b.removeAttribute("inert");
-      }
-    </script>
-  </body>
-</html>
+<head>
+  <link rel="stylesheet" href="/bones.css" />
+</head>
+<body>
+  <h1>Dashboard</h1>
+  <section aria-busy="true" inert data-slot="stats">
+    <h2>This week</h2>
+    <p>Deploy counts and commit totals load here.</p>
+  </section>
+  <script nonce="…">
+    function swap(id) {
+      var t = document.querySelector('template[data-chunk="' + id + '"]');
+      var b = document.querySelector('[data-slot="' + id + '"]');
+      if (!b) { if (t) t.remove(); return; }
+      if (t) { b.replaceChildren(t.content); t.remove(); }
+      b.removeAttribute("aria-busy");
+      b.removeAttribute("inert");
+    }
+  </script>
 ```
 
 **A chunk.** Flush the template and the call together, template first. The script runs when its closing tag parses, so the template is complete by then even if the network splits the chunk.
 
+{/* prettier-ignore */}
 ```html
-<template data-chunk="stats"
-  ><h2>This week</h2>
-  <p>12 deploys, 3 rollbacks, 41 commits.</p></template
->
-<script nonce="…">
-  swap("stats");
-</script>
+<template data-chunk="stats"><h2>This week</h2><p>12 deploys, 3 rollbacks, 41 commits.</p></template>
+<script nonce="…">swap("stats")</script>
 ```
 
 **A failure.** Call `swap` with no template and the region keeps its placeholder children; add a marker if you want to style it:
 
+{/* prettier-ignore */}
 ```html
-<script nonce="…">
-  document.querySelector('[data-slot="stats"]').dataset.error = "";
-  swap("stats");
-</script>
+<script nonce="…">document.querySelector('[data-slot="stats"]').dataset.error = ""; swap("stats")</script>
 ```
 
 **Notes.**
