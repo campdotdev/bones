@@ -180,4 +180,4 @@ try {
 }
 ```
 
-The `finally` keeps a failed request from leaving the region busy and inert. Leave the old content in place while the request runs. If bones show, the stylesheet sizes them from it; if the response beats `delay`, nothing changes on screen. A router that already has pending-state timing (TanStack Router's `pendingMs` and `pendingMinMs`, Vue Suspense's `timeout`) makes this unnecessary; use the router's.
+The `finally` keeps a failed request from leaving the region busy and inert. Leave the old content in place while the request runs. If bones show, the stylesheet sizes them from it; if the response beats `delay`, nothing changes on screen. A router that already has pending-state timing (TanStack Router's `pendingMs` and `pendingMinMs`, Vue Suspense's `timeout`) makes this unnecessary; use the router's. The recipe assumes one request per region at a time. If a newer request can start while one is in flight, keep the region's `done()` in your own state and call it when the latest request lands, instead of calling `busy()` again; an older `done()` would otherwise clear the newer request's busy state.
