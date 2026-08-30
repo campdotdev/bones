@@ -171,10 +171,32 @@ describe("bar geometry is the same in both strengths", () => {
       blockAt(blockAt(unlayered, `&${EXPLICIT_TEXT_TAIL} {`), "&::after {"),
     );
     expect(inferred).toBe(explicit);
+    // The bar inherits the element's padding, so its content box is the bar
+    // inside the padding, and clip-path rounds it there. content-box sizing
+    // is explicit because page resets routinely set border-box on ::after.
+    expect(inferred).toContain("inset-inline: 0");
     expect(inferred).toContain("top: var(--bones-bar-top)");
     expect(inferred).toContain("height: 1ex");
-    expect(inferred).toContain("border-radius: var(--bone-radius)");
+    // !important so a page reset on *::after (border-box, padding: 0) cannot
+    // beat the layered copy; see the header comment in bones.css.
+    expect(inferred).toContain("padding: inherit !important");
+    expect(inferred).toContain("box-sizing: content-box !important");
+    expect(inferred).toContain("clip-path: inset(0 round var(--bones-r)) content-box");
+    expect(inferred).not.toContain("mask");
+    expect(inferred).not.toContain("border-radius");
     expect(inferred).toContain("animation: bone-shimmer var(--bone-duration) ease-in-out infinite");
+  });
+
+  test("the corner radius is clamped to a pill in both strengths", () => {
+    const clamp = "--bones-r: max(0.01px, min(var(--bone-radius), 0.5ex))";
+    const overlap = "--bones-inset: max(0px, var(--bones-r) - 1px)";
+    for (const own of [
+      ownDeclarations(blockAt(layered, `&${TEXT_TAIL} {`)),
+      ownDeclarations(blockAt(unlayered, `&${EXPLICIT_TEXT_TAIL} {`)),
+    ]) {
+      expect(own).toContain(clamp);
+      expect(own).toContain(overlap);
+    }
   });
 
   test("empty inline leaves get width from ::before", () => {
@@ -220,11 +242,14 @@ describe("data-bones-lines", () => {
     const own = ownDeclarations(lines);
     expect(own).toContain("display: block");
     expect(own).toContain("--bones-last: 60%");
-    expect(own).toContain("--bones-r: max(0.01px, min(var(--bone-radius), 0.5ex))");
     const rows = blockAt(lines, "&::before {");
     expect(rows).toContain("inset: 0 0 1lh 0");
+    expect(rows).toContain("padding: inherit");
+    expect(rows).toContain("box-sizing: content-box");
     expect(rows).toContain("mask-repeat: repeat-y");
-    expect(rows).toContain("mask-position: var(--bones-r) 0, left 0, right 0");
+    expect(rows).toContain("mask-origin: content-box");
+    expect(rows).toContain("mask-clip: content-box");
+    expect(rows).toContain("mask-position: var(--bones-inset) 0, left 0, right 0");
     const last = blockAt(lines, "&::after {");
     expect(last).toContain("top: auto");
     expect(last).toContain("bottom: calc(1lh - var(--bones-bar-top) - 1ex)");
@@ -387,11 +412,15 @@ describe("width variance", () => {
     { nth: ":nth-child(4n)", width: "60%" },
   ];
 
-  test("each bucket rule ships with its width inside the inferred text rule", () => {
+  test("each bucket rule caps its width inside the inferred text rule", () => {
+    // max-width, not width: a block leaf fills its container and gets the
+    // cap; an inline-block or flex-item leaf (a badge, a pill) keeps its
+    // content width instead of stretching to a share of the row.
     const text = blockAt(layered, `&${TEXT_TAIL} {`);
     for (const bucket of buckets) {
-      expect(text).toContain(`&${bucket.nth} { width: ${bucket.width}; }`);
+      expect(text).toContain(`&${bucket.nth} { max-width: ${bucket.width}; }`);
     }
+    expect(text).not.toMatch(/[^-]width: \d+%/);
   });
 
   test("positions land in the expected buckets", () => {

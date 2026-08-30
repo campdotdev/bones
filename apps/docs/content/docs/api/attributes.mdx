@@ -58,7 +58,9 @@ Works on the bone itself, on the busy element, or on any ancestor. The nearest v
 | `img`, `svg`, `video`, `canvas`, `picture`, `iframe`, `embed`, `object`, `audio`, `button`, `input`, `select`, `textarea`, `progress`, `meter` | Block     |
 | `hr`, `br`, and anything inside `svg`, `picture`, `select`, or `object`                                                                        | Nothing   |
 
-Block-level text bars cycle through 85%, 100%, 92%, and 60% of their width by position, so a run of lines looks organic. An empty inline leaf gets 4 characters of width.
+A text bar is capped at 85%, 100%, 92%, or 60% of its container by position, so a run of block-level lines looks organic. A leaf that sizes to its content, such as an inline-block badge in a flex row, keeps that width. An empty leaf gets 4 characters of width.
+
+The bar sits inside the element's padding with rounded ends at the content edge, so a padded badge keeps its shape while it loads. Padding in `px`, `em`, or `rem` is exact. Percentage padding resolves against a different box on the bar and misses. A page reset that zeroes padding on `::after` does not move the bar.
 
 An `img` with no `src`, or `src=""`, gets a box sized by its `width` and `height` and a transparent pixel in place of the browser's broken-image glyph. A Content Security Policy that blocks `data:` images shows the glyph again.
 
@@ -75,4 +77,4 @@ An `img` with no `src`, or `src=""`, gets a box sized by its `width` and `height
 
 ## Browser support
 
-CSS nesting, `@scope`, `:has()`, relative color syntax, `lh` units, and `mask`. Baseline 2024.
+CSS nesting, `@scope`, `:has()`, relative color syntax, `lh` units, `mask`, and `clip-path` with a geometry box. Baseline 2024.

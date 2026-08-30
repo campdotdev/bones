@@ -26,10 +26,25 @@
    - The bar geometry is declared twice, once per strength, because a rule
      is either in a layer or not. tests/bones-css.test.ts pins the copies
      equal.
-   - --bone-radius must carry a unit. --bones-r feeds it to min(), where a
-     unitless 0 is a <number> and invalidates the multi-line mask.
+   - The bar is a pseudo-element that inherits the element's padding, so
+     its content box is the element's content box and the bar sits inside a
+     badge's padding. clip-path: inset(0 round r) content-box gives it
+     rounded ends at the content edges as one path; border-radius could not,
+     because a radius shrinks by the padding on the way in, and a layered
+     mask (still used for the multi-line rows, which repeat) leaves seams
+     where the browser snaps each layer's tile to device pixels on its own.
+     Percentage padding resolves against a different box on the
+     pseudo-element and misses; length padding is exact.
+     The padding and box-sizing on the single bar are !important: a page
+     reset such as `*, *::before, *::after { box-sizing: border-box;
+     padding: 0 }` is unlayered, so it would otherwise beat the inferred copy
+     and push the bar back out to the padding edge. No page styles a bone's
+     own bar on purpose, and an important layered declaration wins over
+     every normal one.
    - The enumerated data-bones-lines block exists for browsers without
      advanced attr(). Delete it once Safari ships attr() with type().
+   - --bone-radius must carry a unit. --bones-r feeds it to min(), where a
+     unitless 0 is a <number> and invalidates the multi-line mask.
 --------------------------------------------------------------------------- */
 
 @layer bones-auto;
@@ -92,6 +107,7 @@
 [data-bones-lines="8"] {
   --bones-lines: 8;
 }
+
 @supports (x: attr(x type(*))) {
   [data-bones-lines] {
     --bones-lines: attr(data-bones-lines type(<number>), 1);
@@ -137,6 +153,8 @@
         object *
       ) {
       --bones-bar-top: calc((1lh + 1cap) / 2 - 1ex);
+      --bones-r: max(0.01px, min(var(--bone-radius), 0.5ex));
+      --bones-inset: max(0px, var(--bones-r) - 1px);
       color: rgb(from currentcolor r g b / 0);
       position: relative;
       min-width: 4ch;
@@ -159,7 +177,9 @@
         inset-inline: 0;
         top: var(--bones-bar-top);
         height: 1ex;
-        border-radius: var(--bone-radius);
+        padding: inherit !important;
+        box-sizing: content-box !important;
+        clip-path: inset(0 round var(--bones-r)) content-box;
         pointer-events: none;
         animation: bone-shimmer var(--bone-duration) ease-in-out infinite;
         background: linear-gradient(
@@ -171,18 +191,20 @@
         background-size: 200% 100%;
       }
       /* Width variance: block-level leaves cycle 85 / 100 / 92 / 60 so runs
-         of lines look organic. Inline leaves keep their content width. */
+         of lines look organic. A cap, not a width, so an inline-block or a
+         flex-item leaf (a badge, a pill) keeps its content width instead of
+         stretching to a share of the row. */
       &:nth-child(4n + 1) {
-        width: 85%;
+        max-width: 85%;
       }
       &:nth-child(4n + 2) {
-        width: 100%;
+        max-width: 100%;
       }
       &:nth-child(4n + 3) {
-        width: 92%;
+        max-width: 92%;
       }
       &:nth-child(4n) {
-        width: 60%;
+        max-width: 60%;
       }
     }
 
@@ -700,6 +722,8 @@
 :is([aria-busy="true"], [aria-busy="true"] *) {
   &:is([data-bones-type="text"], [data-bones-lines]) {
     --bones-bar-top: calc((1lh + 1cap) / 2 - 1ex);
+    --bones-r: max(0.01px, min(var(--bone-radius), 0.5ex));
+    --bones-inset: max(0px, var(--bones-r) - 1px);
     color: rgb(from currentcolor r g b / 0);
     position: relative;
     min-width: 4ch;
@@ -713,7 +737,9 @@
       inset-inline: 0;
       top: var(--bones-bar-top);
       height: 1ex;
-      border-radius: var(--bone-radius);
+      padding: inherit !important;
+      box-sizing: content-box !important;
+      clip-path: inset(0 round var(--bones-r)) content-box;
       pointer-events: none;
       animation: bone-shimmer var(--bone-duration) ease-in-out infinite;
       background: linear-gradient(
@@ -734,19 +760,26 @@
   /* N lines in one element. ::after is the single bar above, moved to the
      bottom row and shortened. ::before covers the rows above it and a
      three-layer mask tiled every 1lh cuts it into bars: a stripe body inset
-     by the corner radius, and a left and a right cap column made of ellipses
-     (rx = radius, ry = half the bar). At the default 4px the ends read as
-     rounded corners; at 999px they clamp to a pill. Because ::before fills
+     by the corner radius, and a left and a right cap, each a whole ellipse
+     (rx = radius, ry = half the bar) drawn one radius in from the end of a
+     half-width tile. The layers combine as a union, and the browser snaps
+     each layer's tile to device pixels on its own, so nothing visible may
+     sit on a tile edge: the ellipse's inner half hides under the body, its
+     outer half is the cap, and the body overlaps it by a pixel
+     (--bones-inset) so a snapped tile edge cannot open a gap. At the default
+     4px the ends read as rounded corners; at 999px they clamp to a pill.
+     Because ::before fills
      the box down to the last row, an element taller than N lines still gets
      a bar on every row. */
   &[data-bones-lines] {
     display: block;
     --bones-last: 60%;
-    --bones-r: max(0.01px, min(var(--bone-radius), 0.5ex));
     &::before {
       content: "";
       position: absolute;
       inset: 0 0 1lh 0;
+      padding: inherit;
+      box-sizing: content-box;
       pointer-events: none;
       animation: bone-shimmer var(--bone-duration) ease-in-out infinite;
       background: linear-gradient(
@@ -764,24 +797,27 @@
           transparent calc(var(--bones-bar-top) + 1ex)
         ),
         radial-gradient(
-          ellipse var(--bones-r) 0.5ex at right calc(var(--bones-bar-top) + 0.5ex),
+          ellipse var(--bones-r) 0.5ex at var(--bones-r) calc(var(--bones-bar-top) + 0.5ex),
           #000 calc(100% - 0.5px),
           transparent 100%
         ),
         radial-gradient(
-          ellipse var(--bones-r) 0.5ex at left calc(var(--bones-bar-top) + 0.5ex),
+          ellipse var(--bones-r) 0.5ex at calc(100% - var(--bones-r))
+            calc(var(--bones-bar-top) + 0.5ex),
           #000 calc(100% - 0.5px),
           transparent 100%
         );
       mask-size:
-        calc(100% - 2 * var(--bones-r)) 1lh,
-        var(--bones-r) 1lh,
-        var(--bones-r) 1lh;
+        calc(100% - 2 * var(--bones-inset)) 1lh,
+        50% 1lh,
+        50% 1lh;
       mask-position:
-        var(--bones-r) 0,
+        var(--bones-inset) 0,
         left 0,
         right 0;
       mask-repeat: repeat-y;
+      mask-origin: content-box;
+      mask-clip: content-box;
     }
     &::after {
       top: auto;

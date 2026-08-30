@@ -2,9 +2,10 @@ import { afterEach, expect, test } from "vite-plus/test";
 import "../../src/css/bones.css";
 
 // ---------------------------------------------------------------------------
-// The two shapes the visual baselines cover, pinned by computed style so the
+// The shapes the visual baselines cover, pinned by computed style so the
 // contract stays green independent of screenshot harvesting: a multi-line
-// element is N line heights tall, and an img with no src becomes a box.
+// element is N line heights tall, an img with no src becomes a box, and a
+// padded leaf keeps its bar inside its padding.
 // ---------------------------------------------------------------------------
 
 afterEach(() => {
@@ -59,4 +60,51 @@ test("an img with no src becomes a sized box with no alt rendering", () => {
 test("outside a busy region an img with no src is left alone", () => {
   const root = mount(`<div><img alt="Pikachu" width="64" height="64" /></div>`);
   expect(getComputedStyle(root.querySelector("img")!).content).toBe("normal");
+});
+
+const PILL =
+  "display: inline-block; font: 12px/1.6 sans-serif; padding: 0.2em 0.6em; border-radius: 999px; background: #eee";
+
+test("a padded inline-block leaf in a flex row keeps its content width and its bar stays inside the padding", () => {
+  const root = mount(
+    `<div aria-busy="true" style="width: 320px; font: 16px/1.5 sans-serif">
+       <div style="display: flex; gap: 6px"><span style="${PILL}"></span><span style="${PILL}"></span></div>
+     </div>`,
+  );
+  const [pill] = root.querySelectorAll("span");
+  const probe = mount(
+    `<span style="${PILL}"><span style="display: inline-block; width: 4ch"></span></span>`,
+  );
+  // 4ch of content plus the pill's own padding, not 85% of the row.
+  expect(pill.getBoundingClientRect().width).toBeLessThan(0.5 * 320);
+  expect(pill.getBoundingClientRect().width).toBeCloseTo(probe.getBoundingClientRect().width, 0);
+  const bar = getComputedStyle(pill, "::after");
+  expect(bar.paddingLeft).toBe(getComputedStyle(pill).paddingLeft);
+  expect(bar.paddingTop).toBe(getComputedStyle(pill).paddingTop);
+  expect(bar.boxSizing).toBe("content-box");
+  expect(bar.clipPath).toContain("content-box");
+});
+
+test("a block leaf still takes its share of the width", () => {
+  const root = mount(
+    `<div aria-busy="true" style="width: 320px; font: 16px/1.5 sans-serif"><h3 style="margin: 0"></h3></div>`,
+  );
+  expect(root.querySelector("h3")!.getBoundingClientRect().width).toBeCloseTo(0.85 * 320, 0);
+});
+
+test("a page reset that zeroes padding on ::after does not pull the bar out of the padding", () => {
+  const reset = document.createElement("style");
+  reset.textContent = "*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }";
+  document.head.append(reset);
+  try {
+    const root = mount(
+      `<div aria-busy="true" style="font: 16px/1.5 sans-serif"><span style="${PILL}"></span></div>`,
+    );
+    const pill = root.querySelector("span")!;
+    const bar = getComputedStyle(pill, "::after");
+    expect(bar.paddingLeft).toBe(getComputedStyle(pill).paddingLeft);
+    expect(bar.boxSizing).toBe("content-box");
+  } finally {
+    reset.remove();
+  }
 });

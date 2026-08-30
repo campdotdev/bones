@@ -87,7 +87,7 @@ The fallback is the component, and the async child is what suspends. `data-bones
 | `data-bones-auto="off"`                     | Keep this subtree readable. On `<body>`, only explicit markup paints.                         |
 | `data-bones-animate="shimmer\|pulse\|none"` | Pick the animation for the bones inside, or on the bone itself.                               |
 
-Explicit attributes are unlayered, so page CSS cannot keep their text visible. Inferred bones live in `@layer bones-auto`, so a page rule that sets `color` on a leaf keeps that text visible over its bar; that is the one thing to know when a bar looks wrong.
+Explicit attributes are unlayered, so page CSS cannot keep their text visible. Inferred bones live in `@layer bones-auto`, so a page rule that sets `color` on a leaf keeps that text visible over its bar; that is the one thing to know when a bar looks wrong. A bar sits inside its element's padding, so a badge or a pill keeps its shape while it loads.
 
 ## Previewing skeletons
 
