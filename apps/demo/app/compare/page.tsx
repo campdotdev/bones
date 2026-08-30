@@ -35,7 +35,7 @@ export default function CompareHomePage() {
       {/* ForcedSkeletonsDemo skeleton equivalent */}
       <DemoSection
         title="Forced Skeletons"
-        description="Render a component with aria-busy and no data to see its skeleton. Toggle to see the same loaded cards switch to skeletons."
+        description="Render a component with aria-busy and no data to see its skeleton. Toggle to swap the loaded grid for that skeleton."
       >
         <SkeletonToggle skeleton={<PokemonGrid aria-busy="true" />}>
           <PokemonGrid aria-busy="true" />
