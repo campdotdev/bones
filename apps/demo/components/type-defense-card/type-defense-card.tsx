@@ -54,7 +54,12 @@ export function TypeDefenseCard({
           </div>
           <div className={styles.pills}>
             {group.items.map((item, i) => (
-              <TypeBadge key={item?.type ?? i} type={item?.type} className={styles.pill}>
+              <TypeBadge
+                key={item?.type ?? i}
+                type={item?.type}
+                className={styles.pill}
+                data-bones-length="7"
+              >
                 {item?.text}
               </TypeBadge>
             ))}

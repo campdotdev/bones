@@ -1,12 +1,12 @@
 # Bones
 
-Automatic skeleton loaders for any stack. One stylesheet, ~4.5 kB gzipped, no JavaScript, 0 dependencies.
+Automatic skeleton loaders for any stack. One stylesheet, ~5.7 kB gzipped, no JavaScript, 0 dependencies.
 
 Set `aria-busy="true"` on a region and its content becomes a skeleton: a bar for every leaf, a box for every image and control. No skeleton components, no placeholder markup, no JavaScript in the loading path. When inference gets something wrong, a `data-bones-*` attribute on the real markup fixes it, and the attribute does nothing once the region is not busy.
 
 ## How it works
 
-The stylesheet keys on `aria-busy="true"`. On that element and under it, an element with no element children paints as a text bar and an image or form control paints as a block. Text hides by zeroing the alpha of its own color, so bones take their color from the text around them and contrast on any background. `data-bones-type`, `data-bones-lines`, `data-bones-auto`, and `data-bones-animate` adjust the result. That is the whole API.
+The stylesheet keys on `aria-busy="true"`. On that element and under it, an element with no element children paints as a text bar and an image or form control paints as a block. Text hides by zeroing the alpha of its own color, so bones take their color from the text around them and contrast on any background. `data-bones-type`, `data-bones-lines`, `data-bones-length`, `data-bones-auto`, and `data-bones-animate` adjust the result. That is the whole API.
 
 ## Installation
 
@@ -84,10 +84,11 @@ The fallback is the component, and the async child is what suspends. `data-bones
 | `data-bones-type="text"`                    | Paint a text bar regardless of inference.                                                     |
 | `data-bones-type="block"`                   | Paint one filled box and hide descendants. A `div` avatar, a card.                            |
 | `data-bones-lines="3"`                      | Paint three stacked bars in one element. 2 to 8 everywhere; any integer with modern `attr()`. |
+| `data-bones-length="9"`                     | Make the bar nine characters wide. 1 to 40 everywhere; any integer with modern `attr()`.      |
 | `data-bones-auto="off"`                     | Keep this subtree readable. On `<body>`, only explicit markup paints.                         |
 | `data-bones-animate="shimmer\|pulse\|none"` | Pick the animation for the bones inside, or on the bone itself.                               |
 
-Explicit attributes are unlayered, so page CSS cannot keep their text visible. Inferred bones live in `@layer bones-auto`, so a page rule that sets `color` on a leaf keeps that text visible over its bar; that is the one thing to know when a bar looks wrong.
+Explicit attributes are unlayered, so page CSS cannot keep their text visible without a more specific rule of its own. Inferred bones live in `@layer bones-auto`, so a page rule that sets `color` on a leaf keeps that text visible over its bar; that is the one thing to know when a bar looks wrong. A bar sits inside its element's padding, so a badge or a pill keeps its shape while it loads. Padding in `px`, `em`, or `rem` is exact; percentage padding misses.
 
 ## Previewing skeletons
 

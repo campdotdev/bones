@@ -98,6 +98,13 @@ const layerBlocks = blocksAt(css, "@layer bones-auto {");
 const layered = layerBlocks.join(" ");
 const unlayered = layerBlocks.reduce((rest, block) => rest.replace(block, ""), css);
 
+/**
+ * The data-bones-lines and data-bones-length lookup tables, and the advanced
+ * attr() rules beside them. They set inherited custom properties, so they
+ * carry the busy scope like every painting rule; the marker pins that scope.
+ */
+const table = blockAt(unlayered, `${BUSY} { &[data-bones-lines="2"] {`);
+
 function mount(html: string): void {
   document.body.innerHTML = html;
 }
@@ -171,21 +178,44 @@ describe("bar geometry is the same in both strengths", () => {
       blockAt(blockAt(unlayered, `&${EXPLICIT_TEXT_TAIL} {`), "&::after {"),
     );
     expect(inferred).toBe(explicit);
+    // The bar inherits the element's padding, so its content box is the bar
+    // inside the padding, and clip-path rounds it there. content-box sizing
+    // is explicit because page resets routinely set border-box on ::after.
+    expect(inferred).toContain("inset-inline: 0");
     expect(inferred).toContain("top: var(--bones-bar-top)");
     expect(inferred).toContain("height: 1ex");
-    expect(inferred).toContain("border-radius: var(--bone-radius)");
+    // !important so a page reset on *::after (border-box, padding: 0) cannot
+    // beat the layered copy; see the header comment in bones.css.
+    expect(inferred).toContain("padding: inherit !important");
+    expect(inferred).toContain("box-sizing: content-box !important");
+    expect(inferred).toContain("clip-path: inset(0 round var(--bones-r)) content-box");
+    expect(inferred).not.toContain("mask");
+    expect(inferred).not.toContain("border-radius");
     expect(inferred).toContain("animation: bone-shimmer var(--bone-duration) ease-in-out infinite");
   });
 
+  test("the corner radius is clamped to a pill in both strengths", () => {
+    const clamp = "--bones-r: max(0.01px, min(var(--bone-radius), 0.5ex))";
+    const overlap = "--bones-inset: max(0px, var(--bones-r) - 1px)";
+    for (const own of [
+      ownDeclarations(blockAt(layered, `&${TEXT_TAIL} {`)),
+      ownDeclarations(blockAt(unlayered, `&${EXPLICIT_TEXT_TAIL} {`)),
+    ]) {
+      expect(own).toContain(clamp);
+      expect(own).toContain(overlap);
+    }
+  });
+
   test("empty inline leaves get width from ::before", () => {
-    const rule = '&:empty::before { content: ""; display: inline-block; min-width: 4ch; }';
+    const rule =
+      '&:empty::before { content: ""; display: inline-block; min-width: calc(var(--bones-length, 4) * 1ch); }';
     expect(blockAt(layered, `&${TEXT_TAIL} {`)).toContain(rule);
     // Unlike the inferred rule, the explicit `:empty::before` sits beside
     // `&${EXPLICIT_TEXT_TAIL}`, not nested inside it, so a lines element
     // (display: block, no inline width trick needed) is unaffected. Check
     // it directly against the unlayered text, not inside that rule's block.
     expect(unlayered).toContain(
-      '&[data-bones-type="text"]:empty::before { content: ""; display: inline-block; min-width: 4ch; }',
+      '&[data-bones-type="text"]:empty::before { content: ""; display: inline-block; min-width: calc(var(--bones-length, 4) * 1ch); }',
     );
   });
 
@@ -205,26 +235,32 @@ describe("bar geometry is the same in both strengths", () => {
 describe("data-bones-lines", () => {
   test("enumerates 2 through 8 and reads any value with advanced attr()", () => {
     for (let n = 2; n <= 8; n++) {
-      expect(unlayered).toContain(`[data-bones-lines="${n}"] { --bones-lines: ${n}; }`);
+      expect(table).toContain(`&[data-bones-lines="${n}"] { --bones-lines: ${n}; }`);
     }
-    const supports = blockAt(unlayered, "@supports (x: attr(x type(*))) {");
+    const supports = blockAt(table, "@supports (x: attr(x type(*))) {");
     expect(supports).toContain(
-      "[data-bones-lines] { --bones-lines: attr(data-bones-lines type(<number>), 1); }",
+      "&[data-bones-lines] { --bones-lines: attr(data-bones-lines type(<number>), 1); }",
     );
   });
 
   test("sizes the box from the line count and paints the rows above the last", () => {
     const text = blockAt(unlayered, `&${EXPLICIT_TEXT_TAIL} {`);
     expect(ownDeclarations(text)).toContain("min-height: calc(var(--bones-lines, 1) * 1lh)");
-    const lines = blockAt(unlayered, "&[data-bones-lines] {");
+    const lines = blockAt(
+      blockAt(unlayered, `${BUSY} { &${EXPLICIT_TEXT_TAIL} {`),
+      "&[data-bones-lines] {",
+    );
     const own = ownDeclarations(lines);
     expect(own).toContain("display: block");
     expect(own).toContain("--bones-last: 60%");
-    expect(own).toContain("--bones-r: max(0.01px, min(var(--bone-radius), 0.5ex))");
     const rows = blockAt(lines, "&::before {");
     expect(rows).toContain("inset: 0 0 1lh 0");
+    expect(rows).toContain("padding: inherit");
+    expect(rows).toContain("box-sizing: content-box");
     expect(rows).toContain("mask-repeat: repeat-y");
-    expect(rows).toContain("mask-position: var(--bones-r) 0, left 0, right 0");
+    expect(rows).toContain("mask-origin: content-box");
+    expect(rows).toContain("mask-clip: content-box");
+    expect(rows).toContain("mask-position: var(--bones-inset) 0, left 0, right 0");
     const last = blockAt(lines, "&::after {");
     expect(last).toContain("top: auto");
     expect(last).toContain("bottom: calc(1lh - var(--bones-bar-top) - 1ex)");
@@ -387,11 +423,15 @@ describe("width variance", () => {
     { nth: ":nth-child(4n)", width: "60%" },
   ];
 
-  test("each bucket rule ships with its width inside the inferred text rule", () => {
+  test("each bucket rule caps its width inside the inferred text rule", () => {
+    // max-width, not width: a block leaf fills its container and gets the
+    // cap; an inline-block or flex-item leaf (a badge, a pill) keeps its
+    // content width instead of stretching to a share of the row.
     const text = blockAt(layered, `&${TEXT_TAIL} {`);
     for (const bucket of buckets) {
-      expect(text).toContain(`&${bucket.nth} { width: ${bucket.width}; }`);
+      expect(text).toContain(`&${bucket.nth} { max-width: ${bucket.width}; }`);
     }
+    expect(text).not.toMatch(/[^-]width: \d+%/);
   });
 
   test("positions land in the expected buckets", () => {
@@ -403,6 +443,31 @@ describe("width variance", () => {
     expect(paragraphs[3].matches(TEXT_TAIL + buckets[3].nth)).toBe(true);
     expect(paragraphs[4].matches(TEXT_TAIL + buckets[0].nth)).toBe(true);
     expect(paragraphs[0].matches(TEXT_TAIL + buckets[1].nth)).toBe(false);
+  });
+});
+
+describe("data-bones-length", () => {
+  test("enumerates 1 through 40 and reads any value with advanced attr()", () => {
+    for (let n = 1; n <= 40; n++) {
+      expect(table).toContain(`&[data-bones-length="${n}"] { --bones-length: ${n}; }`);
+    }
+    const supports = blockAt(table, "@supports (x: attr(x type(*))) {");
+    expect(supports).toContain(
+      "&[data-bones-length] { --bones-length: attr(data-bones-length type(<number>), 4); }",
+    );
+  });
+
+  test("sets the width in characters, unlayered, inside the busy scope only", () => {
+    const rule =
+      "&[data-bones-length] { width: calc(var(--bones-length, 4) * 1ch); max-width: 100%; }";
+    expect(blockAt(unlayered, `${BUSY} { &${EXPLICIT_TEXT_TAIL} {`)).toContain(rule);
+    expect(layered).not.toContain("data-bones-length");
+  });
+
+  test("a length element is still inferred; length is a modifier, not a type", () => {
+    mount('<section aria-busy="true"><h3 id="h" data-bones-length="9"></h3></section>');
+    expect(isTextLeaf(el("h"))).toBe(true);
+    expect(isExplicitText(el("h"))).toBe(false);
   });
 });
 

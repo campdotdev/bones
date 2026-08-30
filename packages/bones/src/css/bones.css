@@ -3,11 +3,12 @@
 
    Everything keys on aria-busy="true". Under a busy element (or on it), a
    leaf with no element children becomes a text bar and a replaced element or
-   form control becomes a block. Four data-bones-* attributes adjust that:
+   form control becomes a block. Five data-bones-* attributes adjust that:
    data-bones-type="text|block" overrides the inferred shape,
-   data-bones-lines="N" paints N stacked bars, data-bones-auto="off" exempts a
-   subtree from inference, and data-bones-animate picks shimmer, pulse, or
-   none. Outside a busy region every attribute is inert.
+   data-bones-lines="N" paints N stacked bars, data-bones-length="N" makes
+   the bar N characters wide, data-bones-auto="off" exempts a subtree from
+   inference, and data-bones-animate picks shimmer, pulse, or none. Outside a
+   busy region every attribute is inert.
 
    Two cascade strengths, one activation condition. Keep this shape:
    - Inferred rules live in @layer bones-auto. They match arbitrary page
@@ -26,10 +27,26 @@
    - The bar geometry is declared twice, once per strength, because a rule
      is either in a layer or not. tests/bones-css.test.ts pins the copies
      equal.
+   - The bar is a pseudo-element that inherits the element's padding, so
+     its content box is the element's content box and the bar sits inside a
+     badge's padding. clip-path: inset(0 round r) content-box gives it
+     rounded ends at the content edges as one path; border-radius could not,
+     because a radius shrinks by the padding on the way in, and a layered
+     mask (still used for the multi-line rows, which repeat) leaves seams
+     where the browser snaps each layer's tile to device pixels on its own.
+     Percentage padding resolves against a different box on the
+     pseudo-element and misses; length padding is exact.
+     The padding and box-sizing on the single bar are !important: a page
+     reset such as `*, *::before, *::after { box-sizing: border-box;
+     padding: 0 }` is unlayered, so it would otherwise beat the inferred copy
+     and push the bar back out to the padding edge. No page styles a bone's
+     own bar on purpose, and an important layered declaration wins over
+     every normal one.
+   - The enumerated data-bones-lines and data-bones-length blocks exist for
+     browsers without advanced attr(). Delete them once Safari ships attr()
+     with type().
    - --bone-radius must carry a unit. --bones-r feeds it to min(), where a
      unitless 0 is a <number> and invalidates the multi-line mask.
-   - The enumerated data-bones-lines block exists for browsers without
-     advanced attr(). Delete it once Safari ships attr() with type().
 --------------------------------------------------------------------------- */
 
 @layer bones-auto;
@@ -68,33 +85,163 @@
 
 /* Line count. Enumerated for every Baseline 2024 browser; advanced attr()
    reads any value where it exists (Chrome 133, Firefox 155, Safari after
-   Interop 2026). The value is only a custom property, so these rules need no
-   busy scope. The defaults live in var() fallbacks at the point of use, never
+   Interop 2026). Both tables set an inherited custom property, so they carry
+   the busy scope like every other rule here: an attribute on an element
+   outside a busy region must not reach the leaves of a busy region nested
+   below it. The defaults live in var() fallbacks at the point of use, never
    as declarations in a higher-specificity rule that would beat these. */
-[data-bones-lines="2"] {
-  --bones-lines: 2;
-}
-[data-bones-lines="3"] {
-  --bones-lines: 3;
-}
-[data-bones-lines="4"] {
-  --bones-lines: 4;
-}
-[data-bones-lines="5"] {
-  --bones-lines: 5;
-}
-[data-bones-lines="6"] {
-  --bones-lines: 6;
-}
-[data-bones-lines="7"] {
-  --bones-lines: 7;
-}
-[data-bones-lines="8"] {
-  --bones-lines: 8;
-}
-@supports (x: attr(x type(*))) {
-  [data-bones-lines] {
-    --bones-lines: attr(data-bones-lines type(<number>), 1);
+:is([aria-busy="true"], [aria-busy="true"] *) {
+  &[data-bones-lines="2"] {
+    --bones-lines: 2;
+  }
+  &[data-bones-lines="3"] {
+    --bones-lines: 3;
+  }
+  &[data-bones-lines="4"] {
+    --bones-lines: 4;
+  }
+  &[data-bones-lines="5"] {
+    --bones-lines: 5;
+  }
+  &[data-bones-lines="6"] {
+    --bones-lines: 6;
+  }
+  &[data-bones-lines="7"] {
+    --bones-lines: 7;
+  }
+  &[data-bones-lines="8"] {
+    --bones-lines: 8;
+  }
+
+  /* Width in characters. Enumerated 1 through 40 for the same reason. */
+  &[data-bones-length="1"] {
+    --bones-length: 1;
+  }
+  &[data-bones-length="2"] {
+    --bones-length: 2;
+  }
+  &[data-bones-length="3"] {
+    --bones-length: 3;
+  }
+  &[data-bones-length="4"] {
+    --bones-length: 4;
+  }
+  &[data-bones-length="5"] {
+    --bones-length: 5;
+  }
+  &[data-bones-length="6"] {
+    --bones-length: 6;
+  }
+  &[data-bones-length="7"] {
+    --bones-length: 7;
+  }
+  &[data-bones-length="8"] {
+    --bones-length: 8;
+  }
+  &[data-bones-length="9"] {
+    --bones-length: 9;
+  }
+  &[data-bones-length="10"] {
+    --bones-length: 10;
+  }
+  &[data-bones-length="11"] {
+    --bones-length: 11;
+  }
+  &[data-bones-length="12"] {
+    --bones-length: 12;
+  }
+  &[data-bones-length="13"] {
+    --bones-length: 13;
+  }
+  &[data-bones-length="14"] {
+    --bones-length: 14;
+  }
+  &[data-bones-length="15"] {
+    --bones-length: 15;
+  }
+  &[data-bones-length="16"] {
+    --bones-length: 16;
+  }
+  &[data-bones-length="17"] {
+    --bones-length: 17;
+  }
+  &[data-bones-length="18"] {
+    --bones-length: 18;
+  }
+  &[data-bones-length="19"] {
+    --bones-length: 19;
+  }
+  &[data-bones-length="20"] {
+    --bones-length: 20;
+  }
+  &[data-bones-length="21"] {
+    --bones-length: 21;
+  }
+  &[data-bones-length="22"] {
+    --bones-length: 22;
+  }
+  &[data-bones-length="23"] {
+    --bones-length: 23;
+  }
+  &[data-bones-length="24"] {
+    --bones-length: 24;
+  }
+  &[data-bones-length="25"] {
+    --bones-length: 25;
+  }
+  &[data-bones-length="26"] {
+    --bones-length: 26;
+  }
+  &[data-bones-length="27"] {
+    --bones-length: 27;
+  }
+  &[data-bones-length="28"] {
+    --bones-length: 28;
+  }
+  &[data-bones-length="29"] {
+    --bones-length: 29;
+  }
+  &[data-bones-length="30"] {
+    --bones-length: 30;
+  }
+  &[data-bones-length="31"] {
+    --bones-length: 31;
+  }
+  &[data-bones-length="32"] {
+    --bones-length: 32;
+  }
+  &[data-bones-length="33"] {
+    --bones-length: 33;
+  }
+  &[data-bones-length="34"] {
+    --bones-length: 34;
+  }
+  &[data-bones-length="35"] {
+    --bones-length: 35;
+  }
+  &[data-bones-length="36"] {
+    --bones-length: 36;
+  }
+  &[data-bones-length="37"] {
+    --bones-length: 37;
+  }
+  &[data-bones-length="38"] {
+    --bones-length: 38;
+  }
+  &[data-bones-length="39"] {
+    --bones-length: 39;
+  }
+  &[data-bones-length="40"] {
+    --bones-length: 40;
+  }
+
+  @supports (x: attr(x type(*))) {
+    &[data-bones-lines] {
+      --bones-lines: attr(data-bones-lines type(<number>), 1);
+    }
+    &[data-bones-length] {
+      --bones-length: attr(data-bones-length type(<number>), 4);
+    }
   }
 }
 
@@ -137,9 +284,11 @@
         object *
       ) {
       --bones-bar-top: calc((1lh + 1cap) / 2 - 1ex);
+      --bones-r: max(0.01px, min(var(--bone-radius), 0.5ex));
+      --bones-inset: max(0px, var(--bones-r) - 1px);
       color: rgb(from currentcolor r g b / 0);
       position: relative;
-      min-width: 4ch;
+      min-width: calc(var(--bones-length, 4) * 1ch);
       min-height: 1lh;
       &::before {
         content: "\200b";
@@ -151,7 +300,7 @@
       &:empty::before {
         content: "";
         display: inline-block;
-        min-width: 4ch;
+        min-width: calc(var(--bones-length, 4) * 1ch);
       }
       &::after {
         content: "";
@@ -159,7 +308,9 @@
         inset-inline: 0;
         top: var(--bones-bar-top);
         height: 1ex;
-        border-radius: var(--bone-radius);
+        padding: inherit !important;
+        box-sizing: content-box !important;
+        clip-path: inset(0 round var(--bones-r)) content-box;
         pointer-events: none;
         animation: bone-shimmer var(--bone-duration) ease-in-out infinite;
         background: linear-gradient(
@@ -171,18 +322,20 @@
         background-size: 200% 100%;
       }
       /* Width variance: block-level leaves cycle 85 / 100 / 92 / 60 so runs
-         of lines look organic. Inline leaves keep their content width. */
+         of lines look organic. A cap, not a width, so an inline-block or a
+         flex-item leaf (a badge, a pill) keeps its content width instead of
+         stretching to a share of the row. */
       &:nth-child(4n + 1) {
-        width: 85%;
+        max-width: 85%;
       }
       &:nth-child(4n + 2) {
-        width: 100%;
+        max-width: 100%;
       }
       &:nth-child(4n + 3) {
-        width: 92%;
+        max-width: 92%;
       }
       &:nth-child(4n) {
-        width: 60%;
+        max-width: 60%;
       }
     }
 
@@ -700,9 +853,11 @@
 :is([aria-busy="true"], [aria-busy="true"] *) {
   &:is([data-bones-type="text"], [data-bones-lines]) {
     --bones-bar-top: calc((1lh + 1cap) / 2 - 1ex);
+    --bones-r: max(0.01px, min(var(--bone-radius), 0.5ex));
+    --bones-inset: max(0px, var(--bones-r) - 1px);
     color: rgb(from currentcolor r g b / 0);
     position: relative;
-    min-width: 4ch;
+    min-width: calc(var(--bones-length, 4) * 1ch);
     min-height: calc(var(--bones-lines, 1) * 1lh);
     &::before {
       content: "\200b";
@@ -713,7 +868,9 @@
       inset-inline: 0;
       top: var(--bones-bar-top);
       height: 1ex;
-      border-radius: var(--bone-radius);
+      padding: inherit !important;
+      box-sizing: content-box !important;
+      clip-path: inset(0 round var(--bones-r)) content-box;
       pointer-events: none;
       animation: bone-shimmer var(--bone-duration) ease-in-out infinite;
       background: linear-gradient(
@@ -728,25 +885,41 @@
   &[data-bones-type="text"]:empty::before {
     content: "";
     display: inline-block;
-    min-width: 4ch;
+    min-width: calc(var(--bones-length, 4) * 1ch);
+  }
+
+  /* Width in characters. A modifier, not a type: an inferred leaf with a
+     length is still inferred. Unlayered so a page width rule does not beat
+     a length the author wrote into the markup. On an inline box width does
+     nothing; the empty leaf's ::before carries the length there. */
+  &[data-bones-length] {
+    width: calc(var(--bones-length, 4) * 1ch);
+    max-width: 100%;
   }
 
   /* N lines in one element. ::after is the single bar above, moved to the
      bottom row and shortened. ::before covers the rows above it and a
      three-layer mask tiled every 1lh cuts it into bars: a stripe body inset
-     by the corner radius, and a left and a right cap column made of ellipses
-     (rx = radius, ry = half the bar). At the default 4px the ends read as
-     rounded corners; at 999px they clamp to a pill. Because ::before fills
+     by the corner radius, and a left and a right cap, each a whole ellipse
+     (rx = radius, ry = half the bar) drawn one radius in from the end of a
+     half-width tile. The layers combine as a union, and the browser snaps
+     each layer's tile to device pixels on its own, so nothing visible may
+     sit on a tile edge: the ellipse's inner half hides under the body, its
+     outer half is the cap, and the body overlaps it by a pixel
+     (--bones-inset) so a snapped tile edge cannot open a gap. At the default
+     4px the ends read as rounded corners; at 999px they clamp to a pill.
+     Because ::before fills
      the box down to the last row, an element taller than N lines still gets
      a bar on every row. */
   &[data-bones-lines] {
     display: block;
     --bones-last: 60%;
-    --bones-r: max(0.01px, min(var(--bone-radius), 0.5ex));
     &::before {
       content: "";
       position: absolute;
       inset: 0 0 1lh 0;
+      padding: inherit;
+      box-sizing: content-box;
       pointer-events: none;
       animation: bone-shimmer var(--bone-duration) ease-in-out infinite;
       background: linear-gradient(
@@ -764,24 +937,27 @@
           transparent calc(var(--bones-bar-top) + 1ex)
         ),
         radial-gradient(
-          ellipse var(--bones-r) 0.5ex at right calc(var(--bones-bar-top) + 0.5ex),
+          ellipse var(--bones-r) 0.5ex at var(--bones-r) calc(var(--bones-bar-top) + 0.5ex),
           #000 calc(100% - 0.5px),
           transparent 100%
         ),
         radial-gradient(
-          ellipse var(--bones-r) 0.5ex at left calc(var(--bones-bar-top) + 0.5ex),
+          ellipse var(--bones-r) 0.5ex at calc(100% - var(--bones-r))
+            calc(var(--bones-bar-top) + 0.5ex),
           #000 calc(100% - 0.5px),
           transparent 100%
         );
       mask-size:
-        calc(100% - 2 * var(--bones-r)) 1lh,
-        var(--bones-r) 1lh,
-        var(--bones-r) 1lh;
+        calc(100% - 2 * var(--bones-inset)) 1lh,
+        50% 1lh,
+        50% 1lh;
       mask-position:
-        var(--bones-r) 0,
+        var(--bones-inset) 0,
         left 0,
         right 0;
       mask-repeat: repeat-y;
+      mask-origin: content-box;
+      mask-clip: content-box;
     }
     &::after {
       top: auto;

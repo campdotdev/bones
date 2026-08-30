@@ -76,7 +76,7 @@ describe("PokemonHero", () => {
     expect(container.querySelector("h1")?.textContent).toBe("");
     // name, number, two type badges
     expect(container.querySelectorAll("span").length).toBe(4);
-    expect(container.querySelector("[data-bones-lines='2']")).not.toBeNull();
+    expect(container.querySelector("[data-bones-lines='1']")).not.toBeNull();
     expect((screen.getByAltText("Pokemon") as HTMLImageElement).src.startsWith("data:")).toBe(true);
   });
 });

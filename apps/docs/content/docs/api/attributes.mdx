@@ -7,7 +7,7 @@ description: The stylesheet's contract, one attribute at a time.
 import "@camp.dev/bones/css";
 ```
 
-The stylesheet keys on one thing: an element with `aria-busy="true"`. On that element and under it, every leaf with no element children becomes a text bar and every image or form control becomes a block. Four attributes adjust that. Outside a busy region every attribute is inert, so the markup you ship is the markup you style.
+The stylesheet keys on one thing: an element with `aria-busy="true"`. On that element and under it, every leaf with no element children becomes a text bar and every image or form control becomes a block. Five attributes adjust that. Outside a busy region every attribute is inert, so the markup you ship is the markup you style.
 
 ## `aria-busy="true"`
 
@@ -24,7 +24,7 @@ For a request you run yourself, [Delay and hold](/examples#delay-and-hold) waits
 | `"text"`  | Paint a text bar even where inference would not, or would paint a block.                       |
 | `"block"` | Paint one filled box the size of the element and hide its descendants. A `div` avatar, a card. |
 
-Explicit rules are unlayered, so page CSS does not outrank them. A page rule that sets `color` on an inferred leaf keeps that text visible over its bar; on a `data-bones-type="text"` element the text hides.
+Explicit rules are unlayered, so no page rule in a layer outranks them, and an unlayered one has to beat two attribute selectors on specificity or come from a `style` attribute. A page rule that sets `color` on an inferred leaf keeps that text visible over its bar; on a `data-bones-type="text"` element the text hides.
 
 ## `data-bones-lines`
 
@@ -35,6 +35,18 @@ An integer. Paints that many stacked bars in one element, one per line height, w
 ```
 
 Values 2 through 8 work in every supported browser. Any other integer works where the browser supports `attr()` with a type: Chrome 133, Firefox 155, and Safari after it ships its Interop 2026 work. Elsewhere an out-of-range value paints one line.
+
+## `data-bones-length`
+
+An integer. Makes the bar that many characters wide, measured in the element's own font. A block leaf with a length no longer takes a share of its container, and an inline-block leaf no longer sizes to its content.
+
+```html
+<h3 data-bones-length="9"></h3>
+```
+
+Values 1 through 40 work in every supported browser. Any other integer works where the browser supports `attr()` with a type, as for `data-bones-lines`. Elsewhere an out-of-range value paints 4 characters.
+
+A length is a modifier, not a type. An inferred leaf with a length is still inferred. The width itself is unlayered, so a page `width` rule does not override the length from inside a layer or at lower specificity. A more specific rule, or a `style` attribute, does; the length still holds as a minimum width. On an inline element `width` does nothing, so the length sets the placeholder width of an empty inline leaf and leaves a non-empty one at its text width.
 
 ## `data-bones-auto="off"`
 
@@ -58,7 +70,9 @@ Works on the bone itself, on the busy element, or on any ancestor. The nearest v
 | `img`, `svg`, `video`, `canvas`, `picture`, `iframe`, `embed`, `object`, `audio`, `button`, `input`, `select`, `textarea`, `progress`, `meter` | Block     |
 | `hr`, `br`, and anything inside `svg`, `picture`, `select`, or `object`                                                                        | Nothing   |
 
-Block-level text bars cycle through 85%, 100%, 92%, and 60% of their width by position, so a run of lines looks organic. An empty inline leaf gets 4 characters of width.
+A text bar is capped at 85%, 100%, 92%, or 60% of its container by position, so a run of block-level lines looks organic. A leaf that sizes to its content, such as an inline-block badge in a flex row, keeps that width. An empty leaf gets 4 characters of width.
+
+The bar sits inside the element's padding with rounded ends at the content edge, so a padded badge keeps its shape while it loads. Padding in `px`, `em`, or `rem` is exact. Percentage padding resolves against a different box on the bar and misses. A page reset that zeroes padding on `::after` does not move the bar.
 
 An `img` with no `src`, or `src=""`, gets a box sized by its `width` and `height` and a transparent pixel in place of the browser's broken-image glyph. A Content Security Policy that blocks `data:` images shows the glyph again.
 
@@ -75,4 +89,4 @@ An `img` with no `src`, or `src=""`, gets a box sized by its `width` and `height
 
 ## Browser support
 
-CSS nesting, `@scope`, `:has()`, relative color syntax, `lh` units, and `mask`. Baseline 2024.
+CSS nesting, `@scope`, `:has()`, relative color syntax, `lh` units, `mask`, and `clip-path` with a geometry box. Baseline 2024.

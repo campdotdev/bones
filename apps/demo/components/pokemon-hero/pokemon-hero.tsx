@@ -38,7 +38,7 @@ export function PokemonHero({
             pokemon &&
             `${species.genus} · ${pokemon.height / 10} m · ${pokemon.weight / 10} kg`}
         </p>
-        <p className={styles.description} data-bones-lines="2">
+        <p className={styles.description} data-bones-lines="1">
           {species?.description}
         </p>
       </div>
