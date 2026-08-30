@@ -1,5 +1,33 @@
 # bones
 
+## 0.5.0
+
+### Minor Changes
+
+- [#58](https://github.com/campdotdev/bones/pull/58) [`ba5e27d`](https://github.com/campdotdev/bones/commit/ba5e27d2a44150fb0375e2b453a7f6bb142c6435) Thanks [@hunterbecton](https://github.com/hunterbecton)! - The stylesheet is now the whole API. Under any `aria-busy="true"` element, `@camp.dev/bones/css` draws a bar for every leaf and a box for every image and control. Adjust an element with `data-bones-type="text"` or `"block"`, give a paragraph `data-bones-lines="3"`, exempt a subtree with `data-bones-auto="off"`, and pick an animation with `data-bones-animate`. All attributes are inert until the region is busy.
+
+  Removed: `createBones`, `forceBones`, `readPromise`, `minMax`, `isMinMax`, `resolveLength`, `boneAttributes`, `TRANSPARENT_PIXEL`, the React `BonesBoundary` wrapper, the `@camp.dev/bones/react` and `@camp.dev/bones/element` entries, and the React peer dependency. `data-bone`, `data-bone-line`, `data-bone-animate`, `--bone-length`, and `--bone-contained` are gone.
+
+  Migration. Replace a Suspense fallback of `<Card data={forceBones} />` with `<Card aria-busy="true" />` and have `Card` forward rest props to its root; render the shell when `data` is undefined. Replace `repeat(items, n, render)` with `(items ?? Array.from({ length: n })).map(render)`. Replace `lines(text, 3, ...)` with `data-bones-lines="3"` on the paragraph. Replace `data-bone="text"` with `data-bones-type="text"`, `data-bone="block"` and `data-bone="container"` with `data-bones-type="block"`, and `data-bone-animate` with `data-bones-animate`. Give `--bone-radius` a unit if you override it.
+
+- [#60](https://github.com/campdotdev/bones/pull/60) [`47db7bc`](https://github.com/campdotdev/bones/commit/47db7bcd054b9c59d81c67c91f1dc8c0924de826) Thanks [@hunterbecton](https://github.com/hunterbecton)! - `data-bones-length="9"` makes a bar nine characters wide, measured in the element's own font. Values 1 through 40 work in every supported browser. Any other integer works where the browser supports `attr()` with a type. A length is a modifier, not a type: an inferred leaf with a length is still inferred, and outside a busy region the attribute is inert. The stylesheet is 5.7 kB gzipped, up from 4.5.
+
+- [#56](https://github.com/campdotdev/bones/pull/56) [`a387bef`](https://github.com/campdotdev/bones/commit/a387bef4ab5aca56946d81c0c618cc9f027de4e3) Thanks [@hunterbecton](https://github.com/hunterbecton)! - `@camp.dev/bones/css` is now the only stylesheet. It styles `data-bone` markup and, under any `aria-busy="true"` region, unmarked leaves, so a page that imports it gets skeletons for content with no bone markup at all. `@camp.dev/bones/auto.css` is removed. Change that import to `@camp.dev/bones/css`, and change CDN links from `src/css/auto.css` to `src/css/bones.css`. To keep a region readable while its container skeletonizes, set `data-bones-auto="off"` on it. Set it on `<body>` to turn auto bones off for the whole page.
+
+- [#59](https://github.com/campdotdev/bones/pull/59) [`7d6c753`](https://github.com/campdotdev/bones/commit/7d6c75385ae800d9aabf5a9375a3a298db8a71ee) Thanks [@hunterbecton](https://github.com/hunterbecton)! - The package is the stylesheet alone. `@camp.dev/bones/css` is the only export, nothing ships JavaScript, and there is no build.
+
+  Removed: `<bones-boundary>` and everything on it (`busy`, `force`, `delay`, `min-duration`, `transition`, `precision="measured"`, the `bones:show` and `bones:hide` events), the `BonesBoundary`, `DEFAULT_DELAY`, and `DEFAULT_MIN_DURATION` exports, the `@camp.dev/bones` root entry, and the `@camp.dev/bones/server` streaming kit (`streamBones`, `renderBoundary`, `renderChunk`, `renderErrorChunk`, `BOOTSTRAP_SCRIPT`, `BOOTSTRAP_JS`) with its wire protocol. `bones.css` no longer carries the `bones-boundary[data-bones-measured]` rule.
+
+  Migration. A Suspense or streaming fallback that already renders the component with `aria-busy="true"` needs no change. Add `inert` beside it when the fallback renders links or controls. A `<bones-boundary busy>` you toggled yourself becomes any element you set `aria-busy="true"` and `inert` on; the delay, minimum duration, and crossfade are the "Delay and hold" recipe in the docs. A server that used `streamBones` keeps its shell and chunks and emits the swap script itself; the docs' Streaming page shows it, and a server that owns the script can put a CSP nonce on it, which the kit could not.
+
+### Patch Changes
+
+- [#60](https://github.com/campdotdev/bones/pull/60) [`47db7bc`](https://github.com/campdotdev/bones/commit/47db7bcd054b9c59d81c67c91f1dc8c0924de826) Thanks [@hunterbecton](https://github.com/hunterbecton)! - A bar now sits inside its element's padding, with rounded ends at the content edge, so a padded badge or pill keeps its shape while it loads. Padding in `px`, `em`, or `rem` is exact. Percentage padding misses. A page reset that zeroes padding on `::after` does not move the bar.
+
+  The 85%, 100%, 92%, and 60% width variance is now a cap, not a width. A block leaf still takes its share of the container. An inline-block or flex-item leaf keeps its content width instead of stretching to a share of the row.
+
+- [#60](https://github.com/campdotdev/bones/pull/60) [`47db7bc`](https://github.com/campdotdev/bones/commit/47db7bcd054b9c59d81c67c91f1dc8c0924de826) Thanks [@hunterbecton](https://github.com/hunterbecton)! - `data-bones-lines` and `data-bones-length` now set their value inside a busy region only. Both attributes set an inherited custom property, so an attribute on an element outside a busy region reached the leaves of a busy region nested below it and sized their bars.
+
 ## 0.4.1
 
 ### Patch Changes

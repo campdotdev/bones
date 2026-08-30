@@ -1,5 +1,12 @@
 # bones-demo
 
+## 0.0.6
+
+### Patch Changes
+
+- Updated dependencies [[`ba5e27d`](https://github.com/campdotdev/bones/commit/ba5e27d2a44150fb0375e2b453a7f6bb142c6435), [`47db7bc`](https://github.com/campdotdev/bones/commit/47db7bcd054b9c59d81c67c91f1dc8c0924de826), [`47db7bc`](https://github.com/campdotdev/bones/commit/47db7bcd054b9c59d81c67c91f1dc8c0924de826), [`47db7bc`](https://github.com/campdotdev/bones/commit/47db7bcd054b9c59d81c67c91f1dc8c0924de826), [`a387bef`](https://github.com/campdotdev/bones/commit/a387bef4ab5aca56946d81c0c618cc9f027de4e3), [`7d6c753`](https://github.com/campdotdev/bones/commit/7d6c75385ae800d9aabf5a9375a3a298db8a71ee)]:
+  - @camp.dev/bones@0.5.0
+
 ## 0.0.5
 
 ### Patch Changes
