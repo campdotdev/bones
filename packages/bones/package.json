@@ -1,7 +1,7 @@
 {
   "name": "@camp.dev/bones",
   "version": "0.4.1",
-  "description": "Automatic skeleton loaders for any stack. One stylesheet, one custom element.",
+  "description": "Automatic skeleton loaders for any stack. One stylesheet.",
   "homepage": "https://github.com/campdotdev/bones#readme",
   "bugs": {
     "url": "https://github.com/campdotdev/bones/issues"
@@ -13,17 +13,13 @@
     "url": "git+https://github.com/campdotdev/bones.git"
   },
   "files": [
-    "dist",
     "src/css"
   ],
   "type": "module",
   "sideEffects": [
-    "*.css",
-    "./dist/index.mjs"
+    "*.css"
   ],
   "exports": {
-    ".": "./dist/index.mjs",
-    "./server": "./dist/server/index.mjs",
     "./package.json": "./package.json",
     "./css": {
       "style": "./src/css/bones.css",
@@ -34,17 +30,11 @@
     "access": "public"
   },
   "scripts": {
-    "build": "vp pack",
-    "dev": "vp pack --watch",
     "test": "vp test",
-    "check": "vp check",
-    "health": "vp test --project unit --coverage && fallow health --root . --coverage coverage/coverage-final.json --format json --quiet",
-    "prepublishOnly": "vp run build"
+    "check": "vp check"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
-    "@typescript/native-preview": "7.0.0-dev.20260328.1",
-    "@vitest/coverage-v8": "^4.1.5",
     "jsdom": "^29.0.2",
     "playwright": "^1.62.1",
     "typescript": "^6.0.2",

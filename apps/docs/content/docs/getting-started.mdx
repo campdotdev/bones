@@ -17,6 +17,12 @@ Import it once in your root layout or entry point:
 import "@camp.dev/bones/css";
 ```
 
+Without a bundler, link it from a CDN:
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/@camp.dev/bones/src/css/bones.css" />
+```
+
 ## Mark a region busy
 
 Set `aria-busy="true"` on the element that is loading. Every leaf under it becomes a bar and every image becomes a box. Remove the attribute when the data lands.
@@ -97,6 +103,14 @@ Inference gets most markup right. When it does not, say what you want:
 
 See [Attributes](/api/attributes) for the full list.
 
-## Time the swap
+## Keep a skeleton out of the tab order
 
-`<bones-boundary>` sets `aria-busy` for you, waits before showing bones so fast loads never flash, keeps them long enough that slow loads never strobe, and crossfades to content. See [bones-boundary](/api/bones-boundary).
+A fallback that renders links or buttons is still focusable. Add `inert` next to `aria-busy`:
+
+```tsx
+<Suspense fallback={<ProfileCard aria-busy="true" inert />}>
+```
+
+## Requests you run yourself
+
+Suspense and streaming paint the skeleton first, so it never flashes. A skeleton you toggle around a `fetch` can: a cached response lands in 20 ms and the bones blink. [Delay and hold](/examples#delay-and-hold) is a short function that waits before showing bones and keeps them long enough once shown.

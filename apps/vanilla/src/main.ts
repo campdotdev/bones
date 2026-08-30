@@ -1,6 +1,6 @@
 import "@camp.dev/bones/css";
 
-import { setLoading } from "./apply.ts";
+import { busy } from "./apply.ts";
 
 const AVATAR =
   "data:image/svg+xml," +
@@ -18,23 +18,28 @@ const profile = {
 const card = document.querySelector<HTMLElement>(".card")!;
 const avatar = card.querySelector("img")!;
 const fields = ["name", "role", "bio"] as const;
+const reload = document.querySelector<HTMLButtonElement>("#reload")!;
+const speed = document.querySelector<HTMLSelectElement>("#speed")!;
 
-let loading = true;
-
-function render() {
-  setLoading(card, loading);
-  if (loading) {
-    avatar.removeAttribute("src");
-    for (const id of fields) document.getElementById(id)!.textContent = "";
-  } else {
-    avatar.src = profile.avatar;
-    for (const id of fields) document.getElementById(id)!.textContent = profile[id];
-  }
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-document.getElementById("toggle")!.addEventListener("click", () => {
-  loading = !loading;
-  render();
-});
+function fill(): void {
+  avatar.src = profile.avatar;
+  for (const id of fields) document.getElementById(id)!.textContent = profile[id];
+}
 
-render();
+// The old content stays on screen while the request runs. If bones show,
+// they are sized from it; if the response beats `delay`, nothing flashes.
+async function load(): Promise<void> {
+  reload.disabled = true;
+  const done = busy(card);
+  await sleep(Number(speed.value));
+  fill();
+  done();
+  reload.disabled = false;
+}
+
+reload.addEventListener("click", () => void load());
+void load();

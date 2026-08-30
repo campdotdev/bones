@@ -79,5 +79,6 @@ Speed is controlled by `--bone-duration`. Shimmer colors use `--bone-base` and `
 ## Accessibility
 
 - Bones only paint under `aria-busy="true"`, which is the attribute assistive technology already reads.
+- Add `inert` beside `aria-busy` on a fallback that renders links or controls, so the skeleton leaves the tab order.
 - `pulse` replaces `shimmer` for users who prefer reduced motion. `none` stays still.
 - Skeleton pseudo-elements have `pointer-events: none`.

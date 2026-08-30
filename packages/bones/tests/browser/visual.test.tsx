@@ -1,11 +1,10 @@
 /// <reference types="vite-plus/client" />
 import { afterEach, expect, test } from "vite-plus/test";
 import { page } from "vite-plus/test/browser";
-import "../../src/index.ts";
 import "../../src/css/bones.css";
 
 // ---------------------------------------------------------------------------
-// One card, several renderers, plus the shapes only a screenshot can check:
+// One card, explicit and inferred, plus the shapes only a screenshot can check:
 // multi-line bars, a block on a div, an img with no src. The selector tests
 // pin the two copies of the bar geometry equal; these screenshots pin what a
 // user sees. data-bones-animate="none" everywhere so the shimmer cannot make
@@ -49,14 +48,6 @@ test("explicit markup under a busy wrapper", async () => {
   await expect(page.getByTestId("explicit-card")).toMatchScreenshot("explicit-force");
 });
 
-test("element renderer with inferred rules", async () => {
-  mountHtml(
-    `<bones-boundary force data-testid="element-card" data-bones-animate="none" style="${CARD_STYLE} display: block;">${CONTENT}</bones-boundary>`,
-  );
-  // @ts-expect-error — see the file-level comment above.
-  await expect(page.getByTestId("element-card")).toMatchScreenshot("element-force");
-});
-
 test("bare aria-busy region with inferred rules", async () => {
   mountHtml(
     `<div aria-busy="true" data-testid="bare-card" data-bones-animate="none" style="${CARD_STYLE}">${CONTENT}</div>`,
@@ -65,18 +56,8 @@ test("bare aria-busy region with inferred rules", async () => {
   await expect(page.getByTestId("bare-card")).toMatchScreenshot("bare-busy");
 });
 
-test("measured overlay over the card content", async () => {
-  mountHtml(
-    `<bones-boundary force precision="measured" data-testid="measured-card" data-bones-animate="none" style="${CARD_STYLE}">${CONTENT}</bones-boundary>`,
-  );
-  // @ts-expect-error — see the file-level comment above.
-  await expect(page.getByTestId("measured-card")).toMatchScreenshot("measured-force");
-});
-
 test("the same card content, idle, for contrast", async () => {
-  mountHtml(
-    `<bones-boundary data-testid="idle-card" style="${CARD_STYLE} display: block;">${CONTENT}</bones-boundary>`,
-  );
+  mountHtml(`<div data-testid="idle-card" style="${CARD_STYLE}">${CONTENT}</div>`);
   // @ts-expect-error — see the file-level comment above.
   await expect(page.getByTestId("idle-card")).toMatchScreenshot("idle-content");
 });

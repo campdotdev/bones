@@ -157,10 +157,10 @@ describe("file shape", () => {
     expect(isTextLeaf(el("host"))).toBe(true);
   });
 
-  test("keeps opted-out subtrees visible under a measured overlay", () => {
-    expect(layered).toContain(
-      'bones-boundary[data-bones-measured] [data-bones-auto="off"] { visibility: visible; }',
-    );
+  test("names no element: the stylesheet keys on attributes alone", () => {
+    const css = readFileSync(join(import.meta.dirname, "../src/css/bones.css"), "utf8");
+    expect(css).not.toContain("bones-boundary");
+    expect(css).not.toContain("data-bones-measured");
   });
 });
 

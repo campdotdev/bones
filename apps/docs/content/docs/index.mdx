@@ -5,7 +5,7 @@ description: Automatic skeleton loaders for any stack.
 
 <div className="flex flex-wrap gap-2 not-prose mb-8 -mt-8">
   <span className="rounded-full bg-green-500/10 px-3 py-1 text-xs font-mono text-green-600 dark:text-green-400">
-    ~8.5 kB gzipped
+    ~4.5 kB gzipped
   </span>
   <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-mono text-blue-600 dark:text-blue-400">
     0 dependencies
@@ -78,8 +78,7 @@ async function Card() {
 
 - The stylesheet is the API. Attributes are inert until a region is busy, so you annotate real markup once.
 - Works in any stack: server-rendered HTML, React Server Components, htmx, Turbo, a plain `fetch`.
-- `<bones-boundary>` adds timing and a crossfade when you want them.
-- The streaming kit renders busy boundaries in the shell and swaps content in as it resolves.
+- No JavaScript ships. Timing for a request you run yourself and a swap script for a bare streaming server are short recipes in these docs, not exports.
 - Bones derive their color from the text color, so they contrast on any background.
 
 ## Nested and independent loading

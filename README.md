@@ -1,8 +1,6 @@
 # Bones
 
-[![Bundle Size](https://deno.bundlejs.com/badge?q=@camp.dev/bones)](https://bundlejs.com/?q=%40camp.dev%2Fbones)
-
-Automatic skeleton loaders for any stack. One stylesheet, one custom element.
+Automatic skeleton loaders for any stack. One stylesheet, ~4.5 kB gzipped, no JavaScript, 0 dependencies.
 
 Set `aria-busy="true"` on a region and its content becomes a skeleton: a bar for every leaf, a box for every image and control. No skeleton components, no placeholder markup, no JavaScript in the loading path. When inference gets something wrong, a `data-bones-*` attribute on the real markup fixes it, and the attribute does nothing once the region is not busy.
 
@@ -22,15 +20,19 @@ Import the stylesheet once in your root layout or entry point:
 import "@camp.dev/bones/css";
 ```
 
+Without a bundler, link it from a CDN:
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/@camp.dev/bones/src/css/bones.css" />
+```
+
 ## Entry points
 
-| Import                   | Contents                                                                                                                                                                                                    |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@camp.dev/bones/css`    | The stylesheet. Paints every leaf under `aria-busy="true"` and honors the `data-bones-*` attributes. Import once.                                                                                           |
-| `@camp.dev/bones`        | `<bones-boundary>`, a custom element that sets `aria-busy` and `inert` on its subtree with `delay`, `min-duration`, and a crossfade. `precision="measured"` draws per-line bones measured from the content. |
-| `@camp.dev/bones/server` | `streamBones` and the wire-protocol primitives: stream a shell with busy boundaries, then flush each region's content out of order as it resolves.                                                          |
+| Import                | Contents                                                                                                          |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `@camp.dev/bones/css` | The stylesheet. Paints every leaf under `aria-busy="true"` and honors the `data-bones-*` attributes. Import once. |
 
-Zero dependencies. No framework is required or assumed.
+Zero dependencies. No framework is required or assumed, and nothing ships JavaScript.
 
 ## Basic usage
 
@@ -95,22 +97,15 @@ Render the component busy with no data. No promise, no boundary, no Storybook ad
 <ProfileCard aria-busy="true" />
 ```
 
-## Timing the swap
+## Focus and timing
 
-`<bones-boundary>` manages the loading state for any stack. Set `busy` when a request starts and clear it when the response lands. The element waits 200 ms before showing bones and keeps them for at least 400 ms, then crossfades to content with the View Transitions API where available.
+A skeleton's links and buttons are still focusable. Put `inert` beside `aria-busy` on a fallback that renders any:
 
-```html
-<script type="module">
-  import "@camp.dev/bones";
-</script>
-
-<bones-boundary busy>
-  <h2>Title</h2>
-  <p>Body copy.</p>
-</bones-boundary>
+```tsx
+<Suspense fallback={<ProfileCard aria-busy="true" inert />}>
 ```
 
-`@camp.dev/bones` is a bare specifier. A browser cannot resolve it on its own, so this snippet needs a bundler or an import map. To load the element straight from a CDN in a plain HTML file, see the URL form on the [bones-boundary docs page](apps/docs/content/docs/api/bones-boundary.mdx).
+Suspense paints the skeleton first, so it never flashes. A region you mark busy around your own `fetch` can. The docs' [Delay and hold](apps/docs/content/docs/examples.mdx#delay-and-hold) recipe waits before showing bones and keeps them long enough once shown; [Streaming](apps/docs/content/docs/streaming.mdx) shows the swap script for a server with no framework.
 
 ## Theming
 
@@ -121,5 +116,4 @@ Render the component busy with no data. No promise, no boundary, no Storybook ad
 ```bash
 vp install   # install dependencies
 vp test      # run tests
-vp pack      # build the library
 ```

@@ -46,23 +46,6 @@ jobs:
       - name: Run lint, format, and type checks
         run: vp run --filter @camp.dev/bones check
 
-  bones-build:
-    name: "Bones: Build"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@v1
-        with:
-          cache: true
-
-      - name: Build library
-        run: vp run --filter @camp.dev/bones build
-
   bones-test:
     name: "Bones: Test"
     runs-on: ubuntu-latest
@@ -125,9 +108,6 @@ jobs:
         with:
           cache: true
 
-      - name: Build bones library
-        run: vp run --filter @camp.dev/bones build
-
       - name: Run type check
         run: vp run --filter bones-demo check
 
@@ -144,9 +124,6 @@ jobs:
         uses: voidzero-dev/setup-vp@v1
         with:
           cache: true
-
-      - name: Build bones library
-        run: vp run --filter @camp.dev/bones build
 
       - name: Build demo app
         run: vp run --filter bones-demo build
@@ -165,52 +142,8 @@ jobs:
         with:
           cache: true
 
-      - name: Build bones library
-        run: vp run --filter @camp.dev/bones build
-
       - name: Run tests
         run: vp run --filter bones-demo test -- --run
-
-  # ── Streaming demo ─────────────────────────────────────────
-  stream-check:
-    name: "Stream: Types"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@v1
-        with:
-          cache: true
-
-      - name: Build bones library
-        run: vp run --filter @camp.dev/bones build
-
-      - name: Run type check
-        run: vp run --filter bones-stream check
-
-  stream-test:
-    name: "Stream: Test"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@v1
-        with:
-          cache: true
-
-      - name: Build bones library
-        run: vp run --filter @camp.dev/bones build
-
-      - name: Run tests
-        run: vp run --filter bones-stream test -- --run
 
   # ── Vanilla demo ───────────────────────────────────────────
   vanilla-check:
@@ -226,9 +159,6 @@ jobs:
         uses: voidzero-dev/setup-vp@v1
         with:
           cache: true
-
-      - name: Build bones library
-        run: vp run --filter @camp.dev/bones build
 
       - name: Run type check
         run: vp run --filter bones-vanilla check
@@ -246,9 +176,6 @@ jobs:
         uses: voidzero-dev/setup-vp@v1
         with:
           cache: true
-
-      - name: Build bones library
-        run: vp run --filter @camp.dev/bones build
 
       - name: Run tests
         run: vp run --filter bones-vanilla test -- --run
@@ -285,9 +212,6 @@ jobs:
         with:
           cache: true
 
-      - name: Build bones library
-        run: vp run --filter @camp.dev/bones build
-
       - name: Run type check
         run: vp run --filter bones-docs check
 
@@ -304,9 +228,6 @@ jobs:
         uses: voidzero-dev/setup-vp@v1
         with:
           cache: true
-
-      - name: Build bones library
-        run: vp run --filter @camp.dev/bones build
 
       - name: Build docs site
         run: vp run --filter bones-docs build
