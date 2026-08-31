@@ -98,6 +98,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.1.2
         version: 19.2.3(@types/react@19.2.14)
+      jsdom:
+        specifier: ^29.0.2
+        version: 29.0.2(@noble/hashes@1.8.0)
       tailwindcss:
         specifier: latest
         version: 4.2.4
@@ -111,6 +114,9 @@ importers:
         specifier: workspace:*
         version: link:../../packages/bones
     devDependencies:
+      '@hotwired/turbo':
+        specifier: ^8.0.23
+        version: 8.0.23
       jsdom:
         specifier: ^29.0.2
         version: 29.0.2(@noble/hashes@1.8.0)
@@ -475,6 +481,10 @@ packages:
         optional: true
       tailwindcss:
         optional: true
+
+  '@hotwired/turbo@8.0.23':
+    resolution: {integrity: sha512-GZ7cijxEZ6Ig71u7rD6LHaRv/wcE/hNsc+nEfiWOkLNqUgLOwo5MNGWOy5ZV9ZUDSiQx1no7YxjTNnT4O6//cQ==}
+    engines: {node: '>= 18'}
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -3946,6 +3956,8 @@ snapshots:
     optionalDependencies:
       '@tailwindcss/oxide': 4.2.4
       tailwindcss: 4.2.4
+
+  '@hotwired/turbo@8.0.23': {}
 
   '@img/colour@1.1.0': {}
 

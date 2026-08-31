@@ -131,6 +131,10 @@ A skeleton's links and buttons are still focusable. Put `inert` beside `aria-bus
 
 Suspense paints the skeleton first, so it never flashes. A region you mark busy around your own `fetch` can. The docs' [Delay and hold](https://github.com/campdotdev/bones/blob/main/apps/docs/content/docs/examples.mdx#delay-and-hold) recipe waits before showing bones and keeps them long enough once shown; [Streaming](https://github.com/campdotdev/bones/blob/main/apps/docs/content/docs/streaming.mdx) shows the swap script for a server with no framework.
 
+## Integrations
+
+Turbo sets `aria-busy` on frames and forms by itself; React, Vue, and Svelte bind it in the template; htmx and Livewire wire it in a line or two. The docs' [Integrations](https://github.com/campdotdev/bones/blob/main/apps/docs/content/docs/integrations.mdx) page has the per-stack recipes and a bookmarklet that skeletonizes any page.
+
 ## Theming
 
 `--bone-base`, `--bone-highlight`, `--bone-radius`, and `--bone-duration` are CSS custom properties; set them on any ancestor. `--bone-radius` must carry a unit. `prefers-reduced-motion` turns shimmer into a slow pulse; `data-bones-animate="none"` stays still.

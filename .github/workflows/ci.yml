@@ -215,6 +215,23 @@ jobs:
       - name: Run type check
         run: vp run --filter bones-docs check
 
+  docs-test:
+    name: "Docs: Test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@v1
+        with:
+          cache: true
+
+      - name: Run tests
+        run: vp run --filter bones-docs test -- --run
+
   docs-build:
     name: "Docs: Build"
     runs-on: ubuntu-latest

@@ -1,0 +1,73 @@
+---
+title: Integrations
+description: Set aria-busy from React, Vue, Svelte, Turbo, htmx, or Livewire.
+---
+
+The stylesheet reacts to one attribute. Set `aria-busy="true"` on the element that owns the loading data and skeletons paint. Remove it and they clear. Anything that can set an attribute is integrated, so there are no adapter packages to install. This page shows the wiring per stack. [Getting started](/getting-started) covers loading the stylesheet itself.
+
+## React, Vue, Svelte
+
+Bind the attribute to your loading flag on the container:
+
+```tsx
+// React
+<section aria-busy={isPending}>
+```
+
+```html
+<!-- Vue -->
+<section :aria-busy="pending"></section>
+```
+
+```svelte
+<!-- Svelte -->
+<section aria-busy={pending}>
+```
+
+A false flag renders `aria-busy="false"` in some of these frameworks. That is harmless. The stylesheet matches only the exact value `"true"`.
+
+For Suspense and streaming, render the component with `aria-busy="true"` and no data as the fallback. [Examples](/examples) shows the full pattern.
+
+## Turbo
+
+Nothing to wire. Turbo sets `aria-busy="true"` on a `<turbo-frame>` while the frame loads, and on a `<form>` during submission, then removes it. Load the stylesheet and frame navigations paint skeletons over the outgoing content. See [aria-busy in the Turbo frames handbook](https://turbo.hotwired.dev/handbook/frames).
+
+A test in the repo, `apps/vanilla/test/turbo.test.ts`, runs real Turbo against the claim, so a Turbo release that stops setting the attribute fails our CI before it surprises you.
+
+## htmx
+
+htmx marks an in-flight request with the `htmx-request` class, not with `aria-busy`. Bridge it once for the whole page:
+
+```js
+document.body.addEventListener("htmx:beforeRequest", (event) => {
+  event.detail.target.setAttribute("aria-busy", "true");
+});
+document.body.addEventListener("htmx:afterRequest", (event) => {
+  event.detail.target.removeAttribute("aria-busy");
+});
+```
+
+`event.detail.target` is the element the response swaps into, which is the element that should wear the bones. `htmx:afterRequest` fires on success, error, abort, and timeout, so a failed request cannot leave skeletons behind.
+
+The bridge assumes one request per target at a time. If concurrent requests can swap into the same target, coordinate them with [hx-sync](https://htmx.org/attributes/hx-sync/); otherwise the first request to finish clears the bars while the other is still in flight.
+
+## Livewire
+
+One directive, no JavaScript. `wire:loading.attr` sets the named attribute to `true` while a request runs, which renders as `aria-busy="true"`:
+
+```blade
+<div wire:loading.attr="aria-busy" wire:target="save">
+  <h2>{{ $title }}</h2>
+  <p data-bones-lines="2">{{ $summary }}</p>
+</div>
+```
+
+`wire:target="save"` scopes the busy state to requests from the `save` action. Leave it off to go busy on every request from the component.
+
+## Bookmarklet
+
+Drag this to your bookmarks bar: <Bookmarklet />
+
+Click it on any page to inject the stylesheet and set `aria-busy="true"` on `<body>`, which repaints the whole page as its own skeleton. Click again to restore the page. The stylesheet is baked into the link at docs build time, so the bookmarklet works offline and never fetches anything.
+
+If a page's Content Security Policy forbids inline styles, the injected stylesheet is ignored and the click does nothing visible.
