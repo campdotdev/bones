@@ -90,6 +90,29 @@ The fallback is the component, and the async child is what suspends. `data-bones
 
 Explicit attributes are unlayered, so page CSS cannot keep their text visible without a more specific rule of its own. Inferred bones live in `@layer bones-auto`, so a page rule that sets `color` on a leaf keeps that text visible over its bar; that is the one thing to know when a bar looks wrong. A bar sits inside its element's padding, so a badge or a pill keeps its shape while it loads. Padding in `px`, `em`, or `rem` is exact; percentage padding misses.
 
+## Update part of a page
+
+`aria-busy` marks the element it sits on and every element under it, so one value and a whole page use the same attribute. Put `aria-busy` on the smallest element that owns the data that is changing.
+
+To repaint one value inside a component that is otherwise loaded, mark that value:
+
+```html
+<article class="product-card">
+  <img src="/shoe.png" width="240" height="240" alt="" />
+  <h3>Trail Runner</h3>
+  <span class="price" aria-busy="true">$129.00</span>
+</article>
+```
+
+Only the price paints. The image and the heading stay readable. To repaint one card in a grid, move `aria-busy` to that card's root and leave the grid alone. Nothing above the busy element has to know.
+
+Check two things on the element you mark:
+
+- If it has element children, each child paints its own bar. `<span class="price"><sup>$</sup>129</span>` gives you two. Add `data-bones-type="text"` to the wrapper for a single bar, since descendants of an explicit bone are exempt from inference. A page rule that sets `color` on a child still keeps that child's text visible over the bar.
+- If it is inline and holds its old text, the bar is as wide as that text, so nothing reflows while the new value loads. If it is empty, `min-width` does not apply to an inline box. Set `data-bones-length="7"` to give the bar a width.
+
+`aria-busy="false"` on a descendant does not cancel a busy ancestor. Busy regions nest and add. They never subtract. To keep one subtree readable inside a busy region, use `data-bones-auto="off"`. That attribute turns off inference only, so an explicit `data-bones-type` or `data-bones-lines` under it still paints.
+
 ## Previewing skeletons
 
 Render the component busy with no data. No promise, no boundary, no Storybook addon:
