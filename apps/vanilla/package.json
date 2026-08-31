@@ -13,6 +13,7 @@
     "@camp.dev/bones": "workspace:*"
   },
   "devDependencies": {
+    "@hotwired/turbo": "^8.0.23",
     "jsdom": "^29.0.2",
     "typescript": "^5.8.3"
   }
