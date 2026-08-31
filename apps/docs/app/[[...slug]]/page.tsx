@@ -3,10 +3,12 @@ import { DocsPage, DocsBody, DocsTitle, DocsDescription } from "fumadocs-ui/layo
 import { notFound } from "next/navigation";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import { DemoPokemonCard } from "@/components/demo/pokemon-card";
+import { Bookmarklet } from "@/components/bookmarklet";
 
 const customMdxComponents = {
   ...defaultMdxComponents,
   DemoPokemonCard,
+  Bookmarklet,
 };
 
 interface Props {

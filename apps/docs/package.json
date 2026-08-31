@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "check": "fumadocs-mdx && tsc --noEmit"
+    "check": "fumadocs-mdx && tsc --noEmit",
+    "test": "vp test"
   },
   "dependencies": {
     "@camp.dev/bones": "workspace:*",
@@ -22,6 +23,7 @@
     "@types/node": "^22.15.3",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
+    "jsdom": "^29.0.2",
     "tailwindcss": "latest",
     "typescript": "^5.8.3"
   }
