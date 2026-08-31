@@ -26,6 +26,16 @@ test("first click injects the stylesheet and marks <body> busy", () => {
   expect(document.body.getAttribute("aria-busy")).toBe("true");
 });
 
+test("second click restores a pre-existing aria-busy on <body>", () => {
+  document.body.setAttribute("aria-busy", "true");
+
+  const href = bookmarkletHref(css);
+  click(href);
+  click(href);
+
+  expect(document.body.getAttribute("aria-busy")).toBe("true");
+});
+
 test("second click removes the stylesheet and the busy mark", () => {
   const href = bookmarkletHref(css);
   click(href);

@@ -49,6 +49,8 @@ document.body.addEventListener("htmx:afterRequest", (event) => {
 
 `event.detail.target` is the element the response swaps into, which is the element that should wear the bones. `htmx:afterRequest` fires on success, error, abort, and timeout, so a failed request cannot leave skeletons behind.
 
+The bridge assumes one request per target at a time. If concurrent requests can swap into the same target, coordinate them with [hx-sync](https://htmx.org/attributes/hx-sync/); otherwise the first request to finish clears the bars while the other is still in flight.
+
 ## Livewire
 
 One directive, no JavaScript. `wire:loading.attr` sets the named attribute to `true` while a request runs, which renders as `aria-busy="true"`:
